@@ -1,14 +1,14 @@
 version: '3.8'
 
 # ==========================================
-# SummaryGenie Docker Compose Configuration
+# Gena Docker Compose Configuration
 # Firebase 전용 버전
 # ==========================================
 
 services:
   # ===== 메인 애플리케이션 =====
   app:
-    container_name: summarygenie-server
+    container_name: Gena-server
     build:
       context: .
       dockerfile: Dockerfile

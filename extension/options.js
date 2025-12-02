@@ -1,5 +1,5 @@
 ﻿/**
- * SummaryGenie 옵션 페이지 스크립트 (웹 개선 버전)
+ * Gena 옵션 페이지 스크립트 (웹 개선 버전)
  * UI 표시 및 사용자 인터랙션 담당
  * v2.3.0 - 깜빡임 방지 적용
  * 
@@ -368,7 +368,7 @@ function toggleHistorySection(isPremium) {
       if (upgradeBtn) {
         upgradeBtn.addEventListener('click', () => {
           chrome.tabs.create({ 
-            url: 'https://summarygenie.com/premium' 
+            url: 'https://Gena.com/premium' 
           });
         });
       }
@@ -739,7 +739,7 @@ async function exportHistory() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `summarygenie-history-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `Gena-history-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
     
@@ -813,7 +813,7 @@ async function clearHistory() {
 
 function handleSubscribe() {
   chrome.tabs.create({ 
-    url: 'https://summarygenie.com/subscribe' 
+    url: 'https://Gena.com/subscribe' 
   });
   
   showMessage(window.languageManager.getMessage('redirectingToSubscription'), 'info');
@@ -917,12 +917,12 @@ function setupEventListeners() {
   
   elements.privacyLink.addEventListener('click', (e) => {
     e.preventDefault();
-    chrome.tabs.create({ url: 'https://summarygenie.com/privacy' });
+    chrome.tabs.create({ url: 'https://Gena.com/privacy' });
   });
   
   elements.termsLink.addEventListener('click', (e) => {
     e.preventDefault();
-    chrome.tabs.create({ url: 'https://summarygenie.com/terms' });
+    chrome.tabs.create({ url: 'https://Gena.com/terms' });
   });
 }
 

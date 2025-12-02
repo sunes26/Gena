@@ -1,6 +1,6 @@
 ﻿/**
  * extension\modules\storage-manager.js
- * SummaryGenie Storage Manager (ErrorHandler 통합 버전)
+ * Gena Storage Manager (ErrorHandler 통합 버전)
  * Chrome Storage API 작업을 중앙 관리하는 모듈
  * 
  * @module storage-manager

@@ -1,6 +1,6 @@
 /**
  * extension\modules\sync-manager.js
- * SummaryGenie Cloud Sync Manager
+ * Gena Cloud Sync Manager
  * 로컬-클라우드 히스토리 동기화 관리
  * 
  * @module sync-manager

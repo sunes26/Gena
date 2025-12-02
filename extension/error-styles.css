@@ -1,5 +1,5 @@
 /**
- * SummaryGenie 에러 핸들링 관련 스타일
+ * Gena 에러 핸들링 관련 스타일
  * 토스트, 에러 오버레이, 로딩 상태 등
  */
 
@@ -111,7 +111,7 @@
 }
 
 /* ===== 오버레이 개선된 스타일 ===== */
-.summarygenie-overlay {
+.Gena-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -127,7 +127,7 @@
   transition: opacity 0.3s ease;
 }
 
-.summarygenie-overlay.sg-overlay-show {
+.Gena-overlay.sg-overlay-show {
   opacity: 1;
 }
 
@@ -145,17 +145,17 @@
   position: relative;
 }
 
-.summarygenie-overlay.sg-overlay-show .sg-overlay-container {
+.Gena-overlay.sg-overlay-show .sg-overlay-container {
   transform: scale(1);
 }
 
 /* 최소화 상태 */
-.summarygenie-overlay.sg-overlay-minimized .sg-overlay-container {
+.Gena-overlay.sg-overlay-minimized .sg-overlay-container {
   max-height: 60px;
   overflow: hidden;
 }
 
-.summarygenie-overlay.sg-overlay-minimized .sg-overlay-body {
+.Gena-overlay.sg-overlay-minimized .sg-overlay-body {
   display: none;
 }
 
@@ -496,7 +496,7 @@
 @media (prefers-reduced-motion: reduce) {
   .sg-toast,
   .sg-error-toast,
-  .summarygenie-overlay,
+  .Gena-overlay,
   .sg-overlay-container,
   .sg-spinner {
     transition: none;

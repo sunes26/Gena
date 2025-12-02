@@ -1,6 +1,6 @@
 /**
  * extension\modules\language-manager.js
- * SummaryGenie Language Manager (동적 메시지 로딩 버전)
+ * Gena Language Manager (동적 메시지 로딩 버전)
  * Chrome Extension 런타임 중 언어 변경 완벽 지원
  * 
  * @module language-manager

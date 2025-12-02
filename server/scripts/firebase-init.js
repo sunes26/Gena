@@ -78,7 +78,7 @@ async function initializeFirebase() {
       process.env.FIRESTORE_EMULATOR_HOST = 'localhost:8080';
       process.env.FIREBASE_AUTH_EMULATOR_HOST = 'localhost:9099';
       admin.initializeApp({
-        projectId: 'summarygenie-dev'
+        projectId: 'Gena-dev'
       });
       initialized = true;
     }
@@ -158,7 +158,7 @@ async function initializeFirebase() {
       try {
         const testUserId = 'test-user-' + Date.now();
         const testUser = {
-          email: 'test@summarygenie.com',
+          email: 'test@Gena.com',
           extensionId: 'test-extension-id',
           plan: 'free',
           role: 'user',
@@ -187,7 +187,7 @@ async function initializeFirebase() {
         const subRef = db.collection('subscriptions').doc(testUserId);
         await subRef.set(testSubscription);
         
-        console.log('  ✅ 테스트 사용자 생성됨: test@summarygenie.com');
+        console.log('  ✅ 테스트 사용자 생성됨: test@Gena.com');
       } catch (error) {
         console.log('  ⚠️ 테스트 사용자 생성 실패 (이미 존재할 수 있음)');
       }

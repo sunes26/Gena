@@ -1,5 +1,5 @@
 # ===================================================================
-# SummaryGenie Server - Google Cloud Ignore 설정
+# Gena Server - Google Cloud Ignore 설정
 # Cloud Run, App Engine 등 GCP 배포 시 제외할 파일
 # ===================================================================
 

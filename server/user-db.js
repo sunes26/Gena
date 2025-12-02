@@ -1,5 +1,5 @@
 /**
- * SummaryGenie User Database Module (Firebase Firestore Version)
+ * Gena User Database Module (Firebase Firestore Version)
  * Firebase Firestore를 사용한 사용자 및 구독 정보 관리
  */
 
@@ -127,7 +127,7 @@ async connect() {
       const userRef = this.usersCollection.doc(uid);
       const userData = {
         uid,
-        email: email || `${extensionId}@summarygenie.temp`,
+        email: email || `${extensionId}@Gena.temp`,
         extensionId,
         stripeCustomerId: null,
         plan: 'free',

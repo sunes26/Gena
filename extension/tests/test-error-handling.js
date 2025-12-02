@@ -1,5 +1,5 @@
 /**
- * SummaryGenie 에러 핸들링 테스트 스위트
+ * Gena 에러 핸들링 테스트 스위트
  * Jest 또는 Chrome Extension 환경에서 실행
  */
 

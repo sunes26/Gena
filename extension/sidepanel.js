@@ -1,6 +1,6 @@
 /**
  * extension\sidepanel.js
- * SummaryGenie Side Panel Main Script
+ * Gena Side Panel Main Script
  * popup.js 기반으로 Side Panel 전용 기능 추가
  *
  * ✨ v7.0.0 업데이트:
@@ -414,7 +414,7 @@ class SidePanelController {
         if (upgradeBtn) {
           upgradeBtn.addEventListener('click', () => {
             chrome.tabs.create({
-              url: 'https://summarygenie.com/premium',
+              url: 'https://Gena.com/premium',
             });
           });
         }
@@ -462,7 +462,7 @@ class SidePanelController {
           line-height: 1.6;
           font-size: 14px;
         ">
-          SummaryGenie를 사용하려면<br>
+          Gena를 사용하려면<br>
           먼저 로그인해주세요
         </p>
         
@@ -1669,7 +1669,7 @@ class SidePanelController {
     const upgradeBtn = modal.querySelector('.upgrade-btn');
     upgradeBtn.addEventListener('click', () => {
       chrome.tabs.create({
-        url: 'https://summarygenie.com/premium',
+        url: 'https://Gena.com/premium',
       });
       modal.remove();
     });

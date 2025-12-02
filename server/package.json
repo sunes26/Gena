@@ -1,7 +1,7 @@
 {
-  "name": "summarygenie-proxy-server",
+  "name": "Gena-proxy-server",
   "version": "2.0.0",
-  "description": "Proxy server for SummaryGenie Chrome Extension - Firebase/OpenAI integration",
+  "description": "Proxy server for Gena Chrome Extension - Firebase/OpenAI integration",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
@@ -25,7 +25,7 @@
     "firebase",
     "firestore"
   ],
-  "author": "SummaryGenie Team",
+  "author": "Gena Team",
   "license": "MIT",
   "dependencies": {
     "bcryptjs": "^3.0.2",

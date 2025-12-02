@@ -1,6 +1,6 @@
 # 🔐 Password Utility
 
-SummaryGenie 프로젝트의 비밀번호 해싱 및 검증 유틸리티
+Gena 프로젝트의 비밀번호 해싱 및 검증 유틸리티
 
 ## 📦 설치
 
@@ -318,4 +318,4 @@ npm install bcryptjs
 
 ## 📝 라이센스
 
-이 유틸리티는 SummaryGenie 프로젝트의 일부입니다.
+이 유틸리티는 Gena 프로젝트의 일부입니다.

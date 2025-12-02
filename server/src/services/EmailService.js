@@ -33,7 +33,7 @@ const emailTemplates = {
    * @returns {Object} 이메일 제목 및 HTML
    */
   welcome: (userName) => ({
-    subject: 'SummaryGenie에 오신 것을 환영합니다! 🎉',
+    subject: 'Gena에 오신 것을 환영합니다! 🎉',
     html: `
       <!DOCTYPE html>
       <html>
@@ -109,14 +109,14 @@ const emailTemplates = {
       <body>
         <div class="container">
           <div class="header">
-            <div class="logo">📚 SummaryGenie</div>
+            <div class="logo">📚 Gena</div>
             <p style="color: #666; margin: 0;">AI 웹페이지 요약 서비스</p>
           </div>
           
           <div class="content">
             <h2 style="color: #333; margin-bottom: 20px;">안녕하세요, ${userName || '회원'}님!</h2>
             
-            <p>SummaryGenie에 가입해주셔서 감사합니다. 이제 AI의 힘으로 웹 콘텐츠를 빠르게 요약하고 이해할 수 있습니다.</p>
+            <p>Gena에 가입해주셔서 감사합니다. 이제 AI의 힘으로 웹 콘텐츠를 빠르게 요약하고 이해할 수 있습니다.</p>
             
             <div class="features">
               <h3 style="margin-top: 0;">주요 기능</h3>
@@ -130,16 +130,16 @@ const emailTemplates = {
             <p>지금 바로 Chrome 확장프로그램을 설치하고 시작해보세요!</p>
             
             <div style="text-align: center;">
-              <a href="${process.env.FRONTEND_URL || 'https://summarygenie.com'}" class="button">
+              <a href="${process.env.FRONTEND_URL || 'https://Gena.com'}" class="button">
                 시작하기
               </a>
             </div>
           </div>
           
           <div class="footer">
-            <p>이 이메일은 SummaryGenie 회원가입 시 자동으로 발송되었습니다.</p>
-            <p>문의사항이 있으시면 <a href="mailto:support@summarygenie.com">support@summarygenie.com</a>으로 연락주세요.</p>
-            <p style="margin-top: 20px;">© 2025 SummaryGenie. All rights reserved.</p>
+            <p>이 이메일은 Gena 회원가입 시 자동으로 발송되었습니다.</p>
+            <p>문의사항이 있으시면 <a href="mailto:support@Gena.com">support@Gena.com</a>으로 연락주세요.</p>
+            <p style="margin-top: 20px;">© 2025 Gena. All rights reserved.</p>
           </div>
         </div>
       </body>
@@ -154,7 +154,7 @@ const emailTemplates = {
    * @returns {Object} 이메일 제목 및 HTML
    */
   verification: (userName, verificationLink) => ({
-    subject: 'SummaryGenie 이메일 인증을 완료해주세요 ✉️',
+    subject: 'Gena 이메일 인증을 완료해주세요 ✉️',
     html: `
       <!DOCTYPE html>
       <html>
@@ -222,7 +222,7 @@ const emailTemplates = {
           <div class="content">
             <h2 style="color: #333;">안녕하세요, ${userName || '회원'}님!</h2>
             
-            <p>SummaryGenie 계정의 이메일 인증을 완료하기 위해 아래 버튼을 클릭해주세요.</p>
+            <p>Gena 계정의 이메일 인증을 완료하기 위해 아래 버튼을 클릭해주세요.</p>
             
             <div style="text-align: center; margin: 30px 0;">
               <a href="${verificationLink}" class="button">
@@ -245,7 +245,7 @@ const emailTemplates = {
           </div>
           
           <div class="footer">
-            <p>© 2025 SummaryGenie. All rights reserved.</p>
+            <p>© 2025 Gena. All rights reserved.</p>
           </div>
         </div>
       </body>
@@ -260,7 +260,7 @@ const emailTemplates = {
    * @returns {Object} 이메일 제목 및 HTML
    */
   passwordReset: (userName, resetLink) => ({
-    subject: 'SummaryGenie 비밀번호 재설정 🔑',
+    subject: 'Gena 비밀번호 재설정 🔑',
     html: `
       <!DOCTYPE html>
       <html>
@@ -366,7 +366,7 @@ const emailTemplates = {
           </div>
           
           <div class="footer">
-            <p>© 2025 SummaryGenie. All rights reserved.</p>
+            <p>© 2025 Gena. All rights reserved.</p>
           </div>
         </div>
       </body>
@@ -380,7 +380,7 @@ const emailTemplates = {
    * @returns {Object} 이메일 제목 및 HTML
    */
   passwordChanged: (userName) => ({
-    subject: 'SummaryGenie 비밀번호가 변경되었습니다 ✅',
+    subject: 'Gena 비밀번호가 변경되었습니다 ✅',
     html: `
       <!DOCTYPE html>
       <html>
@@ -479,7 +479,7 @@ const emailTemplates = {
             <div class="warning-box">
               <strong>⚠️ 본인이 변경하지 않았다면?</strong>
               <p style="margin: 10px 0 0 0;">
-                즉시 <a href="mailto:support@summarygenie.com">support@summarygenie.com</a>으로 연락하시거나,
+                즉시 <a href="mailto:support@Gena.com">support@Gena.com</a>으로 연락하시거나,
                 계정 보안 설정에서 비밀번호를 다시 변경해주세요.
               </p>
             </div>
@@ -490,8 +490,8 @@ const emailTemplates = {
           </div>
           
           <div class="footer">
-            <p>문의사항이 있으시면 <a href="mailto:support@summarygenie.com">support@summarygenie.com</a>으로 연락주세요.</p>
-            <p style="margin-top: 10px;">© 2025 SummaryGenie. All rights reserved.</p>
+            <p>문의사항이 있으시면 <a href="mailto:support@Gena.com">support@Gena.com</a>으로 연락주세요.</p>
+            <p style="margin-top: 10px;">© 2025 Gena. All rights reserved.</p>
           </div>
         </div>
       </body>
@@ -610,7 +610,7 @@ class EmailService {
     }
 
     const mailOptions = {
-      from: process.env.EMAIL_FROM || '"SummaryGenie" <noreply@summarygenie.com>',
+      from: process.env.EMAIL_FROM || '"Gena" <noreply@Gena.com>',
       to,
       subject,
       html
@@ -657,7 +657,7 @@ class EmailService {
    * await emailService.sendVerificationEmail('user@example.com', 'John Doe', 'abc123token');
    */
   async sendVerificationEmail(email, name, token) {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://summarygenie.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://Gena.com';
     const verificationLink = `${frontendUrl}/verify-email?token=${token}`;
     
     const { subject, html } = emailTemplates.verification(name, verificationLink);
@@ -676,7 +676,7 @@ class EmailService {
    * await emailService.sendPasswordResetEmail('user@example.com', 'John Doe', 'xyz789token');
    */
   async sendPasswordResetEmail(email, name, token) {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://summarygenie.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://Gena.com';
     const resetLink = `${frontendUrl}/reset-password?token=${token}`;
     
     const { subject, html } = emailTemplates.passwordReset(name, resetLink);

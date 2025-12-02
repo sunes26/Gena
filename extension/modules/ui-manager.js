@@ -1,6 +1,6 @@
 ﻿/**
  * extension\modules\ui-manager.js
- * SummaryGenie UI Manager
+ * Gena UI Manager
  * UI 상태 관리 및 DOM 조작을 담당하는 모듈
  * 
  * ✨ v5.1.0 업데이트:

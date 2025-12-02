@@ -15,7 +15,7 @@
 
 class TokenManager {
   constructor() {
-    this.API_BASE_URL = 'https://api.summarygenie.com'; // 환경변수로 관리
+    this.API_BASE_URL = 'https://api.Gena.com'; // 환경변수로 관리
     this.TOKEN_REFRESH_THRESHOLD = 5 * 60 * 1000; // 5분 (밀리초)
     this.isRefreshing = false;
     this.refreshSubscribers = [];

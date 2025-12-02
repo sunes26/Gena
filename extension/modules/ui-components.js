@@ -1,6 +1,6 @@
 /**
  * extension\modules\ui-components.js
- * SummaryGenie UI Components (보안 강화 버전)
+ * Gena UI Components (보안 강화 버전)
  * 재사용 가능한 UI 컴포넌트 라이브러리
  * - innerHTML 완전 제거
  * - XSS 방어 강화

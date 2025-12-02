@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SummaryGenie - 에러 모니터링 대시보드</title>
+    <title>Gena - 에러 모니터링 대시보드</title>
     <style>
         * {
             margin: 0;
@@ -351,7 +351,7 @@
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <div>
                     <h1>🔍 에러 모니터링 대시보드</h1>
-                    <div class="subtitle">SummaryGenie 에러 현황 및 통계</div>
+                    <div class="subtitle">Gena 에러 현황 및 통계</div>
                 </div>
                 <div class="network-status" id="networkStatus">
                     <span class="status-indicator"></span>
@@ -740,7 +740,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `summarygenie-errors-${Date.now()}.json`;
+            a.download = `Gena-errors-${Date.now()}.json`;
             a.click();
             URL.revokeObjectURL(url);
             

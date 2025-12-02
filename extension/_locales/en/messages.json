@@ -1,6 +1,6 @@
 {
   "appTitle": {
-    "message": "SummaryGenie"
+    "message": "Gena"
   },
   "generalSettings": {
     "message": "General Settings"
@@ -657,7 +657,7 @@
     "message": "Login Successful!"
   },
   "loginSuccessDesc": {
-    "message": "Click the SummaryGenie extension icon\nto start using it."
+    "message": "Click the Gena extension icon\nto start using it."
   },
   "or": {
     "message": "or"

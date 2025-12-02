@@ -1,6 +1,6 @@
 /**
  * extension\config.js
- * SummaryGenie 중앙 설정 파일
+ * Gena 중앙 설정 파일
  * 환경별 API URL 및 앱 설정 관리
  * 
  * @version 1.0.0
@@ -38,7 +38,7 @@ const CONFIG = {
         return 'development';
       }
       
-      if (hostname.includes('summarygenie.com')) {
+      if (hostname.includes('Gena.com')) {
         return 'production';
       }
     }
@@ -51,7 +51,7 @@ const CONFIG = {
    */
   API_BASE_URL: {
     development: 'http://localhost:3000',
-    production: 'https://api.summarygenie.com'
+    production: 'https://api.Gena.com'
   },
   
   /**
@@ -59,7 +59,7 @@ const CONFIG = {
    */
   FRONTEND_URL: {
     development: 'http://localhost:3000',
-    production: 'https://summarygenie.com'
+    production: 'https://Gena.com'
   },
   
   /**
@@ -152,7 +152,7 @@ const CONFIG = {
   printConfig() {
     if (this.isDebug()) {
       console.log('='.repeat(60));
-      console.log('📋 SummaryGenie Configuration');
+      console.log('📋 Gena Configuration');
       console.log('='.repeat(60));
       console.log(`🌍 Environment: ${this.ENV}`);
       console.log(`🔗 API URL: ${this.getApiUrl()}`);

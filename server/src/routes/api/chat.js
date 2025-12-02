@@ -230,7 +230,7 @@ router.post('/',
               '히스토리 클라우드 저장',
               '우선 지원'
             ],
-            link: 'https://summarygenie.com/pricing'
+            link: 'https://Gena.com/pricing'
           }
         });
       }

@@ -1,10 +1,10 @@
 /**
- * SummaryGenie Content Styles
+ * Gena Content Styles
  * 강화된 에러 핸들링 UI 스타일
  */
 
 /* ===== 기본 오버레이 스타일 ===== */
-.summarygenie-overlay {
+.Gena-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -19,7 +19,7 @@
   transition: opacity 0.3s ease;
 }
 
-.summarygenie-overlay.sg-overlay-show {
+.Gena-overlay.sg-overlay-show {
   opacity: 1;
 }
 
@@ -734,23 +734,23 @@
 
 /* ===== 특정 사이트 호환성 ===== */
 /* YouTube */
-.ytd-app .summarygenie-overlay {
+.ytd-app .Gena-overlay {
   z-index: 2147483647 !important;
 }
 
 /* Twitter/X */
-#react-root .summarygenie-overlay {
+#react-root .Gena-overlay {
   z-index: 2147483647 !important;
 }
 
 /* Facebook */
-#facebook .summarygenie-overlay {
+#facebook .Gena-overlay {
   z-index: 2147483647 !important;
 }
 
 /* ===== 인쇄 스타일 ===== */
 @media print {
-  .summarygenie-overlay,
+  .Gena-overlay,
   .sg-error-toast-enhanced,
   .sg-toast,
   .sg-help-dialog {

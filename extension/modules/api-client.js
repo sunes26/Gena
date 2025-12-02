@@ -10,7 +10,7 @@
 class ApiClient {
   /**
    * ApiClient 생성자
-   * @param {string} baseURL - API 서버의 기본 URL (예: 'https://api.summarygenie.com')
+   * @param {string} baseURL - API 서버의 기본 URL (예: 'https://api.Gena.com')
    * @param {TokenManager} tokenManager - 토큰 관리자 인스턴스
    */
   constructor(baseURL, tokenManager) {

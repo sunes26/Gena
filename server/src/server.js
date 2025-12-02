@@ -1,5 +1,5 @@
 /**
- * SummaryGenie 백엔드 서버 시작 파일
+ * Gena 백엔드 서버 시작 파일
  * Google Cloud Run 최적화 버전
  * 서버 초기화, 시작, 종료 및 에러 핸들링 담당
  * 
@@ -117,7 +117,7 @@ function validateCorsConfig() {
 async function startServer() {
   try {
     console.log('='.repeat(60));
-    console.log('🚀 SummaryGenie 서버 시작 중... (Cloud Run 최적화)');
+    console.log('🚀 Gena 서버 시작 중... (Cloud Run 최적화)');
     console.log('='.repeat(60));
     
     // Cloud Run 환경 감지
@@ -212,7 +212,7 @@ function printServerInfo(port, host, isCloudRun) {
   const localUrl = `http://localhost:${port}`;
   
   console.log('='.repeat(60));
-  console.log(`🚀 SummaryGenie API Server v2.1`);
+  console.log(`🚀 Gena API Server v2.1`);
   console.log(`=`.repeat(60));
   console.log(`📍 포트: ${port}`);
   console.log(`🌐 호스트: ${host}`);

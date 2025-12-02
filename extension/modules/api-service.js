@@ -1,6 +1,6 @@
 ﻿/**
  * extension\modules\api-service.js
- * SummaryGenie API Service
+ * Gena API Service
  * OpenAI API 및 히스토리 API 호출을 관리하는 모듈
  * 
  * ✨ v6.2.0 업데이트:

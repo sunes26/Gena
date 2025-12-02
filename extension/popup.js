@@ -1,6 +1,6 @@
 ﻿/**
  * extension\popup.js
- * SummaryGenie Popup Main Script
+ * Gena Popup Main Script
  * 요약 버튼 클릭 시 Side Panel로 리다이렉트
  *
  * ✨ v3.9.0 업데이트:
@@ -183,7 +183,7 @@ class AppController {
           line-height: 1.6;
           font-size: 14px;
         ">
-          SummaryGenie를 사용하려면<br>
+          Gena를 사용하려면<br>
           먼저 로그인해주세요
         </p>
         
@@ -582,7 +582,7 @@ class AppController {
     const upgradeBtn = modal.querySelector('.upgrade-btn');
     upgradeBtn.addEventListener('click', () => {
       chrome.tabs.create({
-        url: 'https://summarygenie.com/premium',
+        url: 'https://Gena.com/premium',
       });
       modal.remove();
     });

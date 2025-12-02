@@ -1,6 +1,6 @@
 /**
  * extension\pdf-extractor.js
- * SummaryGenie PDF Extractor (ES Module 버전)
+ * Gena PDF Extractor (ES Module 버전)
  * PDF.js .mjs 파일을 동적 import로 사용
  * 
  * ✨ v2.0.0 업데이트:

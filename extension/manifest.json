@@ -1,6 +1,6 @@
 ﻿{
   "manifest_version": 3,
-  "name": "SummaryGenie - AI Web Page Summarizer",
+  "name": "Gena - AI Web Page Summarizer",
   "version": "2.3.1",
   "description": "AI가 웹페이지와 PDF를 즉시 요약해주는 스마트한 읽기 도우미 (프리미엄 기능)",
   "default_locale": "ko",
@@ -26,7 +26,7 @@
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     },
-    "default_title": "SummaryGenie - 페이지 요약"
+    "default_title": "Gena - 페이지 요약"
   },
   "side_panel": {
     "default_path": "sidepanel.html"
@@ -97,7 +97,7 @@
         "default": "Alt+G",
         "mac": "Command+Shift+G"
       },
-      "description": "SummaryGenie Side Panel 열기"
+      "description": "Gena Side Panel 열기"
     },
     "summarize-page": {
       "suggested_key": {
@@ -117,10 +117,10 @@
   "minimum_chrome_version": "114",
   "externally_connectable": {
     "matches": [
-      "https://api.summarygenie.com/*",
-      "https://summarygenie.com/*"
+      "https://api.Gena.com/*",
+      "https://Gena.com/*"
     ]
   },
-  "author": "SummaryGenie Team",
-  "homepage_url": "https://summarygenie.com"
+  "author": "Gena Team",
+  "homepage_url": "https://Gena.com"
 }

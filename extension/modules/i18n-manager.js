@@ -300,7 +300,7 @@ class I18nManager {
         'cancel': '취소',
         'close': '닫기',
         'loginSuccess': '로그인 성공!',
-        'loginSuccessDesc': 'SummaryGenie 확장 프로그램 아이콘을\n클릭하여 사용을 시작하세요.',
+        'loginSuccessDesc': 'Gena 확장 프로그램 아이콘을\n클릭하여 사용을 시작하세요.',
         'or': '또는',
         'language': '언어'
       },
@@ -331,7 +331,7 @@ class I18nManager {
         'cancel': 'Cancel',
         'close': 'Close',
         'loginSuccess': 'Login Successful!',
-        'loginSuccessDesc': 'Click the SummaryGenie extension icon\nto start using it.',
+        'loginSuccessDesc': 'Click the Gena extension icon\nto start using it.',
         'or': 'or',
         'language': 'Language'
       }

@@ -114,7 +114,7 @@ async function initializeFirebase() {
       process.env.FIREBASE_AUTH_EMULATOR_HOST = process.env.FIREBASE_AUTH_EMULATOR_HOST || 'localhost:9099';
       
       firebaseApp = admin.initializeApp({
-        projectId: process.env.FIREBASE_PROJECT_ID || 'summarygenie-dev'
+        projectId: process.env.FIREBASE_PROJECT_ID || 'Gena-dev'
       });
       
       isInitialized = true;

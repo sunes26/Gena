@@ -1,6 +1,6 @@
 /**
  * extension\modules\usage-manager.js
- * SummaryGenie Usage Manager
+ * Gena Usage Manager
  * 서버 기반 사용량 추적 및 제한 관리
  * 
  * @module usage-manager

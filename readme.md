@@ -1,8 +1,8 @@
-# SummaryGenie 🧞‍♂️
+# Gena 🧞‍♂️
 
 > AI 기반 웹페이지 요약 및 질문-답변 Chrome Extension
 
-[![Version](https://img.shields.io/badge/version-2.7.0-blue.svg)](https://github.com/yourusername/summarygenie)
+[![Version](https://img.shields.io/badge/version-2.7.0-blue.svg)](https://github.com/yourusername/Gena)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-Coming%20Soon-orange.svg)]()
 [![Firebase](https://img.shields.io/badge/Firebase-Firestore-orange.svg)](https://firebase.google.com/)
@@ -30,7 +30,7 @@
 
 ## 🎯 프로젝트 소개
 
-**SummaryGenie**는 OpenAI GPT-4o-mini를 활용하여 웹페이지를 즉시 요약하고, 내용에 대해 질문할 수 있는 올인원 Chrome Extension입니다. 정보 과부하 시대에 효율적인 콘텐츠 소비를 돕습니다.
+**Gena**는 OpenAI GPT-4o-mini를 활용하여 웹페이지를 즉시 요약하고, 내용에 대해 질문할 수 있는 올인원 Chrome Extension입니다. 정보 과부하 시대에 효율적인 콘텐츠 소비를 돕습니다.
 
 ### 핵심 가치
 
@@ -317,7 +317,7 @@ firestore/
 ## 📁 프로젝트 구조
 
 ```
-summarygenie/
+Gena/
 ├── docker-compose.yml          # Docker Compose 설정 (루트)
 ├── package-lock.json           # NPM 패키지 잠금 파일 (루트)
 ├── readme.md                   # 프로젝트 README (이 파일)
@@ -490,8 +490,8 @@ summarygenie/
 ### 1. 저장소 클론
 
 ```bash
-git clone https://github.com/yourusername/summarygenie.git
-cd summarygenie
+git clone https://github.com/yourusername/Gena.git
+cd Gena
 ```
 
 ### 2. Firebase 프로젝트 설정
@@ -500,7 +500,7 @@ cd summarygenie
 
 1. [Firebase Console](https://console.firebase.google.com/) 접속
 2. "프로젝트 추가" 클릭
-3. 프로젝트 이름 입력 (예: summarygenie)
+3. 프로젝트 이름 입력 (예: Gena)
 4. Google Analytics 설정 (선택사항)
 
 #### 2.2. Firebase Authentication 활성화
@@ -568,7 +568,7 @@ JWT_SECRET=your_jwt_secret_min_32_characters_long_please_change_this
 EMAIL_SERVICE=gmail
 EMAIL_USER=your-email@gmail.com
 EMAIL_PASSWORD=your-app-password
-EMAIL_FROM="SummaryGenie <noreply@summarygenie.com>"
+EMAIL_FROM="Gena <oceancode0321@gmail.com>"
 # SendGrid 사용 시
 # EMAIL_SERVICE=sendgrid
 # SENDGRID_API_KEY=SG.your_sendgrid_api_key
@@ -763,7 +763,7 @@ version: '3.8'
 
 services:
   app:
-    container_name: summarygenie-server
+    container_name: Gena-server
     build:
       context: .
       dockerfile: Dockerfile
@@ -812,17 +812,17 @@ docker-compose down
 cd server
 
 # 이미지 빌드
-docker build -t gcr.io/your-project-id/summarygenie-server:v2.7.0 .
+docker build -t gcr.io/your-project-id/Gena-server:v2.7.0 .
 
 # Container Registry에 푸시
-docker push gcr.io/your-project-id/summarygenie-server:v2.7.0
+docker push gcr.io/your-project-id/Gena-server:v2.7.0
 ```
 
 #### 2. Cloud Run 배포
 
 ```bash
-gcloud run deploy summarygenie-server \
-  --image gcr.io/your-project-id/summarygenie-server:v2.7.0 \
+gcloud run deploy Gena-server \
+  --image gcr.io/your-project-id/Gena-server:v2.7.0 \
   --platform managed \
   --region asia-northeast3 \
   --allow-unauthenticated \
@@ -1031,7 +1031,7 @@ curl http://localhost:3000/health
 
 ## 📧 연락처
 
-- 프로젝트 링크: [https://github.com/sunes26/SummaryGenie](https://github.com/sunes26/SummaryGenie)
+- 프로젝트 링크: [https://github.com/sunes26/Gena](https://github.com/sunes26/Gena)
 
 ## 🙏 감사의 말
 
@@ -1049,10 +1049,10 @@ curl http://localhost:3000/health
 
 - [보안 가이드](SECURITY.md)
 - [기획서](__AI_웹페이지_요약봇_크롬_확장프로그램_기획서)
-- [개발 로드맵](__SummaryGenie_개발_로드맵_ver_2.0)
+- [개발 로드맵](__Gena_개발_로드맵_ver_2.0)
 
 ---
 
-**Made with ❤️ by SummaryGenie Team**
+**Made with by Gena Team**
 
 **Version**: 2.7.0 | **Last Updated**: 2025-11-11

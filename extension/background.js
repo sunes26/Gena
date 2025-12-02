@@ -1,6 +1,6 @@
 ﻿/**
  * extension\background.js
- * SummaryGenie Enhanced Background Service Worker - All-in-One
+ * Gena Enhanced Background Service Worker - All-in-One
  * TokenManager, ErrorHandler, 모든 기능 통합
  * 
  * ✨ v5.0.0 업데이트:
@@ -12,7 +12,7 @@
  * @version 5.0.0
  */
 
-console.log('[Background] 🔵 SummaryGenie 시작 (v5.0.0 - Firebase Auth 자동 복구)');
+console.log('[Background] 🔵 Gena 시작 (v5.0.0 - Firebase Auth 자동 복구)');
 
 // =====================================================
 // 1. ErrorHandler 모듈 (통합)
@@ -301,7 +301,7 @@ console.log('[ErrorHandler] ✅ Module loaded');
 
 class TokenManager {
   constructor() {
-    this.API_BASE_URL = 'https://api.summarygenie.com';
+    this.API_BASE_URL = 'https://api.Gena.com';
     this.TOKEN_REFRESH_THRESHOLD = 5 * 60 * 1000;
     this.isRefreshing = false;
     this.refreshSubscribers = [];
@@ -1159,7 +1159,7 @@ class TokenRefreshManager {
     chrome.notifications.create('token-refresh-failed', {
       type: 'basic',
       iconUrl: 'icons/icon128.png',
-      title: 'SummaryGenie 인증 만료',
+      title: 'Gena 인증 만료',
       message: '로그인이 필요합니다. 다시 로그인해주세요.',
       priority: 2
     });
@@ -1217,7 +1217,7 @@ async function waitForFirebase(timeout = 10000) {
 // ===== Service Worker 이벤트 핸들러 =====
 
 chrome.runtime.onInstalled.addListener(async (details) => {
-  console.log('SummaryGenie Enhanced 설치:', details.reason);
+  console.log('Gena Enhanced 설치:', details.reason);
   
   try {
     if (details.reason === 'install') {
@@ -1382,7 +1382,7 @@ function createContextMenus() {
       
       chrome.contextMenus.create({
         id: 'open-side-panel',
-        title: 'SummaryGenie Side Panel 열기',
+        title: 'Gena Side Panel 열기',
         contexts: ['page']
       });
     });
@@ -1963,4 +1963,4 @@ chrome.runtime.onSuspend.addListener(() => {
   pdfOffscreenManager.closeOffscreenDocument();
 });
 
-console.log('🚀 SummaryGenie Enhanced Background Service 시작 완료 (v5.0.0 - Firebase Auth 자동 복구)');
+console.log('🚀 Gena Enhanced Background Service 시작 완료 (v5.0.0 - Firebase Auth 자동 복구)');

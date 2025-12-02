@@ -111,8 +111,8 @@ function generateToken(payload, options = {}) {
   // 토큰 생성 옵션
   const tokenOptions = {
     expiresIn: options.expiresIn || JWT_EXPIRES_IN,
-    issuer: 'SummaryGenie',
-    audience: 'SummaryGenie-Users'
+    issuer: 'Gena',
+    audience: 'Gena-Users'
   };
 
   try {
@@ -161,8 +161,8 @@ function verifyToken(token) {
   try {
     // 토큰 검증 및 디코딩
     const decoded = jwt.verify(token, JWT_SECRET, {
-      issuer: 'SummaryGenie',
-      audience: 'SummaryGenie-Users'
+      issuer: 'Gena',
+      audience: 'Gena-Users'
     });
 
     // 토큰 타입 검증
@@ -213,8 +213,8 @@ function generateRefreshToken(payload) {
   try {
     const token = jwt.sign(refreshPayload, JWT_SECRET, {
       expiresIn: REFRESH_EXPIRES_IN,
-      issuer: 'SummaryGenie',
-      audience: 'SummaryGenie-Users'
+      issuer: 'Gena',
+      audience: 'Gena-Users'
     });
     return token;
   } catch (error) {
@@ -249,8 +249,8 @@ function refreshToken(oldToken, useRefresh = false) {
     // 만료된 토큰도 디코딩 (ignoreExpiration)
     const decoded = jwt.verify(oldToken, JWT_SECRET, {
       ignoreExpiration: true,
-      issuer: 'SummaryGenie',
-      audience: 'SummaryGenie-Users'
+      issuer: 'Gena',
+      audience: 'Gena-Users'
     });
 
     // Refresh 토큰 검증

@@ -1,6 +1,6 @@
 ﻿/**
  * extension\content.js
- * SummaryGenie Content Script
+ * Gena Content Script
  * 웹페이지에서 콘텐츠를 추출하는 스크립트
  * 
  * ✨ v5.1.0 업데이트:
@@ -14,8 +14,8 @@
  * @version 5.1.0
  */
 
-if (!window.summaryGenieInitialized) {
-  window.summaryGenieInitialized = true;
+if (!window.GenaInitialized) {
+  window.GenaInitialized = true;
 
   /**
    * 콘텐츠 추출기 클래스

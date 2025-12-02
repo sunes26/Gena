@@ -38,7 +38,7 @@ const historyRouter = require('./api/history');
  * 
  * Response:
  * {
- *   "name": "SummaryGenie API",
+ *   "name": "Gena API",
  *   "version": "2.0.0",
  *   "description": "AI 웹페이지 요약 서비스 API",
  *   "endpoints": {
@@ -54,7 +54,7 @@ const historyRouter = require('./api/history');
  */
 router.get('/', (req, res) => {
   res.json({
-    name: 'SummaryGenie API',
+    name: 'Gena API',
     version: '2.0.0',
     description: 'AI 웹페이지 요약 서비스 API',
     endpoints: {
@@ -98,7 +98,7 @@ router.get('/', (req, res) => {
       note: '대부분의 엔드포인트는 JWT 인증이 필요합니다'
     },
     documentation: [
-      'https://docs.summarygenie.com/api'
+      'https://docs.Gena.com/api'
     ],
     timestamp: new Date().toISOString()
   });

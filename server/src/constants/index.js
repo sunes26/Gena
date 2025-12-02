@@ -1,5 +1,5 @@
 /**
- * SummaryGenie 전역 상수 정의
+ * Gena 전역 상수 정의
  * 모든 하드코딩된 값을 중앙 집중식으로 관리
  * 
  * @module constants
@@ -256,8 +256,8 @@ const CACHE = {
 const JWT = {
   EXPIRES_IN: '7d',
   ALGORITHM: 'HS256',
-  ISSUER: 'summarygenie',
-  AUDIENCE: 'summarygenie-users'
+  ISSUER: 'Gena',
+  AUDIENCE: 'Gena-users'
 };
 
 // ===== Circuit Breaker 설정 =====

@@ -1,6 +1,6 @@
 ﻿/**
  * extension\modules\qa-manager.js
- * SummaryGenie Q&A Manager (ErrorHandler 통합 + 메모리 최적화 버전)
+ * Gena Q&A Manager (ErrorHandler 통합 + 메모리 최적화 버전)
  * 질문/답변 기능을 관리하는 모듈
  * 
  * @module qa-manager

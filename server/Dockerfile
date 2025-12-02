@@ -1,5 +1,5 @@
 # ===================================================================
-# SummaryGenie Server - Google Cloud Run 최적화 빌드 (프로덕션)
+# Gena Server - Google Cloud Run 최적화 빌드 (프로덕션)
 # Node.js 18 기반, Firebase 실제 인증, 포트 3000
 # ===================================================================
 
@@ -20,7 +20,7 @@ RUN npm ci --only=production && \
 FROM node:18-alpine AS production
 
 # 메타데이터
-LABEL maintainer="SummaryGenie Team"
+LABEL maintainer="Gena Team"
 LABEL version="2.1.0"
 LABEL description="AI-powered web summarization service - Production Build"
 
@@ -69,11 +69,11 @@ CMD ["node", "src/server.js"]
 # 빌드 및 실행 명령어:
 #
 # 1. 프로덕션 이미지 빌드:
-#    docker build -t summarygenie-server:production .
+#    docker build -t Gena-server:production .
 #
 # 2. 로컬 테스트 실행:
 #    docker run -d \
-#      --name summarygenie-server \
+#      --name Gena-server \
 #      -p 3000:3000 \
 #      -e OPENAI_API_KEY=your-key \
 #      -e JWT_SECRET=your-secret-min-32-chars \
@@ -81,17 +81,17 @@ CMD ["node", "src/server.js"]
 #      -e NODE_ENV=production \
 #      -e FREE_USER_DAILY_LIMIT=3 \
 #      --restart unless-stopped \
-#      summarygenie-server:production
+#      Gena-server:production
 #
 # 3. 환경변수 확인:
-#    docker exec summarygenie-server env | grep FREE_USER_DAILY_LIMIT
+#    docker exec Gena-server env | grep FREE_USER_DAILY_LIMIT
 #
 # 4. 로그 확인:
-#    docker logs -f summarygenie-server
+#    docker logs -f Gena-server
 #
 # 5. Cloud Run 배포:
-#    gcloud run deploy summarygenie-server \
-#      --image gcr.io/PROJECT_ID/summarygenie-server:v1 \
+#    gcloud run deploy Gena-server \
+#      --image gcr.io/PROJECT_ID/Gena-server:v1 \
 #      --platform managed \
 #      --region asia-northeast3 \
 #      --allow-unauthenticated \
