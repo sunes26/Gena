@@ -3,6 +3,9 @@
  * Gena Settings Manager (Simplified)
  * 설정 관리를 담당하는 모듈
  * 
+ * ✨ v5.1.0 업데이트:
+ * - autoReopenSidePanel 설정 추가 (Side Panel 자동 복원)
+ * 
  * @module settings-manager
  * @version 5.2.0
  * Universal Module: 브라우저 환경과 Service Worker 모두 지원
@@ -29,7 +32,8 @@ class SettingsManager {
       summaryLength: 'medium',
       model: 'gpt-4o-mini',
       useProxy: true,
-      proxyUrl: 'http://localhost:3000/api/chat'
+      proxyUrl: 'http://localhost:3000/api/chat',
+      autoReopenSidePanel: true // ✨ v5.1.0 추가
     };
     
     this.VALIDATION_RULES = {
@@ -139,6 +143,12 @@ class SettingsManager {
     if (migrated.proxyUrl === 'http://localhost:3000') {
       migrated.proxyUrl = 'http://localhost:3000/api/chat';
       console.log('[SettingsManager] proxyUrl 업데이트: /api/chat 엔드포인트');
+    }
+    
+    // ✨ v5.1.0: autoReopenSidePanel 기본값 설정
+    if (migrated.autoReopenSidePanel === undefined) {
+      migrated.autoReopenSidePanel = true;
+      console.log('[SettingsManager] autoReopenSidePanel 기본값 설정: true');
     }
     
     // 제거된 설정 정리
@@ -274,6 +284,11 @@ class SettingsManager {
     
     if (settings.useProxy !== undefined && typeof settings.useProxy !== 'boolean') {
       throw new Error('useProxy must be a boolean');
+    }
+
+    // ✨ v5.1.0: autoReopenSidePanel 검증
+    if (settings.autoReopenSidePanel !== undefined && typeof settings.autoReopenSidePanel !== 'boolean') {
+      throw new Error('autoReopenSidePanel must be a boolean');
     }
   }
 
@@ -421,6 +436,45 @@ class SettingsManager {
    */
   isContextMenuEnabled() {
     return true;
+  }
+
+  /**
+   * ✨ v5.1.0: Side Panel 자동 재열림 여부
+   */
+  shouldAutoReopenSidePanel() {
+    return this.settings.autoReopenSidePanel !== false; // 기본값 true
+  }
+
+  /**
+   * 설정 내보내기 (JSON)
+   */
+  exportSettings() {
+    try {
+      const json = JSON.stringify(this.settings, null, 2);
+      return json;
+    } catch (error) {
+      if (this.errorHandler) {
+        this.errorHandler.handle(error, 'SettingsManager.exportSettings');
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * 설정 가져오기 (JSON)
+   */
+  async importSettings(json) {
+    try {
+      const importedSettings = JSON.parse(json);
+      await this.saveSettings(importedSettings);
+      console.log('[SettingsManager] 설정 가져오기 완료');
+      return true;
+    } catch (error) {
+      if (this.errorHandler) {
+        this.errorHandler.handle(error, 'SettingsManager.importSettings');
+      }
+      throw error;
+    }
   }
 
   /**

@@ -4,12 +4,14 @@
  * 웹페이지에서 콘텐츠를 추출하는 스크립트
  * 
  * ✨ v5.1.0 업데이트:
+ * - Side Panel 자동 복원 배지 표시 기능 추가 (showSummaryBadge)
  * - PDF 추출 기능 추가 (extractPDF 메서드)
  * - 노이즈 제거 대폭 강화 (4단계 필터링)
  * - 광고/프로모션 제거 강화 (속성 기반 필터링 추가)
  * - CTA 버튼 텍스트 자동 감지 및 제거
  * - 메타 텍스트 패턴 제거 (공유하기, 댓글 수 등)
  * - 이미지 alt 텍스트 필터링 개선
+ * - Extension context invalidated 에러 처리 추가
  * 
  * @version 5.1.0
  */
@@ -450,56 +452,306 @@ if (!window.GenaInitialized) {
   }
 
   /**
+   * ✨ v5.1.0: 요약 보기 배지 표시
+   */
+  function showSummaryBadge() {
+    console.log('[Content] 요약 배지 표시 요청');
+
+    // 중복 체크
+    const existingBadge = document.getElementById('Gena-summary-badge');
+    if (existingBadge) {
+      console.log('[Content] 기존 배지가 이미 존재함');
+      return;
+    }
+
+    // 배지 생성
+    const badge = document.createElement('div');
+    badge.id = 'Gena-summary-badge';
+    badge.className = 'Gena-summary-badge';
+    
+    badge.innerHTML = `
+      <span class="material-icons Gena-badge-icon">description</span>
+      <span class="Gena-badge-text">요약 보기</span>
+      <button class="Gena-badge-close" aria-label="닫기">
+        <span class="material-icons">close</span>
+      </button>
+    `;
+
+    document.body.appendChild(badge);
+
+    // 페이드인 효과
+    setTimeout(() => {
+      badge.classList.add('Gena-badge-show');
+    }, 100);
+
+    // 배지 클릭 이벤트 (✨ Extension context 체크 추가)
+    badge.addEventListener('click', async (e) => {
+      if (e.target.closest('.Gena-badge-close')) {
+        return; // 닫기 버튼은 별도 처리
+      }
+
+      try {
+        // ✅ Extension context 유효성 체크
+        if (!chrome.runtime?.id) {
+          console.error('[Content] Extension context 무효화됨 - 페이지 새로고침 필요');
+          showReloadNotification();
+          return;
+        }
+
+        console.log('[Content] 배지 클릭 - Side Panel 열기');
+        
+        await chrome.runtime.sendMessage({
+          action: 'openSidePanel'
+        });
+
+        console.log('[Content] Side Panel 열림 요청 완료');
+        
+        // 배지 제거
+        badge.classList.add('Gena-badge-hide');
+        setTimeout(() => {
+          badge.remove();
+        }, 300);
+
+      } catch (error) {
+        console.error('[Content] Side Panel 열기 실패:', error);
+
+        // Extension context 에러인 경우
+        if (error.message && error.message.includes('Extension context invalidated')) {
+          showReloadNotification();
+        } else {
+          // 다른 에러는 배지만 제거
+          badge.classList.add('Gena-badge-hide');
+          setTimeout(() => {
+            badge.remove();
+          }, 300);
+        }
+      }
+    });
+
+    // 닫기 버튼 이벤트
+    const closeBtn = badge.querySelector('.Gena-badge-close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        console.log('[Content] 배지 닫기 버튼 클릭');
+        
+        badge.classList.add('Gena-badge-hide');
+        setTimeout(() => {
+          badge.remove();
+        }, 300);
+      });
+    }
+
+    console.log('[Content] 요약 배지 표시 완료');
+  }
+
+  /**
+   * ✨ Extension context 무효화 시 새로고침 안내
+   */
+  function showReloadNotification() {
+    // 기존 알림 제거
+    const existingNotification = document.getElementById('Gena-reload-notification');
+    if (existingNotification) {
+      existingNotification.remove();
+    }
+
+    const notification = document.createElement('div');
+    notification.id = 'Gena-reload-notification';
+    notification.style.cssText = `
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px 24px;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4);
+      z-index: 999999;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      animation: slideInFromTop 0.3s ease-out;
+      max-width: 400px;
+    `;
+
+    notification.innerHTML = `
+      <span style="font-size: 20px;">🔄</span>
+      <div style="flex: 1;">
+        <div style="font-weight: 600; margin-bottom: 4px;">확장 프로그램이 업데이트되었습니다</div>
+        <div style="font-size: 12px; opacity: 0.9;">페이지를 새로고침해주세요</div>
+      </div>
+      <button id="Gena-reload-btn" style="
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        font-size: 13px;
+        transition: all 0.2s;
+        white-space: nowrap;
+      " onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
+         onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+        새로고침
+      </button>
+      <button id="Gena-close-notification" style="
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 4px;
+        margin-left: 4px;
+        opacity: 0.7;
+        font-size: 18px;
+        line-height: 1;
+      " onmouseover="this.style.opacity='1'" 
+         onmouseout="this.style.opacity='0.7'">
+        ✕
+      </button>
+    `;
+
+    // 애니메이션 CSS 추가
+    if (!document.getElementById('Gena-reload-notification-styles')) {
+      const style = document.createElement('style');
+      style.id = 'Gena-reload-notification-styles';
+      style.textContent = `
+        @keyframes slideInFromTop {
+          from {
+            transform: translateY(-100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+        @keyframes slideOutToTop {
+          from {
+            transform: translateY(0);
+            opacity: 1;
+          }
+          to {
+            transform: translateY(-100%);
+            opacity: 0;
+          }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    document.body.appendChild(notification);
+
+    // 새로고침 버튼
+    const reloadBtn = notification.querySelector('#Gena-reload-btn');
+    if (reloadBtn) {
+      reloadBtn.addEventListener('click', () => {
+        window.location.reload();
+      });
+    }
+
+    // 닫기 버튼
+    const closeBtn = notification.querySelector('#Gena-close-notification');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        notification.style.animation = 'slideOutToTop 0.3s ease-in';
+        setTimeout(() => {
+          notification.remove();
+        }, 300);
+      });
+    }
+
+    // 10초 후 자동 제거
+    setTimeout(() => {
+      if (notification.parentElement) {
+        notification.style.animation = 'slideOutToTop 0.3s ease-in';
+        setTimeout(() => {
+          notification.remove();
+        }, 300);
+      }
+    }, 10000);
+
+    console.log('[Content] 새로고침 안내 알림 표시');
+  }
+
+  /**
    * 메시지 리스너
    */
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === 'extractContent') {
-      console.log('[ContentExtractor] 추출 요청 받음');
-
-      const extractor = new ContentExtractor();
-
-      extractor.extract()
-        .then(result => {
-          console.log('[ContentExtractor] 추출 완료:', result.stats);
-          sendResponse({
-            success: true,
-            content: result.content,
-            metadata: result.metadata,
-            stats: result.stats
-          });
-        })
-        .catch(error => {
-          console.error('[ContentExtractor] 추출 실패:', error);
-          sendResponse({
-            success: false,
-            error: error.message,
-            content: ''
-          });
-        });
-
-      return true; // 비동기 응답
+    // ✅ Extension context 체크
+    if (!chrome.runtime?.id) {
+      console.warn('[Content] Extension context 무효화됨 - 메시지 무시');
+      return false;
     }
 
-if (request.action === 'checkPDFExtractor') {
-  console.log('[ContentExtractor] PDF Extractor 초기화 확인 요청');
-  
-  const initialized = typeof window.pdfExtractor !== 'undefined' && 
-                     window.pdfExtractor !== null &&
-                     typeof window.pdfExtractor.extractText === 'function';
-  
-  console.log('[ContentExtractor] PDF Extractor 초기화 상태:', initialized);
-  
-  sendResponse({
-    initialized: initialized,
-    available: initialized
+    console.log('[Content] 메시지 수신:', request.action);
+
+    try {
+      switch (request.action) {
+        case 'extractContent':
+          console.log('[ContentExtractor] 추출 요청 받음');
+
+          const extractor = new ContentExtractor();
+
+          extractor.extract()
+            .then(result => {
+              console.log('[ContentExtractor] 추출 완료:', result.stats);
+              sendResponse({
+                success: true,
+                content: result.content,
+                metadata: result.metadata,
+                stats: result.stats
+              });
+            })
+            .catch(error => {
+              console.error('[ContentExtractor] 추출 실패:', error);
+              sendResponse({
+                success: false,
+                error: error.message,
+                content: ''
+              });
+            });
+
+          return true; // 비동기 응답
+
+        case 'showSummaryBadge':
+          showSummaryBadge();
+          sendResponse({ success: true });
+          break;
+
+        case 'checkPDFExtractor':
+          console.log('[ContentExtractor] PDF Extractor 초기화 확인 요청');
+          
+          const initialized = typeof window.pdfExtractor !== 'undefined' && 
+                             window.pdfExtractor !== null &&
+                             typeof window.pdfExtractor.extractText === 'function';
+          
+          console.log('[ContentExtractor] PDF Extractor 초기화 상태:', initialized);
+          
+          sendResponse({
+            initialized: initialized,
+            available: initialized
+          });
+          break;
+
+        case 'ping':
+          sendResponse({ success: true });
+          break;
+
+        default:
+          console.warn('[Content] 알 수 없는 액션:', request.action);
+          sendResponse({ success: false, error: 'Unknown action' });
+      }
+    } catch (error) {
+      console.error('[Content] 메시지 처리 오류:', error);
+      sendResponse({ success: false, error: error.message });
+    }
+
+    return false; // 동기 응답
   });
-  
-  return false;
-}
 
-  });
-
-  
-
-  console.log('[ContentExtractor] 초기화 완료');
+  // 초기화 로그
+  console.log('[Content] Content script 초기화 완료');
 }

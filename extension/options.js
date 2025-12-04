@@ -1,6 +1,10 @@
 ﻿/**
  * Gena 옵션 페이지 스크립트 (웹 개선 버전)
  * UI 표시 및 사용자 인터랙션 담당
+ * 
+ * ✨ v5.1.0 업데이트:
+ * - autoReopenSidePanel 설정 UI 처리 추가
+ * 
  * v2.3.0 - 깜빡임 방지 적용
  * 
  * 전역 방식: 모든 모듈은 window 객체에 이미 노출되어 있습니다.
@@ -75,7 +79,10 @@ const elements = {
   subscriptionTitle: document.querySelector('.subscription-title'),
   subscriptionDescription: document.querySelector('.subscription-description'),
   subscriptionBadge: document.querySelector('.subscription-badge'),
-  subscriptionFeatures: document.querySelector('.subscription-features')
+  subscriptionFeatures: document.querySelector('.subscription-features'),
+
+  // ✨ v5.1.0: Side Panel 설정 요소
+  autoReopenCheckbox: document.getElementById('autoReopenCheckbox')
 };
 
 let appState = {
@@ -428,13 +435,25 @@ async function initialize() {
   }
 }
 
+/**
+ * ✨ v5.1.0: 설정값으로 UI 업데이트 (autoReopenCheckbox 추가)
+ */
 function updateUIFromSettings() {
   const settings = window.settingsManager.getSettings();
   
   elements.languageSelect.value = settings.language;
   elements.themeSelect.value = settings.theme;
+
+  // ✨ v5.1.0: Side Panel 자동 재열림 설정
+  if (elements.autoReopenCheckbox) {
+    elements.autoReopenCheckbox.checked = settings.autoReopenSidePanel !== false; // 기본값 true
+    console.log('[Options] autoReopenSidePanel UI 업데이트:', elements.autoReopenCheckbox.checked);
+  }
 }
 
+/**
+ * ✨ v5.1.0: UI에서 설정값 수집 (autoReopenCheckbox 추가)
+ */
 function collectAndValidateSettings() {
   const languageValidation = window.validateInput(elements.languageSelect.value, {
     type: 'string',
@@ -455,11 +474,19 @@ function collectAndValidateSettings() {
   if (!themeValidation.valid) {
     throw new Error(`테마 설정: ${themeValidation.error}`);
   }
-  
-  return {
+
+  // ✨ v5.1.0: autoReopenSidePanel 수집
+  const settings = {
     language: languageValidation.sanitized,
     theme: themeValidation.sanitized
   };
+
+  if (elements.autoReopenCheckbox) {
+    settings.autoReopenSidePanel = elements.autoReopenCheckbox.checked;
+    console.log('[Options] autoReopenSidePanel 수집:', settings.autoReopenSidePanel);
+  }
+  
+  return settings;
 }
 
 async function saveSettings() {
@@ -467,7 +494,7 @@ async function saveSettings() {
     const previousLanguage = window.settingsManager.getSetting('language');
     const newSettings = collectAndValidateSettings();
     
-    console.log('[Options] 설정 저장 중...');
+    console.log('[Options] 설정 저장 중...', newSettings);
     
     await window.settingsManager.saveSettings(newSettings);
     

@@ -8,8 +8,9 @@
  * - Service Worker Keep-Alive 구현 (15초 주기)
  * - PDF 진행 상황 실시간 UI 업데이트
  * - 페이드인 효과로 깜빡임 방지
+ * - Side Panel 상태 저장 기능 추가 (v7.1.0)
  *
- * @version 7.0.0
+ * @version 7.1.0
  */
 
 class SidePanelController {
@@ -40,7 +41,7 @@ class SidePanelController {
     // Side Panel 전용: 활성 탭 추적
     this.currentTabId = null;
 
-    // ✨ Service Worker Keep-Alive (새로 추가)
+    // ✨ Service Worker Keep-Alive
     this.keepAliveInterval = null;
     this.progressListener = null;
   }
@@ -80,7 +81,7 @@ class SidePanelController {
       this.setupSettingsChangeListener();
       this.setupRealtimeUsageUpdate();
       this.setupTabChangeListener();
-      this.setupProgressListener(); // ✨ 진행 상황 리스너 설정
+      this.setupProgressListener();
       window.languageManager.applyLanguageFont();
 
       this.displayUserInfo();
@@ -103,7 +104,7 @@ class SidePanelController {
   }
 
   /**
-   * ✨ 진행 상황 리스너 설정 (새로 추가)
+   * ✨ 진행 상황 리스너 설정
    */
   setupProgressListener() {
     this.progressListener = (message, sender, sendResponse) => {
@@ -117,7 +118,7 @@ class SidePanelController {
   }
 
   /**
-   * ✨ PDF 진행 상황 UI 업데이트 (새로 추가)
+   * ✨ PDF 진행 상황 UI 업데이트
    */
   updatePDFProgress(data) {
     const container = document.getElementById('pdfProgressContainer');
@@ -210,19 +211,27 @@ class SidePanelController {
    * ✅ Side Panel 전용: 활성 탭 변경 감지
    */
   setupTabChangeListener() {
-    chrome.tabs.onActivated.addListener(async (activeInfo) => {
-      console.log('[SidePanel] 탭 변경 감지:', activeInfo.tabId);
-      this.currentTabId = activeInfo.tabId;
-      await this.loadCurrentTab();
-    });
+  chrome.tabs.onActivated.addListener(async (activeInfo) => {
+    console.log('[SidePanel] 탭 변경 감지:', activeInfo.tabId);
+    
+    // ✨ v5.1.0: 다른 탭으로 이동 시 Side Panel 닫기
+    if (this.currentTabId && activeInfo.tabId !== this.currentTabId) {
+      console.log('[SidePanel] 다른 탭으로 이동 → Side Panel 닫기');
+      window.close();
+      return; // 닫힌 후에는 더 이상 실행하지 않음
+    }
+    
+    this.currentTabId = activeInfo.tabId;
+    await this.loadCurrentTab();
+  });
 
-    chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-      if (tabId === this.currentTabId && changeInfo.status === 'complete') {
-        console.log('[SidePanel] 탭 업데이트 완료');
-        await this.loadCurrentTab();
-      }
-    });
-  }
+  chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+    if (tabId === this.currentTabId && changeInfo.status === 'complete') {
+      console.log('[SidePanel] 탭 업데이트 완료');
+      await this.loadCurrentTab();
+    }
+  });
+}
 
   /**
    * ✅ 질문 섹션 오버레이 텍스트만 업데이트 (언어 변경 시)
@@ -310,7 +319,7 @@ class SidePanelController {
   }
 
   /**
-   * ✅ 질문 섹션 잠금/해제 (항상 오버레이)
+   * ✅ 질문 섹션 잠금/해제
    */
   toggleQuestionSection(isPremium) {
     const questionSection = document.getElementById('questionSection');
@@ -774,9 +783,6 @@ class SidePanelController {
     }
   }
 
-  /**
-   * ✨ v8.0 - 콘텐츠 추출 메서드 (타임아웃 180초 + Keep-Alive)
-   */
   async extractPageContent() {
     try {
       const [tab] = await chrome.tabs.query({
@@ -790,161 +796,151 @@ class SidePanelController {
 
       console.log('[SidePanel] 현재 탭 URL:', tab.url);
 
-  if (this.isPDFUrl(tab.url)) {
-  console.log('[SidePanel] PDF 페이지 감지 - Offscreen Document 통한 추출 시작');
+      if (this.isPDFUrl(tab.url)) {
+        console.log('[SidePanel] PDF 페이지 감지 - Offscreen Document 통한 추출 시작');
 
-  try {
-    // ✨ Keep-Alive 시작
-    this.startKeepAlive();
+        try {
+          this.startKeepAlive();
 
-    // ✨ 진행 상황 초기화
-    this.updatePDFProgress({
-      stage: 'download',
-      progress: 0,
-      message: 'PDF 파일을 가져오는 중...'
-    });
+          this.updatePDFProgress({
+            stage: 'download',
+            progress: 0,
+            message: 'PDF 파일을 가져오는 중...'
+          });
 
-    console.log('[SidePanel] 🔵 Service Worker 깨우는 중...');
-    await this.wakeUpServiceWorker();
-    console.log('[SidePanel] 🔵 Service Worker 활성화 완료');
+          console.log('[SidePanel] 🔵 Service Worker 깨우는 중...');
+          await this.wakeUpServiceWorker();
+          console.log('[SidePanel] 🔵 Service Worker 활성화 완료');
 
-    console.log('[SidePanel] 🔵 PDF 추출 메시지 전송');
+          console.log('[SidePanel] 🔵 PDF 추출 메시지 전송');
 
-    // ✨ 1. ACK 응답만 받음 (즉시 반환)
-    const ackResponse = await new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        reject(new Error('ACK 응답 타임아웃 (10초)'));
-      }, 10000);
+          const ackResponse = await new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => {
+              reject(new Error('ACK 응답 타임아웃 (10초)'));
+            }, 10000);
 
-      chrome.runtime.sendMessage(
-        {
-          action: 'extractPDF',
-          url: tab.url
-        },
-        (response) => {
-          clearTimeout(timeout);
-          
-          if (chrome.runtime.lastError) {
-            console.error('[SidePanel] 🔴 런타임 에러:', chrome.runtime.lastError);
-            reject(new Error(chrome.runtime.lastError.message));
-            return;
+            chrome.runtime.sendMessage(
+              {
+                action: 'extractPDF',
+                url: tab.url
+              },
+              (response) => {
+                clearTimeout(timeout);
+                
+                if (chrome.runtime.lastError) {
+                  console.error('[SidePanel] 🔴 런타임 에러:', chrome.runtime.lastError);
+                  reject(new Error(chrome.runtime.lastError.message));
+                  return;
+                }
+                
+                if (!response) {
+                  reject(new Error('응답이 비어있습니다'));
+                  return;
+                }
+                
+                resolve(response);
+              }
+            );
+          });
+
+          console.log('[SidePanel] ✅ ACK 응답 받음:', ackResponse);
+
+          if (!ackResponse.success) {
+            throw new Error(ackResponse.error || 'PDF 추출 요청 실패');
           }
-          
-          if (!response) {
-            reject(new Error('응답이 비어있습니다'));
-            return;
+
+          const result = await new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => {
+              this.stopKeepAlive();
+              reject(new Error('PDF 추출 타임아웃 (180초)'));
+            }, 180000);
+
+            const completionListener = (message, sender, sendResponse) => {
+              if (message.action === 'pdfExtractionComplete') {
+                clearTimeout(timeout);
+                chrome.runtime.onMessage.removeListener(completionListener);
+                
+                console.log('[SidePanel] ✅ PDF 추출 완료 메시지 받음');
+                resolve(message.result);
+              }
+            };
+
+            chrome.runtime.onMessage.addListener(completionListener);
+          });
+
+          this.stopKeepAlive();
+
+          console.log('[SidePanel] PDF 추출 결과:', result);
+
+          if (!result || !result.success) {
+            throw new Error(result?.error || 'PDF 추출 실패');
           }
-          
-          resolve(response);
+
+          if (!result.text || result.text.length < 50) {
+            throw new Error('PDF에서 텍스트를 찾을 수 없습니다. 이미지 기반 PDF는 지원하지 않습니다.');
+          }
+
+          this.updatePDFProgress({
+            stage: 'complete',
+            progress: 100,
+            message: '추출이 완료되었습니다!'
+          });
+
+          const contentValidation = window.validateInput(result.text, {
+            type: 'string',
+            required: true,
+            minLength: 50,
+            maxLength: 100000,
+          });
+
+          if (!contentValidation.valid) {
+            throw new Error(`PDF 콘텐츠 검증 실패: ${contentValidation.error}`);
+          }
+
+          this.currentPageContent = contentValidation.sanitized;
+
+          if (result.metadata) {
+            this.currentPageInfo.isPDF = true;
+            this.currentPageInfo.pdfPages = result.metadata.extractedPages;
+            this.currentPageInfo.pdfTotalPages = result.metadata.totalPages;
+          }
+
+          console.log('[SidePanel] ✅ PDF 콘텐츠 추출 완료:', 
+            this.currentPageContent.length, '문자');
+
+          return this.currentPageContent;
+
+        } catch (pdfError) {
+          console.error('[SidePanel] PDF 추출 실패:', pdfError);
+
+          this.stopKeepAlive();
+
+          this.updatePDFProgress({
+            stage: 'error',
+            progress: 0,
+            message: pdfError.message
+          });
+
+          let errorMessage = 'PDF를 추출할 수 없습니다.';
+
+          if (pdfError.message.includes('Chrome 114+')) {
+            errorMessage = 'PDF 추출 기능은 Chrome 114 이상 버전에서만 사용할 수 있습니다.';
+          } else if (pdfError.message.includes('텍스트를 찾을 수 없습니다')) {
+            errorMessage = pdfError.message;
+          } else if (pdfError.message.includes('접근')) {
+            errorMessage = 'PDF 파일에 접근할 수 없습니다.';
+          } else if (pdfError.message.includes('타임아웃') || pdfError.message.includes('시간')) {
+            errorMessage = 'PDF 추출 시간이 초과되었습니다. 파일이 너무 크거나 복잡할 수 있습니다.';
+          } else if (pdfError.message.includes('응답이 비어있습니다') || pdfError.message.includes('ACK')) {
+            errorMessage = 'Service Worker가 응답하지 않습니다. 확장 프로그램을 새로고침해주세요.';
+          } else if (pdfError.message.includes('Service Worker')) {
+            errorMessage = 'Service Worker 통신 오류가 발생했습니다. 확장 프로그램을 새로고침해주세요.';
+          }
+
+          throw new Error(errorMessage);
         }
-      );
-    });
+      }
 
-    console.log('[SidePanel] ✅ ACK 응답 받음:', ackResponse);
-
-    if (!ackResponse.success) {
-      throw new Error(ackResponse.error || 'PDF 추출 요청 실패');
-    }
-
-    // ✨ 2. 실제 결과는 별도 메시지로 받음 (180초 대기)
-    const result = await new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        this.stopKeepAlive();
-        reject(new Error('PDF 추출 타임아웃 (180초)'));
-      }, 180000);
-
-      // ✨ 완료 메시지 리스너 등록
-      const completionListener = (message, sender, sendResponse) => {
-        if (message.action === 'pdfExtractionComplete') {
-          clearTimeout(timeout);
-          chrome.runtime.onMessage.removeListener(completionListener);
-          
-          console.log('[SidePanel] ✅ PDF 추출 완료 메시지 받음');
-          resolve(message.result);
-        }
-      };
-
-      chrome.runtime.onMessage.addListener(completionListener);
-    });
-
-    // ✨ Keep-Alive 중지
-    this.stopKeepAlive();
-
-    console.log('[SidePanel] PDF 추출 결과:', result);
-
-    if (!result || !result.success) {
-      throw new Error(result?.error || 'PDF 추출 실패');
-    }
-
-    if (!result.text || result.text.length < 50) {
-      throw new Error('PDF에서 텍스트를 찾을 수 없습니다. 이미지 기반 PDF는 지원하지 않습니다.');
-    }
-
-    // ✨ 진행 상황 완료
-    this.updatePDFProgress({
-      stage: 'complete',
-      progress: 100,
-      message: '추출이 완료되었습니다!'
-    });
-
-    const contentValidation = window.validateInput(result.text, {
-      type: 'string',
-      required: true,
-      minLength: 50,
-      maxLength: 100000,
-    });
-
-    if (!contentValidation.valid) {
-      throw new Error(`PDF 콘텐츠 검증 실패: ${contentValidation.error}`);
-    }
-
-    this.currentPageContent = contentValidation.sanitized;
-
-    if (result.metadata) {
-      this.currentPageInfo.isPDF = true;
-      this.currentPageInfo.pdfPages = result.metadata.extractedPages;
-      this.currentPageInfo.pdfTotalPages = result.metadata.totalPages;
-    }
-
-    console.log('[SidePanel] ✅ PDF 콘텐츠 추출 완료:', 
-      this.currentPageContent.length, '문자');
-
-    return this.currentPageContent;
-
-  } catch (pdfError) {
-    console.error('[SidePanel] PDF 추출 실패:', pdfError);
-
-    // ✨ Keep-Alive 중지
-    this.stopKeepAlive();
-
-    // ✨ 진행 상황 에러 표시
-    this.updatePDFProgress({
-      stage: 'error',
-      progress: 0,
-      message: pdfError.message
-    });
-
-    let errorMessage = 'PDF를 추출할 수 없습니다.';
-
-    if (pdfError.message.includes('Chrome 114+')) {
-      errorMessage = 'PDF 추출 기능은 Chrome 114 이상 버전에서만 사용할 수 있습니다.';
-    } else if (pdfError.message.includes('텍스트를 찾을 수 없습니다')) {
-      errorMessage = pdfError.message;
-    } else if (pdfError.message.includes('접근')) {
-      errorMessage = 'PDF 파일에 접근할 수 없습니다.';
-    } else if (pdfError.message.includes('타임아웃') || pdfError.message.includes('시간')) {
-      errorMessage = 'PDF 추출 시간이 초과되었습니다. 파일이 너무 크거나 복잡할 수 있습니다.';
-    } else if (pdfError.message.includes('응답이 비어있습니다') || pdfError.message.includes('ACK')) {
-      errorMessage = 'Service Worker가 응답하지 않습니다. 확장 프로그램을 새로고침해주세요.';
-    } else if (pdfError.message.includes('Service Worker')) {
-      errorMessage = 'Service Worker 통신 오류가 발생했습니다. 확장 프로그램을 새로고침해주세요.';
-    }
-
-    throw new Error(errorMessage);
-  }
-}
-
-      // 일반 웹페이지 처리
       if (window.isRestrictedPage && window.isRestrictedPage(tab.url)) {
         throw new Error(window.languageManager.getMessage('errorRestrictedPage'));
       }
@@ -1044,25 +1040,19 @@ class SidePanelController {
       console.error('[SidePanel] 콘텐츠 추출 오류:', error);
       window.errorHandler.handle(error, 'extract-page-content');
       
-      // ✨ Keep-Alive 중지 (에러 시에도)
       this.stopKeepAlive();
       
       throw error;
     }
   }
 
-  /**
-   * ✨ Service Worker Keep-Alive 시작 (새로 추가)
-   */
   startKeepAlive() {
     console.log('[Keep-Alive] 시작 - 15초 주기');
     
-    // 기존 인터벌이 있으면 제거
     if (this.keepAliveInterval) {
       clearInterval(this.keepAliveInterval);
     }
 
-    // 15초마다 ping 전송
     this.keepAliveInterval = setInterval(async () => {
       try {
         await chrome.runtime.sendMessage({ action: 'ping' });
@@ -1073,9 +1063,6 @@ class SidePanelController {
     }, 15000);
   }
 
-  /**
-   * ✨ Service Worker Keep-Alive 중지 (새로 추가)
-   */
   stopKeepAlive() {
     if (this.keepAliveInterval) {
       clearInterval(this.keepAliveInterval);
@@ -1084,13 +1071,10 @@ class SidePanelController {
     }
   }
 
-  /**
-   * ✅ Service Worker 깨우기 (타임아웃 3초 → 5초로 증가)
-   */
   async wakeUpServiceWorker() {
     const MAX_RETRIES = 3;
     const RETRY_DELAY = 1000;
-    const PING_TIMEOUT = 5000; // ✨ 3초 → 5초
+    const PING_TIMEOUT = 5000;
     
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       try {
@@ -1140,9 +1124,6 @@ class SidePanelController {
     console.warn('[SidePanel] ⚠️ 모든 재시도 실패 - PDF 추출 진행');
   }
 
-  /**
-   * PDF URL 확인
-   */
   isPDFUrl(url) {
     if (!url) return false;
 
@@ -1165,9 +1146,6 @@ class SidePanelController {
     return false;
   }
 
-  /**
-   * ✨ v6.0 - 콘텐츠 길이 기반 최적 요약 길이 자동 판단
-   */
   determineOptimalLength(contentLength) {
     if (contentLength < 1000) {
       console.log(
@@ -1207,9 +1185,6 @@ class SidePanelController {
     }
   }
 
-  /**
-   * ✨ v6.0 - 콘텐츠 길이 기반 max_tokens 동적 계산
-   */
   calculateMaxTokens(contentLength) {
     if (contentLength < 1000) {
       return 500;
@@ -1283,13 +1258,43 @@ class SidePanelController {
 
       await this.updateUsage();
 
+      // ✨ Side Panel 상태 저장
+      await this.saveSidePanelState();
+
       this.showToast('toastSaved');
+      
     } catch (error) {
       console.error('[SidePanel] 요약 오류:', error);
       window.errorHandler.handle(error, 'summarize-page');
       this.showError('errorSummarize');
     } finally {
       window.uiManager.showLoading(false);
+    }
+  }
+
+  /**
+   * ✨ Side Panel 상태 저장
+   */
+  async saveSidePanelState() {
+    try {
+      if (!this.currentTabId) {
+        console.warn('[SidePanel] Tab ID가 없어서 상태 저장 불가');
+        return;
+      }
+
+      console.log('[SidePanel] 탭 상태 저장:', this.currentTabId);
+
+      await chrome.runtime.sendMessage({
+        action: 'saveSidePanelState',
+        tabId: this.currentTabId,
+        hasSummary: !!this.currentSummary
+      });
+
+      console.log('[SidePanel] 상태 저장 완료');
+
+    } catch (error) {
+      console.error('[SidePanel] 상태 저장 오류:', error);
+      window.errorHandler.handle(error, 'save-sidepanel-state');
     }
   }
 
@@ -1777,10 +1782,8 @@ class SidePanelController {
       console.log('[Usage Update] 폴링 인터벌 제거');
     }
 
-    // ✨ Keep-Alive 정리
     this.stopKeepAlive();
 
-    // ✨ 진행 상황 리스너 제거
     if (this.progressListener) {
       chrome.runtime.onMessage.removeListener(this.progressListener);
       this.progressListener = null;

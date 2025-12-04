@@ -3,16 +3,18 @@
  * Gena Enhanced Background Service Worker - All-in-One
  * TokenManager, ErrorHandler, 모든 기능 통합
  * 
- * ✨ v5.0.0 업데이트:
+ * ✨ v5.1.0 업데이트:
  * - Firebase Auth 자동 복구 추가 (onStartup)
  * - Keep-Alive ping 응답 강화 (Firebase Auth 상태 포함)
  * - 타임아웃 180초로 통일
  * - PDF 진행 상황 중계 기능 추가
+ * - Side Panel 자동 복원 기능 추가 (방법 6)
+ * - 탭 전환 시 Side Panel 자동 닫힘/열림 처리
  * 
- * @version 5.0.0
+ * @version 5.1.0
  */
 
-console.log('[Background] 🔵 Gena 시작 (v5.0.0 - Firebase Auth 자동 복구)');
+console.log('[Background] 🔵 Gena 시작 (v5.1.0 - Side Panel 자동 복원)');
 
 // =====================================================
 // 1. ErrorHandler 모듈 (통합)
@@ -556,6 +558,9 @@ console.log('[TokenManager] ✅ Module loaded');
 // =====================================================
 
 console.log('[Background] ✅ Modules loaded successfully');
+
+// ✨ 현재 활성 탭 추적 (v5.1.0 추가)
+let currentActiveTabId = null;
 
 // ===== 사이트 관리자 =====
 class SiteManager {
@@ -1172,12 +1177,92 @@ class TokenRefreshManager {
   }
 }
 
+// ===== Side Panel 상태 관리자 (v5.1.0 추가) =====
+class SidePanelStateManager {
+  constructor() {
+    this.REOPEN_TIMEOUT = 5 * 60 * 1000; // 5분
+  }
+
+  /**
+   * Side Panel 상태 저장
+   */
+  async savePanelState(tabId, hasSummary = true) {
+    try {
+      const state = {
+        tabId: tabId,
+        hasSummary: hasSummary,
+        timestamp: Date.now(),
+        lastAccessed: Date.now()
+      };
+
+      await chrome.storage.local.set({ [`sidePanelState_${tabId}`]: state });
+      console.log(`[SidePanel] 상태 저장: 탭 ${tabId}`);
+      
+    } catch (error) {
+      console.error('[SidePanel] 상태 저장 오류:', error);
+      errorHandler.handle(error, 'save-panel-state');
+    }
+  }
+
+  /**
+   * Side Panel 상태 조회
+   */
+  async getPanelState(tabId) {
+    try {
+      const result = await chrome.storage.local.get(`sidePanelState_${tabId}`);
+      return result[`sidePanelState_${tabId}`] || null;
+      
+    } catch (error) {
+      console.error('[SidePanel] 상태 조회 오류:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Side Panel 상태 삭제
+   */
+  async clearPanelState(tabId) {
+    try {
+      await chrome.storage.local.remove(`sidePanelState_${tabId}`);
+      console.log(`[SidePanel] 상태 삭제: 탭 ${tabId}`);
+      
+    } catch (error) {
+      console.error('[SidePanel] 상태 삭제 오류:', error);
+    }
+  }
+
+  /**
+   * 자동 재열림 여부 체크
+   */
+  shouldAutoReopen(state) {
+    if (!state || !state.hasSummary) {
+      return false;
+    }
+
+    const elapsed = Date.now() - state.lastAccessed;
+    return elapsed < this.REOPEN_TIMEOUT;
+  }
+
+  /**
+   * 배지 표시 여부 체크
+   */
+  shouldShowBadge(state) {
+    if (!state || !state.hasSummary) {
+      return false;
+    }
+
+    const elapsed = Date.now() - state.lastAccessed;
+    return elapsed >= this.REOPEN_TIMEOUT;
+  }
+}
+
 // ===== 전역 인스턴스 생성 =====
 const siteManager = new SiteManager();
 const contentScriptManager = new ContentScriptManager();
 const extractionManager = new ExtractionManager();
 const pdfOffscreenManager = new PDFOffscreenManager();
 const tokenRefreshManager = new TokenRefreshManager(tokenManager);
+const sidePanelStateManager = new SidePanelStateManager();
 
 console.log('[Background] ✅ All managers initialized');
 
@@ -1187,9 +1272,6 @@ console.log('[Background] ✅ All managers initialized');
 
 /**
  * Firebase 초기화 대기 헬퍼 함수
- * Service Worker 재시작 시 Firebase가 아직 로드되지 않았을 수 있음
- * @param {number} timeout - 최대 대기 시간 (밀리초)
- * @returns {Promise<boolean>}
  */
 async function waitForFirebase(timeout = 10000) {
   const startTime = Date.now();
@@ -1206,7 +1288,6 @@ async function waitForFirebase(timeout = 10000) {
       // Firebase 아직 로드 안 됨
     }
     
-    // 100ms 대기
     await new Promise(resolve => setTimeout(resolve, 100));
   }
   
@@ -1230,7 +1311,8 @@ chrome.runtime.onInstalled.addListener(async (details) => {
           maxScrolls: 3,
           autoExtract: false,
           useProxy: true,
-          proxyUrl: 'http://localhost:3000/api/chat'
+          proxyUrl: 'http://localhost:3000/api/chat',
+          autoReopenSidePanel: true
         }
       });
       
@@ -1250,12 +1332,10 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   }
 });
 
-// ✨ Service Worker 재시작 시 Firebase Auth 복구
 chrome.runtime.onStartup.addListener(async () => {
   console.log('[Background] 🔵 Service Worker 재시작 - Firebase Auth 복구 시작');
   
   try {
-    // 1. Firebase 초기화 대기
     const firebaseReady = await waitForFirebase();
     
     if (!firebaseReady) {
@@ -1263,23 +1343,19 @@ chrome.runtime.onStartup.addListener(async () => {
       return;
     }
     
-    // 2. Firebase 로그인 상태 확인
     const currentUser = firebase.auth().currentUser;
     
     if (currentUser) {
       console.log('[Background] ✅ Firebase 로그인 상태 복구:', currentUser.email);
       
       try {
-        // 3. 토큰 갱신 (force refresh)
         const newIdToken = await currentUser.getIdToken(true);
         const refreshToken = currentUser.refreshToken;
         
-        // 4. TokenManager에 저장
         await tokenManager.saveTokens(newIdToken, refreshToken);
         
         console.log('[Background] ✅ 세션 복구 완료');
         
-        // 토큰 정보 로깅
         const tokenInfo = await tokenManager.getTokenInfo();
         console.log('[Background] 토큰 만료:', tokenInfo.expiresAt);
         console.log('[Background] 남은 시간:', Math.floor(tokenInfo.timeUntilExpiry / 60000), '분');
@@ -1291,7 +1367,6 @@ chrome.runtime.onStartup.addListener(async () => {
     } else {
       console.log('[Background] ℹ️ 로그인 상태 없음 (정상)');
       
-      // Chrome Storage에서 토큰 확인
       const result = await chrome.storage.local.get('tokens');
       if (result.tokens) {
         console.log('[Background] ⚠️ Chrome Storage에 토큰 있으나 Firebase 세션 없음');
@@ -1308,7 +1383,6 @@ chrome.runtime.onStartup.addListener(async () => {
     errorHandler.handle(error, 'firebase-auth-recovery');
   }
   
-  // 5. Token Refresh Alarm 재설정
   try {
     await tokenRefreshManager.setupTokenRefreshAlarm();
     console.log('[Background] ✅ Token Refresh Alarm 재설정 완료');
@@ -1455,10 +1529,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   try {
     switch (request.action) {
       case 'ping':
-        // ✨ Keep-Alive 응답 강화 + Firebase Auth 상태 확인
         console.log('[Background] 🔵 Ping 받음 - Service Worker 활성 상태 유지');
         
-        // Firebase Auth 상태 확인
         let authStatus = 'unknown';
         let userEmail = null;
         
@@ -1534,6 +1606,18 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
       case 'extractPDF':
         handleExtractPDF(request, sender, sendResponse);
+        return true;
+      
+      case 'saveSidePanelState':
+        handleSaveSidePanelState(request, sender, sendResponse);
+        return true;
+      
+      case 'getSidePanelState':
+        handleGetSidePanelState(request, sender, sendResponse);
+        return true;
+      
+      case 'clearSidePanelState':
+        handleClearSidePanelState(request, sender, sendResponse);
         return true;
     }
   } catch (error) {
@@ -1732,9 +1816,6 @@ async function handleOpenSidePanel(request, sender, sendResponse) {
   }
 }
 
-/**
- * ✨ PDF 추출 핸들러 (타임아웃 180초 + 진행 상황 중계)
- */
 async function handleExtractPDF(request, sender, sendResponse) {
   console.log('[Background] PDF 추출 요청 받음:', request.url);
   
@@ -1749,9 +1830,6 @@ async function handleExtractPDF(request, sender, sendResponse) {
   });
 }
 
-/**
- * ✨ 실제 PDF 처리 로직
- */
 async function processPDFExtraction(request, sender) {
   try {
     console.log('[Background] PDF 처리 시작:', request.url);
@@ -1890,9 +1968,6 @@ async function processPDFExtraction(request, sender) {
   }
 }
 
-/**
- * ✨ 진행 상황 업데이트 전송
- */
 function sendProgressUpdate(sender, data) {
   try {
     if (sender && sender.tab && sender.tab.id) {
@@ -1905,6 +1980,186 @@ function sendProgressUpdate(sender, data) {
     }
   } catch (error) {
     console.warn('[Background] 진행 상황 전송 오류:', error.message);
+  }
+}
+
+/**
+ * ✨ v5.1.0: Side Panel 상태 저장 핸들러
+ */
+async function handleSaveSidePanelState(request, sender, sendResponse) {
+  try {
+    const tabId = request.tabId || sender.tab?.id;
+    const hasSummary = request.hasSummary;
+
+    if (!tabId) {
+      return sendResponse({ success: false, error: 'tabId 없음' });
+    }
+
+    console.log('[Background] Side Panel 상태 저장:', { tabId, hasSummary });
+
+    await sidePanelStateManager.savePanelState(tabId, hasSummary);
+
+    // ✨ 요약 완료 시 해당 탭에서 Side Panel 활성화
+    if (hasSummary) {
+      await chrome.sidePanel.setOptions({
+        tabId: tabId,
+        path: 'sidepanel.html',
+        enabled: true
+      });
+      console.log('[Background] ✅ 탭 Side Panel 활성화:', tabId);
+    }
+
+    sendResponse({ 
+      success: true,
+      state: await sidePanelStateManager.getPanelState(tabId)
+    });
+
+  } catch (error) {
+    console.error('[Background] Side Panel 상태 저장 오류:', error);
+    errorHandler.handle(error, 'save-sidepanel-state');
+    sendResponse({ success: false, error: error.message });
+  }
+}
+
+async function handleGetSidePanelState(request, sender, sendResponse) {
+  try {
+    const tabId = request.tabId || sender.tab?.id;
+    
+    if (!tabId) {
+      throw new Error('Tab ID가 없습니다');
+    }
+    
+    const state = await sidePanelStateManager.getPanelState(tabId);
+    
+    sendResponse({ 
+      success: true, 
+      state: state 
+    });
+    
+  } catch (error) {
+    console.error('[Background] Side Panel 상태 조회 오류:', error);
+    errorHandler.handle(error, 'get-sidepanel-state');
+    sendResponse({ success: false, error: error.message });
+  }
+}
+
+async function handleClearSidePanelState(request, sender, sendResponse) {
+  try {
+    const tabId = request.tabId || sender.tab?.id;
+    
+    if (!tabId) {
+      throw new Error('Tab ID가 없습니다');
+    }
+    
+    await sidePanelStateManager.clearPanelState(tabId);
+    
+    sendResponse({ success: true });
+    
+  } catch (error) {
+    console.error('[Background] Side Panel 상태 삭제 오류:', error);
+    errorHandler.handle(error, 'clear-sidepanel-state');
+    sendResponse({ success: false, error: error.message });
+  }
+}
+
+/**
+ * ✨ v5.1.0: Side Panel 복원 처리
+ * - 5분 이내: Side Panel 활성화 + 자동 열기
+ * - 5분 이후: 배지 표시
+ */
+async function handleSidePanelRestore(tabId) {
+  try {
+    console.log('[Background] ========== Side Panel 복원 시작 ==========');
+    console.log('[Background] 대상 탭 ID:', tabId);
+    
+    // 설정 확인
+    const result = await chrome.storage.local.get('settings');
+    const settings = result.settings || {};
+    
+    console.log('[Background] autoReopenSidePanel 설정:', settings.autoReopenSidePanel);
+    
+    if (settings.autoReopenSidePanel === false) {
+      console.log('[Background] ❌ Side Panel 자동 재열림 비활성화됨');
+      return;
+    }
+
+    // 탭 상태 조회
+    const state = await sidePanelStateManager.getPanelState(tabId);
+    
+    console.log('[Background] 탭 상태:', state);
+    
+    if (!state || !state.hasSummary) {
+      console.log('[Background] ❌ 탭 상태 없음 또는 요약 없음');
+      return;
+    }
+
+    const elapsed = Date.now() - state.lastAccessed;
+    const shouldReopen = sidePanelStateManager.shouldAutoReopen(state);
+    const shouldShowBadge = sidePanelStateManager.shouldShowBadge(state);
+
+    console.log('[Background] 복원 체크:', {
+      tabId,
+      elapsedSeconds: Math.floor(elapsed / 1000),
+      shouldReopen,
+      shouldShowBadge
+    });
+
+    if (shouldReopen) {
+      // ✨ 5분 이내: Side Panel 활성화 + 자동 열기
+      console.log('[Background] ✅ 5분 이내 복귀 → Side Panel 자동 재열림');
+
+      try {
+        // 1) 탭에서 Side Panel 활성화
+        await chrome.sidePanel.setOptions({
+          tabId: tabId,
+          path: 'sidepanel.html',
+          enabled: true
+        });
+        console.log('[Background] ✅ Side Panel 활성화 완료');
+
+        // 2) Side Panel 열기
+        const tab = await chrome.tabs.get(tabId);
+        await chrome.sidePanel.open({ windowId: tab.windowId });
+        console.log('[Background] ✅ Side Panel 열기 완료');
+
+        // 3) 상태 업데이트
+        await sidePanelStateManager.savePanelState(tabId, true);
+        console.log('[Background] ✅ 상태 업데이트 완료');
+
+      } catch (openError) {
+        console.error('[Background] ❌ Side Panel 열기 실패:', openError);
+      }
+
+    } else if (shouldShowBadge) {
+      // ✨ 5분 이후: 배지 표시
+      console.log('[Background] 📛 5분 이후 복귀 → 배지 표시');
+
+      try {
+        // Content Script 주입 확인
+        const isInjected = await contentScriptManager.check(tabId);
+        console.log('[Background] Content Script 주입 상태:', isInjected);
+        
+        if (!isInjected) {
+          console.log('[Background] Content Script 주입 중...');
+          await contentScriptManager.inject(tabId);
+        }
+
+        // 배지 표시 메시지 전송
+        await chrome.tabs.sendMessage(tabId, {
+          action: 'showSummaryBadge'
+        });
+        console.log('[Background] ✅ 배지 표시 메시지 전송 완료');
+
+      } catch (badgeError) {
+        console.error('[Background] ❌ 배지 표시 실패:', badgeError);
+      }
+    }
+
+    console.log('[Background] ========== Side Panel 복원 종료 ==========');
+
+  } catch (error) {
+    console.error('[Background] ❌ Side Panel 복원 오류:', error);
+    errorHandler.handle(error, 'handle-sidepanel-restore');
   }
 }
 
@@ -1939,21 +2194,70 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 chrome.tabs.onRemoved.addListener((tabId) => {
   contentScriptManager.cleanup(tabId);
   extractionManager.activeExtractions.delete(tabId);
+  
+  sidePanelStateManager.clearPanelState(tabId);
 });
 
+/**
+ * ✨ v5.1.0: 탭 활성화 시 Side Panel 제어
+ * - 이전 탭: Side Panel 비활성화 (닫힘)
+ * - 현재 탭: Side Panel 복원 체크 (5분 이내면 재열림)
+ */
 chrome.tabs.onActivated.addListener(async (activeInfo) => {
+  const newTabId = activeInfo.tabId;
+  const windowId = activeInfo.windowId;
+
   try {
-    const tab = await chrome.tabs.get(activeInfo.tabId);
-    
-    const siteInfo = siteManager.getSiteInfo(tab.url);
-    if (siteInfo.spa) {
-      const isInjected = await contentScriptManager.check(activeInfo.tabId);
-      if (!isInjected && !siteManager.isRestricted(tab.url)) {
-        await contentScriptManager.inject(activeInfo.tabId);
+    console.log('[Background] 탭 활성화:', newTabId, '이전:', currentActiveTabId);
+
+    // ✨ 1. 이전 탭의 Side Panel 비활성화 (닫기 효과)
+    if (currentActiveTabId && currentActiveTabId !== newTabId) {
+      try {
+        await chrome.sidePanel.setOptions({
+          tabId: currentActiveTabId,
+          enabled: false
+        });
+        console.log('[Background] ✅ 이전 탭 Side Panel 닫음:', currentActiveTabId);
+      } catch (err) {
+        // 탭이 이미 닫혔거나 없는 경우 무시
+        console.log('[Background] 이전 탭 닫기 실패 (탭이 없을 수 있음):', err.message);
       }
     }
+
+    // ✨ 2. 현재 활성 탭 업데이트
+    currentActiveTabId = newTabId;
+
+    // 3. SPA 자동 주입 (기존 로직)
+    const tab = await chrome.tabs.get(newTabId);
+    
+    if (!tab || !tab.url) {
+      return;
+    }
+
+    if (siteManager.isRestricted(tab.url)) {
+      return;
+    }
+
+    const siteInfo = siteManager.getSiteInfo(tab.url);
+    if (siteInfo.spa) {
+      const isInjected = await contentScriptManager.check(newTabId);
+      if (!isInjected) {
+        console.log('[Background] SPA 감지:', tab.url);
+
+        try {
+          await contentScriptManager.inject(newTabId);
+          console.log('[Background] SPA에 content script 주입 완료');
+        } catch (error) {
+          console.log('[Background] Content script 주입 실패:', error.message);
+        }
+      }
+    }
+
+    // ✨ 4. Side Panel 복원 체크 (5분 이내면 자동 재열림)
+    await handleSidePanelRestore(newTabId);
+
   } catch (error) {
-    console.error('탭 활성화 처리 오류:', error.message);
+    console.error('[Background] 탭 활성화 처리 오류:', error);
     errorHandler.handle(error, 'tab-activated');
   }
 });
@@ -1963,4 +2267,4 @@ chrome.runtime.onSuspend.addListener(() => {
   pdfOffscreenManager.closeOffscreenDocument();
 });
 
-console.log('🚀 Gena Enhanced Background Service 시작 완료 (v5.0.0 - Firebase Auth 자동 복구)');
+console.log('🚀 Gena Enhanced Background Service 시작 완료 (v5.1.0 - Side Panel 자동 복원)');

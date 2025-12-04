@@ -48,6 +48,17 @@
             <option value="auto" data-i18n="themeAuto">시스템 설정 따르기</option>
           </select>
         </div>
+
+        <!-- ✨ Side Panel 자동 재열림 설정 (새로 추가) -->
+        <div class="setting-item">
+          <label class="checkbox-label">
+            <input type="checkbox" id="autoReopenCheckbox" checked>
+            <span data-i18n="autoReopenSidePanel">탭 전환 시 Side Panel 자동 재열림</span>
+          </label>
+          <p class="setting-description" data-i18n="autoReopenDescription">
+            5분 이내에 요약한 탭으로 돌아오면 Side Panel이 자동으로 다시 열립니다. 5분 이후에는 알림 배지가 표시됩니다.
+          </p>
+        </div>
       </section>
 
       <!-- 히스토리 관리 -->
@@ -221,6 +232,7 @@
     </div>
   </div>
 
+  <!-- Scripts -->
   <script src="modules/security.js"></script>
   <script src="modules/utils.js"></script>
   <script src="modules/error-handler.js"></script>

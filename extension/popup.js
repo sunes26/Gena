@@ -1,4 +1,4 @@
-﻿/**
+﻿﻿/**
  * extension\popup.js
  * Gena Popup Main Script
  * 요약 버튼 클릭 시 Side Panel로 리다이렉트
