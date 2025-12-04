@@ -1,7 +1,6 @@
-﻿﻿/**
+﻿/**
  * Gena Popup Styles - Modern Design
- * Pure CSS (No Tailwind)
- * v5.0.0 - 채팅 스타일 Q&A UI
+ * v5.1.1 - Layout Stability Fix
  */
 
 /* Reset & Base */
@@ -11,25 +10,29 @@
   box-sizing: border-box;
 }
 
-/* ✅ 깜빡임 방지: 초기 숨김 */
+/* ✅ html, body 모두에 고정 크기 강제 */
+html {
+  width: 380px !important;
+  height: 600px !important;
+  overflow: hidden; /* html 스크롤 방지 */
+}
+
 body {
-  opacity: 0;
-  visibility: hidden;
-  width: 380px;
+  width: 380px !important; /* 강제 너비 */
+  min-width: 380px !important; /* 최소 너비도 강제 */
   min-height: 500px;
+  height: 100%;
+  
+  /* ✅ 애니메이션 제거: 레이아웃 계산 오류 방지 */
+  opacity: 1 !important; 
+  visibility: visible !important;
+  
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 14px;
   line-height: 1.5;
   color: #1F2937;
   background: #f0f4f8;
-  overflow-x: hidden;
-  transition: opacity 0.3s ease;
-}
-
-/* ✅ 초기화 완료 후 페이드인 */
-body.loaded {
-  opacity: 1;
-  visibility: visible;
+  overflow-x: hidden; /* 가로 스크롤 방지 */
 }
 
 /* Header - Modern */

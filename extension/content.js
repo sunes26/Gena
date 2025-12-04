@@ -1,4 +1,4 @@
-﻿/**
+﻿﻿/**
  * extension\content.js
  * Gena Content Script
  * 웹페이지에서 콘텐츠를 추출하는 스크립트

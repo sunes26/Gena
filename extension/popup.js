@@ -1,16 +1,13 @@
-﻿﻿/**
+﻿/**
  * extension\popup.js
  * Gena Popup Main Script
  * 요약 버튼 클릭 시 Side Panel로 리다이렉트
  *
- * ✨ v3.9.0 업데이트:
- * - 사용량 표시 깜빡임 제거
- * - 초기 로딩 시 정확한 값만 표시
- * - storage 리스너로 실시간 업데이트
- * - 프리미엄/무료 상태 즉시 반영
- * - 페이드인 효과로 깜빡임 방지
+ * ✨ v5.1.3 Hotfix:
+ * - 로그인 화면 아이콘 깨짐 수정 (Font -> SVG 교체)
+ * - 레이아웃 강제 고정 유지
  *
- * @version 3.9.0
+ * @version 5.1.3
  */
 
 class AppController {
@@ -39,6 +36,10 @@ class AppController {
 
     try {
       console.log('[Popup] 초기화 시작');
+      
+      // ✅ [Hotfix] JS 초기화 시작 시점에 강제로 너비 고정
+      document.documentElement.style.width = '380px';
+      document.body.style.width = '380px';
 
       const isAuthenticated = await this.checkAuthStatusDirect();
 
@@ -146,16 +147,21 @@ class AppController {
   }
 
   showLoginRequiredScreen() {
+    // ✅ [Hotfix] 아이콘 폰트 로딩 실패 대비 SVG 직접 주입
     document.body.innerHTML = `
       <div style="
+        width: 380px !important;
+        min-width: 380px !important;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         padding: 40px 20px;
         text-align: center;
-        font-family: 'Roboto', sans-serif;
+        font-family: 'Inter', sans-serif;
         height: 100vh;
+        box-sizing: border-box;
+        overflow: hidden;
       ">
         <div style="
           width: 80px;
@@ -166,15 +172,19 @@ class AppController {
           align-items: center;
           justify-content: center;
           margin-bottom: 24px;
+          flex-shrink: 0;
         ">
-          <span class="material-icons" style="color: white; font-size: 48px;">lock</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="white">
+            <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+          </svg>
         </div>
         
         <h2 style="
           color: #212121;
           margin-bottom: 12px;
           font-size: 20px;
-          font-weight: 500;
+          font-weight: 600;
+          white-space: nowrap;
         ">로그인이 필요합니다</h2>
         
         <p style="
@@ -182,38 +192,46 @@ class AppController {
           margin-bottom: 32px;
           line-height: 1.6;
           font-size: 14px;
+          white-space: nowrap;
         ">
           Gena를 사용하려면<br>
           먼저 로그인해주세요
         </p>
         
         <button id="loginBtn" style="
+          width: 100%;
+          max-width: 280px;
           background: #2196F3;
           color: white;
           border: none;
           border-radius: 8px;
           padding: 12px 32px;
           font-size: 16px;
-          font-weight: 500;
+          font-weight: 600;
           cursor: pointer;
           transition: all 0.2s;
           display: flex;
           align-items: center;
+          justify-content: center;
           gap: 8px;
           margin-bottom: 16px;
         " onmouseover="this.style.background='#1976D2'" onmouseout="this.style.background='#2196F3'">
-          <span class="material-icons">login</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M11 7L9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v14z"/>
+          </svg>
           로그인하기
         </button>
         
         <button id="signupBtn" style="
+          width: 100%;
+          max-width: 280px;
           background: transparent;
           color: #2196F3;
           border: 2px solid #2196F3;
           border-radius: 8px;
           padding: 10px 32px;
           font-size: 14px;
-          font-weight: 500;
+          font-weight: 600;
           cursor: pointer;
           transition: all 0.2s;
         " onmouseover="this.style.background='#E3F2FD'" onmouseout="this.style.background='transparent'">

@@ -1,4 +1,4 @@
-﻿/**
+﻿﻿/**
  * extension\modules\api-service.js
  * Gena API Service
  * OpenAI API 및 히스토리 API 호출을 관리하는 모듈

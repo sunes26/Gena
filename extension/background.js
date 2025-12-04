@@ -1,4 +1,4 @@
-﻿/**
+﻿﻿/**
  * extension\background.js
  * Gena Enhanced Background Service Worker - All-in-One
  * TokenManager, ErrorHandler, 모든 기능 통합
