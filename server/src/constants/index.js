@@ -4,6 +4,9 @@
  * 
  * @module constants
  * @description 프로젝트 전역에서 사용되는 상수들을 정의합니다
+ * 
+ * ✨ v2.3.0 업데이트:
+ * - MAX_CONTENT_LENGTH를 100,000으로 증가 (System Message + 긴 콘텐츠 지원)
  */
 
 // ===== HTTP 상태 코드 =====
@@ -98,7 +101,7 @@ const ERROR_MESSAGES = {
   INVALID_INPUT: '잘못된 입력값입니다',
   DUPLICATE_EMAIL: '이미 사용 중인 이메일입니다',
   CONTENT_TOO_SHORT: '콘텐츠가 너무 짧습니다 (최소 50자)',
-  CONTENT_TOO_LONG: '콘텐츠가 너무 깁니다 (최대 15000자)',
+  CONTENT_TOO_LONG: '콘텐츠가 너무 깁니다 (최대 100000자)',
   
   // 리소스
   NOT_FOUND: '요청한 리소스를 찾을 수 없습니다',
@@ -174,11 +177,22 @@ const SUMMARY_LENGTHS = {
 };
 
 // ===== 사용량 제한 =====
+/**
+ * ✨ v2.3.0: MAX_CONTENT_LENGTH 변경
+ * - 기존: 15,000자
+ * - 변경: 100,000자
+ * 
+ * 이유:
+ * 1. System Message (buildKoreanSystemMessage 등)가 약 8,000~15,000자
+ * 2. User Message에 웹페이지 콘텐츠가 포함됨 (최대 100,000자)
+ * 3. 클라이언트(api-service.js)에서 maxLength: 100,000으로 설정됨
+ * 4. 서버와 클라이언트 검증 기준 일치 필요
+ */
 const LIMITS = {
   FREE_DAILY_LIMIT: 3,
   PREMIUM_DAILY_LIMIT: Infinity,
-  MIN_CONTENT_LENGTH: 50,
-  MAX_CONTENT_LENGTH: 15000,
+  MIN_CONTENT_LENGTH: 1,       // System message의 role별 최소 길이 (1자로 완화)
+  MAX_CONTENT_LENGTH: 100000,  // ✨ 15000 → 100000 (System Message + 긴 콘텐츠 지원)
   MIN_QUESTION_LENGTH: 2,
   MAX_QUESTION_LENGTH: 5000,
   MIN_TITLE_LENGTH: 1,
