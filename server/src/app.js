@@ -2,6 +2,11 @@
  * Express 애플리케이션 설정
  * 미들웨어, 라우터, 에러 핸들러 구성
  * 
+ * ✅ v2.0 업데이트:
+ * - CORS 설정 개선 (Chrome Extension ID 정확히 매칭)
+ * - .env의 ALLOWED_ORIGINS 환경변수 활용
+ * - 개발/프로덕션 환경 분리 강화
+ * 
  * @module app
  */
 
@@ -29,27 +34,72 @@ const routes = require('./routes');
 
 /**
  * 허용된 오리진 목록 생성
- * 환경에 따라 다른 오리진 패턴 반환
+ * 환경변수 우선 사용 → 기본값 fallback
  * 
  * @returns {Array<string|RegExp>} 허용된 오리진 목록
  */
 function getAllowedOrigins() {
   const isDevelopment = process.env.NODE_ENV === ENVIRONMENTS.DEVELOPMENT;
   
+  // ===== 개발 환경 =====
   if (isDevelopment) {
-    // 개발 환경: localhost 모든 포트 허용
+    // 환경변수에서 ALLOWED_ORIGINS 읽기
+    const envOrigins = process.env.ALLOWED_ORIGINS;
+    
+    if (envOrigins) {
+      const origins = envOrigins.split(',').map(origin => origin.trim());
+      const patterns = [];
+      
+      origins.forEach(origin => {
+        // chrome-extension://* 패턴
+        if (origin === 'chrome-extension://*') {
+          // Chrome Extension ID 형식: 32자 소문자 (a-z)
+          patterns.push(/^chrome-extension:\/\/[a-z]{32}$/);
+        }
+        // http://localhost:* 패턴
+        else if (origin === 'http://localhost:*') {
+          patterns.push(/^http:\/\/localhost:\d+$/);
+          patterns.push(/^http:\/\/127\.0\.0\.1:\d+$/);
+        }
+        // https://localhost:* 패턴
+        else if (origin === 'https://localhost:*') {
+          patterns.push(/^https:\/\/localhost:\d+$/);
+          patterns.push(/^https:\/\/127\.0\.0\.1:\d+$/);
+        }
+        // 정확한 URL
+        else {
+          patterns.push(origin);
+        }
+      });
+      
+      console.log('[CORS] 개발 환경 - 허용된 오리진 패턴:', patterns.length, '개');
+      return patterns;
+    }
+    
+    // 기본값 (환경변수 없을 경우)
     return [
+      /^chrome-extension:\/\/[a-z]{32}$/,
       /^http:\/\/localhost:\d+$/,
-      /^http:\/\/127\.0\.0\.1:\d+$/,
-      /^chrome-extension:\/\/[a-z]{32}$/
+      /^http:\/\/127\.0\.0\.1:\d+$/
     ];
-  } else {
-    // 프로덕션: 환경변수에 정의된 확장 ID만 허용
+  } 
+  
+  // ===== 프로덕션 환경 =====
+  else {
+    // 환경변수에서 ALLOWED_EXTENSION_IDS 읽기
     const allowedIds = process.env.ALLOWED_EXTENSION_IDS 
       ? process.env.ALLOWED_EXTENSION_IDS.split(',').map(id => id.trim())
       : [];
     
-    return allowedIds.map(id => `chrome-extension://${id}`);
+    if (allowedIds.length === 0) {
+      console.warn('⚠️ [CORS] 프로덕션 환경이지만 ALLOWED_EXTENSION_IDS가 설정되지 않았습니다!');
+      console.warn('⚠️ [CORS] 모든 Chrome Extension 요청이 차단됩니다.');
+    }
+    
+    const origins = allowedIds.map(id => `chrome-extension://${id}`);
+    console.log('[CORS] 프로덕션 환경 - 허용된 Extension ID:', allowedIds.length, '개');
+    
+    return origins;
   }
 }
 
@@ -60,7 +110,7 @@ function getAllowedOrigins() {
  * @returns {boolean} 허용 여부
  */
 function isOriginAllowed(origin) {
-  // 오리진이 없는 경우 (예: 서버 to 서버 요청)
+  // 오리진이 없는 경우 (예: Postman, 서버 to 서버)
   if (!origin) {
     return true;
   }
@@ -68,19 +118,17 @@ function isOriginAllowed(origin) {
   const allowedOrigins = getAllowedOrigins();
   const isDevelopment = process.env.NODE_ENV === ENVIRONMENTS.DEVELOPMENT;
   
-  // 개발 환경: RegExp 패턴 매칭
-  if (isDevelopment) {
-    return allowedOrigins.some(pattern => {
-      if (pattern instanceof RegExp) {
-        return pattern.test(origin);
-      }
-      return pattern === origin;
-    });
-  } 
-  // 프로덕션: 정확한 매칭
-  else {
-    return allowedOrigins.includes(origin);
-  }
+  // 허용 목록 확인
+  const allowed = allowedOrigins.some(pattern => {
+    // RegExp 패턴 매칭
+    if (pattern instanceof RegExp) {
+      return pattern.test(origin);
+    }
+    // 문자열 정확 매칭
+    return pattern === origin;
+  });
+  
+  return allowed;
 }
 
 // ===== 요청 로깅 미들웨어 =====
@@ -108,7 +156,8 @@ function requestLogger(req, res, next) {
       console.log(
         `[${new Date().toISOString()}] ` +
         `${req.method} ${req.path} - ` +
-        `${res.statusCode} (${duration}ms)`
+        `${res.statusCode} (${duration}ms) - ` +
+        `Origin: ${req.headers.origin || 'none'}`
       );
     }
   });
@@ -132,9 +181,11 @@ function createApp() {
   const app = express();
   
   // ===== 1. 보안 헤더 설정 =====
-  app.use(helmet());
+  app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+  }));
   
-  // ===== 2. CORS 설정 =====
+  // ===== 2. CORS 설정 (가장 중요!) =====
   app.use(cors({
     origin: function (origin, callback) {
       const allowed = isOriginAllowed(origin);
@@ -144,7 +195,7 @@ function createApp() {
         return callback(new Error('CORS policy: Origin not allowed'), false);
       }
       
-      // 개발 환경에서 로그 출력
+      // 개발 환경에서 허용된 오리진 로그
       if (process.env.NODE_ENV === ENVIRONMENTS.DEVELOPMENT && origin) {
         console.log(`✅ CORS 허용: ${origin}`);
       }
@@ -163,7 +214,6 @@ function createApp() {
   app.use(express.urlencoded({ extended: true, limit: BODY_LIMITS.URL_ENCODED }));
   
   // ===== 4. 정적 파일 제공 (선택) =====
-  // 프로덕션에서는 보통 Nginx 등에서 처리
   if (process.env.SERVE_STATIC === 'true') {
     app.use(express.static('public'));
   }
