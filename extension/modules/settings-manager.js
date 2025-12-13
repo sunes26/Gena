@@ -110,23 +110,21 @@ class SettingsManager {
 
       const data = await this.storageManager.get('settings', null);
 
-      // ✨ Chrome 언어 감지
+      // ✨ 항상 Chrome 언어 자동 감지
       const chromeLanguage = this.detectChromeLanguage();
       let defaultSettings = { ...this.DEFAULT_SETTINGS };
 
       // 기존 설정 마이그레이션
       const migratedSettings = this.migrateSettings(data || {});
 
-      // ✨ 저장된 언어가 없거나 기본값(ko)이면 Chrome 언어 사용
-      if (!migratedSettings.language || migratedSettings.language === 'ko') {
-        migratedSettings.language = chromeLanguage;
-        console.log('[SettingsManager] Chrome 언어로 설정:', chromeLanguage);
-
-        // Storage에도 저장
-        await this.storageManager.set('settings', { ...migratedSettings, language: chromeLanguage });
-      }
+      // ✨ 항상 Chrome 언어 사용 (자동 감지)
+      migratedSettings.language = chromeLanguage;
+      console.log('[SettingsManager] ✅ Chrome 언어 자동 감지:', chromeLanguage);
 
       this.settings = { ...defaultSettings, ...migratedSettings };
+
+      // Storage에도 Chrome 언어 저장
+      await this.storageManager.set('settings', this.settings);
 
       if (this.settings.apiKey) {
         await this.decryptApiKey();
