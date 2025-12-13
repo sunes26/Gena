@@ -837,8 +837,30 @@ class SidePanelController {
 
       console.log('[SidePanel] 현재 탭 URL:', tab.url);
 
-      if (this.isPDFUrl(tab.url)) {
-        console.log('[SidePanel] PDF 페이지 감지 - Offscreen Document 통한 추출 시작');
+      // ✨ PDF 감지: URL 기반 또는 DOM 스캔
+      let pdfUrl = null;
+      let isPDF = this.isPDFUrl(tab.url);
+
+      if (isPDF) {
+        pdfUrl = tab.url;
+        console.log('[SidePanel] PDF URL 감지:', pdfUrl);
+      } else {
+        // URL로 감지 안 되면 DOM에서 PDF embed/iframe 찾기
+        console.log('[SidePanel] DOM에서 PDF 검색 중...');
+        const domPDF = await this.hasPDFInDOM(tab.id);
+        if (domPDF.found) {
+          isPDF = true;
+          pdfUrl = domPDF.url;
+          console.log('[SidePanel] ✅ DOM에서 PDF 발견 (' + domPDF.type + '):', pdfUrl);
+        }
+      }
+
+      if (isPDF && pdfUrl) {
+        // ✨ PDF 뷰어 URL을 다운로드 가능한 URL로 변환
+        const directPdfUrl = this.convertToDirectPDFUrl(pdfUrl);
+        console.log('[SidePanel] PDF 추출 시작');
+        console.log('[SidePanel] 원본 URL:', pdfUrl);
+        console.log('[SidePanel] 변환된 URL:', directPdfUrl);
 
         try {
           this.startKeepAlive();
@@ -863,7 +885,7 @@ class SidePanelController {
             chrome.runtime.sendMessage(
               {
                 action: 'extractPDF',
-                url: tab.url
+                url: directPdfUrl  // ✨ 변환된 다운로드 URL 사용
               },
               (response) => {
                 clearTimeout(timeout);
@@ -1170,6 +1192,7 @@ class SidePanelController {
 
     const urlLower = url.toLowerCase();
 
+    // 1. 직접 PDF URL
     if (urlLower.endsWith('.pdf') ||
         urlLower.includes('.pdf?') ||
         urlLower.includes('.pdf#')) {
@@ -1184,7 +1207,103 @@ class SidePanelController {
       return true;
     }
 
+    // 2. ✨ PDF 뷰어 사이트 감지
+    // Google Drive PDF 뷰어
+    if (urlLower.includes('drive.google.com/file/d/')) {
+      return true;
+    }
+
+    // Dropbox PDF 뷰어
+    if (urlLower.includes('dropbox.com') &&
+        (urlLower.includes('/s/') || urlLower.includes('/sh/'))) {
+      return true;
+    }
+
+    // OneDrive PDF 뷰어
+    if (urlLower.includes('onedrive.live.com') ||
+        urlLower.includes('1drv.ms')) {
+      return true;
+    }
+
+    // arXiv PDF
+    if (urlLower.includes('arxiv.org/pdf/')) {
+      return true;
+    }
+
     return false;
+  }
+
+  /**
+   * ✨ PDF 뷰어 URL을 다운로드 가능한 URL로 변환
+   */
+  convertToDirectPDFUrl(url) {
+    const urlLower = url.toLowerCase();
+
+    // Google Drive: /file/d/FILE_ID/view → /uc?export=download&id=FILE_ID
+    if (urlLower.includes('drive.google.com/file/d/')) {
+      const match = url.match(/\/file\/d\/([^\/]+)/);
+      if (match && match[1]) {
+        const fileId = match[1];
+        return `https://drive.google.com/uc?export=download&id=${fileId}`;
+      }
+    }
+
+    // Dropbox: ?dl=0 → ?dl=1
+    if (urlLower.includes('dropbox.com')) {
+      return url.replace(/[?&]dl=0/i, '?dl=1');
+    }
+
+    // OneDrive: embed 파라미터 추가
+    if (urlLower.includes('onedrive.live.com') || urlLower.includes('1drv.ms')) {
+      return url + (url.includes('?') ? '&' : '?') + 'download=1';
+    }
+
+    // 기타 경우는 원본 URL 반환
+    return url;
+  }
+
+  /**
+   * ✨ DOM에서 PDF embed/iframe 찾기
+   */
+  async hasPDFInDOM(tabId) {
+    try {
+      const result = await chrome.scripting.executeScript({
+        target: { tabId },
+        func: () => {
+          // PDF embed 찾기
+          const pdfEmbed = document.querySelector('embed[type="application/pdf"]');
+          if (pdfEmbed && pdfEmbed.src) {
+            return { found: true, url: pdfEmbed.src, type: 'embed' };
+          }
+
+          // PDF object 찾기
+          const pdfObject = document.querySelector('object[type="application/pdf"]');
+          if (pdfObject && pdfObject.data) {
+            return { found: true, url: pdfObject.data, type: 'object' };
+          }
+
+          // PDF iframe 찾기
+          const iframes = document.querySelectorAll('iframe');
+          for (const iframe of iframes) {
+            const src = iframe.src || '';
+            if (src.toLowerCase().includes('.pdf')) {
+              return { found: true, url: src, type: 'iframe' };
+            }
+          }
+
+          return { found: false };
+        }
+      });
+
+      if (result && result[0] && result[0].result) {
+        return result[0].result;
+      }
+
+      return { found: false };
+    } catch (error) {
+      console.error('[SidePanel] DOM PDF 감지 오류:', error);
+      return { found: false };
+    }
   }
 
   determineOptimalLength(contentLength) {
