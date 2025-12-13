@@ -1432,13 +1432,24 @@ class SidePanelController {
       
     } catch (error) {
       console.error('[SidePanel] 요약 오류:', error);
-      window.errorHandler.handle(error, 'summarize-page');
 
       // ✨ Rate Limit 에러인 경우 카운트다운 표시
       if (error.statusCode === 429 && error.retryAfter) {
         this.handleRateLimitError(error.retryAfter);
       } else {
-        this.showError('errorSummarize');
+        // ✨ 구체적인 에러 메시지 표시
+        let errorMessage = error.message;
+
+        // ErrorHandler의 사용자 친화적 메시지 변환 활용
+        if (window.errorHandler) {
+          errorMessage = window.errorHandler.getUserMessage(error);
+        }
+
+        // 에러 로깅
+        window.errorHandler?.handle(error, 'summarize-page');
+
+        // 구체적인 에러 메시지 표시
+        window.uiManager.showError(errorMessage);
       }
     } finally {
       window.uiManager.showLoading(false);
@@ -1594,8 +1605,20 @@ class SidePanelController {
       console.log('[SidePanel] 질문 처리 완료');
     } catch (error) {
       console.error('[SidePanel] 질문 처리 오류:', error);
-      window.errorHandler.handle(error, 'ask-question');
-      this.showError(error.message || 'errorAnswer');
+
+      // ✨ 구체적인 에러 메시지 표시
+      let errorMessage = error.message || window.languageManager.getMessage('errorAnswer');
+
+      // ErrorHandler의 사용자 친화적 메시지 변환 활용
+      if (window.errorHandler && error.message) {
+        errorMessage = window.errorHandler.getUserMessage(error);
+      }
+
+      // 에러 로깅
+      window.errorHandler?.handle(error, 'ask-question');
+
+      // 구체적인 에러 메시지 표시
+      window.uiManager.showError(errorMessage);
     }
   }
 
