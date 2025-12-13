@@ -839,8 +839,8 @@ async function clearHistory() {
 }
 
 function handleSubscribe() {
-  chrome.tabs.create({ 
-    url: 'https://genaai.net/subscribe' 
+  chrome.tabs.create({
+    url: 'https://www.genaai.net/subscription'
   });
   
   showMessage(window.languageManager.getMessage('redirectingToSubscription'), 'info');
