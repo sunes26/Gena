@@ -1,4 +1,19 @@
 {
+  "appName": {
+    "message": "Gena - AI网页摘要"
+  },
+  "appDescription": {
+    "message": "使用AI即时摘要网页和PDF的智能阅读助手（高级功能）"
+  },
+  "openSidePanelCommand": {
+    "message": "打开Gena侧边栏"
+  },
+  "summarizePageCommand": {
+    "message": "摘要当前页面"
+  },
+  "openHistoryCommand": {
+    "message": "打开历史记录"
+  },
   "appTitle": {
     "message": "Gena"
   },
@@ -739,6 +754,21 @@
   },
   "loadingUsage": {
     "message": "检查使用量中..."
+  },
+  "authExpiredTitle": {
+    "message": "Gena 认证过期"
+  },
+  "authExpiredMessage": {
+    "message": "请重新登录以继续使用Gena。"
+  },
+  "loginRequired": {
+    "message": "需要登录"
+  },
+  "loginRequiredDesc": {
+    "message": "请登录以使用Gena"
+  },
+  "signupPrompt": {
+    "message": "还没有账户？注册"
   }
 
 }

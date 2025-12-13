@@ -32,25 +32,15 @@ const elements = {
   // 언어 선택
   languageSelect: document.getElementById('language-select'),
   
-  // 탭
-  tabs: document.querySelectorAll('.tab-button'),
+  // 로그인 폼만 유지 (회원가입은 외부 사이트로 이동)
   loginForm: document.getElementById('login-form'),
-  signupForm: document.getElementById('signup-form'),
-  
+
   // 로그인
   loginEmail: document.getElementById('login-email'),
   loginPassword: document.getElementById('login-password'),
   loginSubmit: document.getElementById('login-submit'),
   rememberMe: document.getElementById('remember-me'),
   forgotPasswordLink: document.getElementById('forgot-password-link'),
-  
-  // 회원가입
-  signupName: document.getElementById('signup-name'),
-  signupEmail: document.getElementById('signup-email'),
-  signupPassword: document.getElementById('signup-password'),
-  signupPasswordConfirm: document.getElementById('signup-password-confirm'),
-  signupSubmit: document.getElementById('signup-submit'),
-  passwordStrength: document.getElementById('password-strength'),
   
   // 비밀번호 재설정 모달
   resetModal: document.getElementById('reset-password-modal'),
@@ -90,11 +80,6 @@ async function init() {
     
     // 비밀번호 표시/숨기기 기능 초기화
     setupPasswordToggle();
-
-    // URL 해시 확인하여 회원가입 탭 자동 선택
-    if (window.location.hash === '#signup') {
-      switchTab('signup');
-    }
     
     // ✅ 깜빡임 방지: 초기화 완료 후 페이드인
     document.body.classList.add('loaded');
@@ -225,19 +210,6 @@ function showLoginSuccessMessage() {
 function setupEventListeners() {
   // 언어 선택
   elements.languageSelect.addEventListener('change', handleLanguageChange);
-  
-  // 탭 전환
-  elements.tabs.forEach(tab => {
-    tab.addEventListener('click', () => switchTab(tab.dataset.tab));
-  });
-
-  // 폼 내 링크로 탭 전환
-  document.querySelectorAll('.switch-link').forEach(link => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      switchTab(link.dataset.switch);
-    });
-  });
 
   // 로그인
   elements.loginSubmit.addEventListener('click', handleLogin);
@@ -245,20 +217,23 @@ function setupEventListeners() {
     if (e.key === 'Enter') handleLogin();
   });
 
-  // 회원가입
-  elements.signupSubmit.addEventListener('click', handleSignup);
-  elements.signupPasswordConfirm.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') handleSignup();
-  });
-
-  // 비밀번호 강도 체크
-  elements.signupPassword.addEventListener('input', checkPasswordStrength);
-
   // 입력 필드 실시간 검증
   elements.loginEmail.addEventListener('blur', () => validateEmail(elements.loginEmail, 'login-email-error'));
-  elements.signupEmail.addEventListener('blur', () => validateEmail(elements.signupEmail, 'signup-email-error'));
-  elements.signupName.addEventListener('blur', validateName);
-  elements.signupPasswordConfirm.addEventListener('blur', validatePasswordMatch);
+
+  // 회원가입 링크 - 언어 감지하여 외부 사이트로 이동
+  const signupLink = document.getElementById('signup-link');
+  if (signupLink) {
+    signupLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      // 사용자 언어 감지 - 한국어가 아니면 영어로 표시
+      const userLang = chrome.i18n.getUILanguage().split('-')[0]; // 'ko', 'en', 'ja' etc.
+      const signupUrl = userLang === 'ko'
+        ? 'https://www.genaai.net/signup'
+        : 'https://www.genaai.net/signup?lang=en';
+
+      window.open(signupUrl, '_blank');
+    });
+  }
 
   // 비밀번호 찾기
   elements.forgotPasswordLink.addEventListener('click', (e) => {
@@ -284,11 +259,6 @@ async function handleLanguageChange() {
   const newLocale = elements.languageSelect.value;
   await i18nManager.changeLocale(newLocale);
   updateAllText();
-  
-  // 비밀번호 강도 텍스트도 업데이트
-  if (elements.signupPassword.value) {
-    checkPasswordStrength();
-  }
 }
 
 /**
@@ -307,36 +277,6 @@ function setupPasswordToggle() {
         : '<svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
     });
   });
-}
-
-/**
- * 탭 전환
- */
-function switchTab(tabName) {
-  // 탭 버튼 활성화
-  elements.tabs.forEach(tab => {
-    if (tab.dataset.tab === tabName) {
-      tab.classList.add('active');
-      tab.setAttribute('aria-selected', 'true');
-    } else {
-      tab.classList.remove('active');
-      tab.setAttribute('aria-selected', 'false');
-    }
-  });
-
-  // 폼 표시
-  if (tabName === 'login') {
-    elements.loginForm.classList.add('active');
-    elements.signupForm.classList.remove('active');
-    elements.loginEmail.focus();
-  } else {
-    elements.loginForm.classList.remove('active');
-    elements.signupForm.classList.add('active');
-    elements.signupName.focus();
-  }
-
-  // 에러 메시지 초기화
-  clearAllErrors();
 }
 
 /**
@@ -384,57 +324,6 @@ async function handleLogin() {
   } catch (error) {
     showAlert('error', error.message);
     setButtonLoading(elements.loginSubmit, false);
-  }
-}
-
-/**
- * 회원가입 처리
- */
-async function handleSignup() {
-  const name = elements.signupName.value.trim();
-  const email = elements.signupEmail.value.trim();
-  const password = elements.signupPassword.value;
-  const passwordConfirm = elements.signupPasswordConfirm.value;
-
-  // 입력값 검증
-  let hasError = false;
-
-  if (!validateName()) hasError = true;
-  if (!validateEmail(elements.signupEmail, 'signup-email-error')) hasError = true;
-  if (!validatePasswordMatch()) hasError = true;
-
-  // 비밀번호 강도 검증
-  const passwordValidation = authManager.validatePassword(password);
-  if (!passwordValidation.valid) {
-    showError('signup-password-error', passwordValidation.message);
-    elements.signupPassword.classList.add('error');
-    hasError = true;
-  }
-
-  if (hasError) return;
-
-  // 로딩 상태 표시
-  setButtonLoading(elements.signupSubmit, true);
-
-  try {
-    const result = await authManager.signup(email, password, name, passwordConfirm);
-    
-    if (result.success) {
-      showAlert('success', result.message);
-      
-      setTimeout(() => {
-        const currentUrl = window.location.href;
-        
-        if (currentUrl.includes('auth.html')) {
-          showLoginSuccessMessage();
-        } else {
-          window.location.href = 'popup.html';
-        }
-      }, 1000);
-    }
-  } catch (error) {
-    showAlert('error', error.message);
-    setButtonLoading(elements.signupSubmit, false);
   }
 }
 
@@ -515,86 +404,6 @@ function validateEmail(input, errorId) {
   clearError(errorId);
   input.classList.remove('error');
   return true;
-}
-
-/**
- * 이름 검증
- */
-function validateName() {
-  const name = elements.signupName.value.trim();
-
-  if (!name || name.length < 2) {
-    showError('signup-name-error', getErrorMessage('nameRequired'));
-    elements.signupName.classList.add('error');
-    return false;
-  }
-
-  clearError('signup-name-error');
-  elements.signupName.classList.remove('error');
-  return true;
-}
-
-/**
- * 비밀번호 일치 검증
- */
-function validatePasswordMatch() {
-  const password = elements.signupPassword.value;
-  const passwordConfirm = elements.signupPasswordConfirm.value;
-
-  if (!passwordConfirm) {
-    showError('signup-password-confirm-error', getErrorMessage('passwordConfirmRequired'));
-    elements.signupPasswordConfirm.classList.add('error');
-    return false;
-  }
-
-  if (password !== passwordConfirm) {
-    showError('signup-password-confirm-error', getErrorMessage('passwordMismatch'));
-    elements.signupPasswordConfirm.classList.add('error');
-    return false;
-  }
-
-  clearError('signup-password-confirm-error');
-  elements.signupPasswordConfirm.classList.remove('error');
-  return true;
-}
-
-/**
- * 비밀번호 강도 체크 및 표시
- */
-function checkPasswordStrength() {
-  const password = elements.signupPassword.value;
-  const strengthBar = elements.passwordStrength.querySelector('.strength-fill');
-  const strengthText = elements.passwordStrength.querySelector('.strength-text');
-
-  if (!password) {
-    strengthBar.className = 'strength-fill';
-    strengthText.textContent = '';
-    return;
-  }
-
-  const validation = authManager.validatePassword(password);
-  
-  // 강도 계산
-  let strength = 0;
-  if (password.length >= 8) strength++;
-  if (/[A-Z]/.test(password)) strength++;
-  if (/[a-z]/.test(password)) strength++;
-  if (/[0-9]/.test(password)) strength++;
-  if (/[^A-Za-z0-9]/.test(password)) strength++;
-
-  // UI 업데이트
-  strengthBar.className = 'strength-fill';
-  
-  if (strength <= 2) {
-    strengthBar.classList.add('weak');
-    strengthText.textContent = i18nManager.getAuthText('passwordWeak');
-  } else if (strength <= 3) {
-    strengthBar.classList.add('medium');
-    strengthText.textContent = i18nManager.getAuthText('passwordMedium');
-  } else {
-    strengthBar.classList.add('strong');
-    strengthText.textContent = i18nManager.getAuthText('passwordStrong');
-  }
 }
 
 /**

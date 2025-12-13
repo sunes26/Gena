@@ -463,18 +463,17 @@ class SidePanelController {
           margin-bottom: 12px;
           font-size: 20px;
           font-weight: 500;
-        ">로그인이 필요합니다</h2>
-        
+        ">${chrome.i18n.getMessage('loginRequired')}</h2>
+
         <p style="
           color: #757575;
           margin-bottom: 32px;
           line-height: 1.6;
           font-size: 14px;
         ">
-          Gena를 사용하려면<br>
-          먼저 로그인해주세요
+          ${chrome.i18n.getMessage('loginRequiredDesc')}
         </p>
-        
+
         <button id="loginBtn" style="
           background: #2196F3;
           color: white;
@@ -491,9 +490,9 @@ class SidePanelController {
           margin-bottom: 16px;
         " onmouseover="this.style.background='#1976D2'" onmouseout="this.style.background='#2196F3'">
           <span class="material-icons">login</span>
-          로그인하기
+          ${chrome.i18n.getMessage('loginButton')}
         </button>
-        
+
         <button id="signupBtn" style="
           background: transparent;
           color: #2196F3;
@@ -505,7 +504,7 @@ class SidePanelController {
           cursor: pointer;
           transition: all 0.2s;
         " onmouseover="this.style.background='#E3F2FD'" onmouseout="this.style.background='transparent'">
-          계정이 없으신가요? 회원가입
+          ${chrome.i18n.getMessage('signupPrompt')}
         </button>
       </div>
     `;
@@ -517,9 +516,13 @@ class SidePanelController {
     });
 
     document.getElementById('signupBtn').addEventListener('click', () => {
-      chrome.tabs.create({
-        url: chrome.runtime.getURL('auth.html#signup'),
-      });
+      // 사용자 언어 감지 - 한국어가 아니면 영어로 표시
+      const userLang = chrome.i18n.getUILanguage().split('-')[0]; // 'ko', 'en', 'ja' etc.
+      const signupUrl = userLang === 'ko'
+        ? 'https://www.genaai.net/signup'
+        : 'https://www.genaai.net/signup?lang=en';
+
+      chrome.tabs.create({ url: signupUrl });
     });
   }
 

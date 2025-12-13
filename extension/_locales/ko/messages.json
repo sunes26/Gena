@@ -1,4 +1,19 @@
 {
+  "appName": {
+    "message": "Gena - AI 웹페이지 요약"
+  },
+  "appDescription": {
+    "message": "AI가 웹페이지와 PDF를 즉시 요약해주는 스마트한 읽기 도우미 (프리미엄 기능)"
+  },
+  "openSidePanelCommand": {
+    "message": "Gena Side Panel 열기"
+  },
+  "summarizePageCommand": {
+    "message": "현재 페이지 요약"
+  },
+  "openHistoryCommand": {
+    "message": "히스토리 열기"
+  },
   "appTitle": {
     "message": "Gena"
   },
@@ -739,6 +754,21 @@
   },
   "loadingUsage": {
     "message": "사용량 확인 중..."
+  },
+  "authExpiredTitle": {
+    "message": "Gena 인증 만료"
+  },
+  "authExpiredMessage": {
+    "message": "로그인이 필요합니다. 다시 로그인해주세요."
+  },
+  "loginRequired": {
+    "message": "로그인이 필요합니다"
+  },
+  "loginRequiredDesc": {
+    "message": "Gena를 사용하려면 먼저 로그인해주세요"
+  },
+  "signupPrompt": {
+    "message": "계정이 없으신가요? 회원가입"
   }
 
 }

@@ -1,4 +1,19 @@
 {
+  "appName": {
+    "message": "Gena - AI Web Page Summarizer"
+  },
+  "appDescription": {
+    "message": "Smart reading assistant that instantly summarizes web pages and PDFs using AI (Premium features)"
+  },
+  "openSidePanelCommand": {
+    "message": "Open Gena Side Panel"
+  },
+  "summarizePageCommand": {
+    "message": "Summarize current page"
+  },
+  "openHistoryCommand": {
+    "message": "Open history"
+  },
   "appTitle": {
     "message": "Gena"
   },
@@ -739,6 +754,21 @@
   },
   "loadingUsage": {
     "message": "Checking usage..."
+  },
+  "authExpiredTitle": {
+    "message": "Gena Authentication Expired"
+  },
+  "authExpiredMessage": {
+    "message": "Please log in again to continue using Gena."
+  },
+  "loginRequired": {
+    "message": "Login Required"
+  },
+  "loginRequiredDesc": {
+    "message": "Please log in to use Gena"
+  },
+  "signupPrompt": {
+    "message": "Don't have an account? Sign up"
   }
 
 }

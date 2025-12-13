@@ -1,4 +1,19 @@
 {
+  "appName": {
+    "message": "Gena - AIウェブページ要約"
+  },
+  "appDescription": {
+    "message": "AIでウェブページとPDFを即座に要約するスマートな読書アシスタント（プレミアム機能）"
+  },
+  "openSidePanelCommand": {
+    "message": "Gena サイドパネルを開く"
+  },
+  "summarizePageCommand": {
+    "message": "現在のページを要約"
+  },
+  "openHistoryCommand": {
+    "message": "履歴を開く"
+  },
   "appTitle": {
     "message": "Gena"
   },
@@ -739,6 +754,21 @@
   },
   "loadingUsage": {
     "message": "使用量を確認中..."
+  },
+  "authExpiredTitle": {
+    "message": "Gena 認証期限切れ"
+  },
+  "authExpiredMessage": {
+    "message": "Genaを引き続き使用するには、再度ログインしてください。"
+  },
+  "loginRequired": {
+    "message": "ログインが必要です"
+  },
+  "loginRequiredDesc": {
+    "message": "Genaを使用するにはログインしてください"
+  },
+  "signupPrompt": {
+    "message": "アカウントをお持ちでないですか？登録"
   }
 
 }

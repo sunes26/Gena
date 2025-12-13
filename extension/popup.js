@@ -185,8 +185,8 @@ class AppController {
           font-size: 20px;
           font-weight: 600;
           white-space: nowrap;
-        ">로그인이 필요합니다</h2>
-        
+        ">${chrome.i18n.getMessage('loginRequired')}</h2>
+
         <p style="
           color: #757575;
           margin-bottom: 32px;
@@ -194,10 +194,9 @@ class AppController {
           font-size: 14px;
           white-space: nowrap;
         ">
-          Gena를 사용하려면<br>
-          먼저 로그인해주세요
+          ${chrome.i18n.getMessage('loginRequiredDesc')}
         </p>
-        
+
         <button id="loginBtn" style="
           width: 100%;
           max-width: 280px;
@@ -219,9 +218,9 @@ class AppController {
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
             <path d="M11 7L9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v14z"/>
           </svg>
-          로그인하기
+          ${chrome.i18n.getMessage('loginButton')}
         </button>
-        
+
         <button id="signupBtn" style="
           width: 100%;
           max-width: 280px;
@@ -235,7 +234,7 @@ class AppController {
           cursor: pointer;
           transition: all 0.2s;
         " onmouseover="this.style.background='#E3F2FD'" onmouseout="this.style.background='transparent'">
-          계정이 없으신가요? 회원가입
+          ${chrome.i18n.getMessage('signupPrompt')}
         </button>
       </div>
     `;
@@ -248,9 +247,13 @@ class AppController {
     });
 
     document.getElementById('signupBtn').addEventListener('click', () => {
-      chrome.tabs.create({
-        url: chrome.runtime.getURL('auth.html#signup'),
-      });
+      // 사용자 언어 감지 - 한국어가 아니면 영어로 표시
+      const userLang = chrome.i18n.getUILanguage().split('-')[0]; // 'ko', 'en', 'ja' etc.
+      const signupUrl = userLang === 'ko'
+        ? 'https://www.genaai.net/signup'
+        : 'https://www.genaai.net/signup?lang=en';
+
+      chrome.tabs.create({ url: signupUrl });
       window.close();
     });
   }

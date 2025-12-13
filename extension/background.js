@@ -1161,13 +1161,8 @@ class TokenRefreshManager {
   }
 
   notifyTokenRefreshFailure() {
-    chrome.notifications.create('token-refresh-failed', {
-      type: 'basic',
-      iconUrl: 'icons/icon128.png',
-      title: 'Gena 인증 만료',
-      message: '로그인이 필요합니다. 다시 로그인해주세요.',
-      priority: 2
-    });
+    // 백그라운드 알림 제거 - 사용자가 확장 프로그램을 열 때 자동으로 로그인 화면이 표시됨
+    console.log('[TokenRefresh] Token refresh failed - user will see login screen when opening extension');
   }
 
   openLoginPage() {

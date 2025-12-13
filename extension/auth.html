@@ -40,15 +40,7 @@
       <p class="app-subtitle">AI 웹페이지 요약봇</p>
     </div>
 
-    <!-- 탭 영역 -->
-    <div class="tab-container">
-      <button class="tab-button active" data-tab="login" data-i18n-aria-label="login" aria-label="로그인 탭">
-        <span data-i18n-text="login">로그인</span>
-      </button>
-      <button class="tab-button" data-tab="signup" data-i18n-aria-label="signup" aria-label="회원가입 탭">
-        <span data-i18n-text="signup">회원가입</span>
-      </button>
-    </div>
+    <!-- 탭 영역 제거 - 로그인만 표시 -->
 
     <!-- 로그인 폼 -->
     <div id="login-form" class="auth-form active">
@@ -108,93 +100,12 @@
       </div>
 
       <p class="auth-switch">
-        <span data-i18n-text="noAccount">계정이 없으신가요?</span> 
-        <a href="#" class="switch-link" data-switch="signup" data-i18n-text="signup">회원가입</a>
+        <span data-i18n-text="noAccount">계정이 없으신가요?</span>
+        <a href="#" id="signup-link" target="_blank" class="external-link" data-i18n-text="signup">회원가입</a>
       </p>
     </div>
 
-    <!-- 회원가입 폼 -->
-    <div id="signup-form" class="auth-form">
-      <div class="form-group">
-        <label for="signup-name" data-i18n-text="name">이름</label>
-        <input 
-          type="text" 
-          id="signup-name" 
-          data-i18n-placeholder="namePlaceholder"
-          placeholder="홍길동"
-          autocomplete="name"
-          aria-required="true"
-        >
-        <span class="error-message" id="signup-name-error"></span>
-      </div>
-
-      <div class="form-group">
-        <label for="signup-email" data-i18n-text="email">이메일</label>
-        <input 
-          type="email" 
-          id="signup-email" 
-          data-i18n-placeholder="emailPlaceholder"
-          placeholder="email@example.com"
-          autocomplete="email"
-          aria-required="true"
-        >
-        <span class="error-message" id="signup-email-error"></span>
-      </div>
-
-      <div class="form-group">
-        <label for="signup-password" data-i18n-text="password">비밀번호</label>
-        <div class="password-input-wrapper">
-          <input 
-            type="password" 
-            id="signup-password" 
-            data-i18n-placeholder="passwordRequirement"
-            placeholder="8자 이상, 영문 대소문자, 숫자 포함"
-            autocomplete="new-password"
-            aria-required="true"
-          >
-          <button type="button" class="password-toggle" aria-label="비밀번호 표시/숨기기">
-            <svg class="eye-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-              <circle cx="12" cy="12" r="3"/>
-            </svg>
-          </button>
-        </div>
-        <div class="password-strength" id="password-strength">
-          <div class="strength-bar">
-            <div class="strength-fill"></div>
-          </div>
-          <span class="strength-text"></span>
-        </div>
-        <span class="error-message" id="signup-password-error"></span>
-      </div>
-
-      <div class="form-group">
-        <label for="signup-password-confirm" data-i18n-text="passwordConfirm">비밀번호 확인</label>
-        <input 
-          type="password" 
-          id="signup-password-confirm" 
-          data-i18n-placeholder="passwordConfirmPlaceholder"
-          placeholder="비밀번호를 다시 입력하세요"
-          autocomplete="new-password"
-          aria-required="true"
-        >
-        <span class="error-message" id="signup-password-confirm-error"></span>
-      </div>
-
-      <button type="button" class="btn-primary" id="signup-submit">
-        <span class="btn-text" data-i18n-text="signupButton">회원가입</span>
-        <span class="btn-loader" style="display: none;">
-          <svg class="spinner" width="20" height="20" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10" stroke="white" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" stroke-linecap="round"/>
-          </svg>
-        </span>
-      </button>
-
-      <p class="auth-switch">
-        <span data-i18n-text="hasAccount">이미 계정이 있으신가요?</span> 
-        <a href="#" class="switch-link" data-switch="login" data-i18n-text="login">로그인</a>
-      </p>
-    </div>
+    <!-- 회원가입 폼 제거 - 외부 사이트(https://www.genaai.net/signup)로 이동 -->
 
     <!-- 알림 메시지 영역 -->
     <div id="alert-container" class="alert-container"></div>
