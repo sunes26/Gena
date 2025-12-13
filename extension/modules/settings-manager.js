@@ -25,8 +25,11 @@ class SettingsManager {
                         (typeof self !== 'undefined' ? self.errorHandler : 
                         (typeof globalThis !== 'undefined' ? globalThis.errorHandler : null));
     
+    // ✨ Chrome 언어 기반 기본 설정
+    const detectedLanguage = this.getInitialLanguage();
+
     this.DEFAULT_SETTINGS = {
-      language: 'ko',
+      language: detectedLanguage,
       theme: 'light',
       apiKey: '',
       summaryLength: 'medium',
@@ -131,6 +134,33 @@ class SettingsManager {
         this.errorHandler.handle(error, 'SettingsManager.loadSettings');
       }
       throw error;
+    }
+  }
+
+  /**
+   * ✨ 초기 언어 설정 (Constructor에서 사용)
+   */
+  getInitialLanguage() {
+    try {
+      // Chrome의 현재 언어 가져오기
+      const uiLanguage = chrome.i18n.getUILanguage(); // 예: 'en-US', 'ko', 'ja', 'zh-CN'
+      const langCode = uiLanguage.split('-')[0].toLowerCase(); // 'en', 'ko', 'ja', 'zh'
+
+      // 지원되는 언어
+      const supportedLanguages = ['ko', 'en', 'ja', 'zh'];
+
+      if (supportedLanguages.includes(langCode)) {
+        console.log(`[SettingsManager] 초기 언어: Chrome '${uiLanguage}' → '${langCode}'`);
+        return langCode;
+      }
+
+      // 지원하지 않는 언어면 영어로 폴백
+      console.log(`[SettingsManager] 초기 언어: Chrome '${uiLanguage}' 미지원 → 'en'`);
+      return 'en';
+
+    } catch (error) {
+      console.warn('[SettingsManager] 초기 언어 감지 실패 → 영어로 폴백:', error);
+      return 'en';
     }
   }
 
