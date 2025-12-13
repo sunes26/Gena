@@ -48,6 +48,10 @@ class SidePanelController {
     // ✨ Rate Limit Countdown
     this.rateLimitCountdown = null;
     this.rateLimitTimer = null;
+
+    // ✨ PDF Progress Tracking (for time estimation)
+    this.pdfStartTime = null;
+    this.pdfLastProgress = 0;
   }
 
   async initialize() {
@@ -141,28 +145,60 @@ class SidePanelController {
     const percentage = data.progress || 0;
     progressBar.style.width = `${percentage}%`;
 
+    // ✨ 시작 시간 기록 (처음 progress 업데이트 시)
+    if (this.pdfStartTime === null && percentage > 0 && percentage < 100) {
+      this.pdfStartTime = Date.now();
+      this.pdfLastProgress = percentage;
+    }
+
+    // ✨ 예상 남은 시간 계산
+    let estimatedTimeText = '';
+    if (this.pdfStartTime && percentage > this.pdfLastProgress && percentage < 100) {
+      const elapsedMs = Date.now() - this.pdfStartTime;
+      const progressMade = percentage - this.pdfLastProgress;
+      const remainingProgress = 100 - percentage;
+
+      // 평균 속도 기반 예상 시간 (최소 5초 이상 경과 시에만 표시)
+      if (elapsedMs >= 5000) {
+        const estimatedRemainingMs = (elapsedMs / progressMade) * remainingProgress;
+        const estimatedSeconds = Math.ceil(estimatedRemainingMs / 1000);
+
+        if (estimatedSeconds > 60) {
+          const minutes = Math.floor(estimatedSeconds / 60);
+          const seconds = estimatedSeconds % 60;
+          estimatedTimeText = ` (약 ${minutes}분 ${seconds}초 남음)`;
+        } else if (estimatedSeconds > 0 && estimatedSeconds <= 120) {
+          estimatedTimeText = ` (약 ${estimatedSeconds}초 남음)`;
+        }
+      }
+    }
+
     // 단계별 메시지
     switch (data.stage) {
       case 'download':
         progressText.textContent = 'PDF 다운로드 중...';
-        progressDetail.textContent = data.message || '파일을 가져오는 중입니다...';
+        progressDetail.textContent = (data.message || '파일을 가져오는 중입니다...') + estimatedTimeText;
         break;
-      
+
       case 'offscreen':
         progressText.textContent = 'PDF 처리 준비 중...';
-        progressDetail.textContent = data.message || 'PDF 분석 도구를 준비하고 있습니다...';
+        progressDetail.textContent = (data.message || 'PDF 분석 도구를 준비하고 있습니다...') + estimatedTimeText;
         break;
-      
+
       case 'extract':
         progressText.textContent = 'PDF 텍스트 추출 중...';
         if (data.currentPage && data.totalPages) {
-          progressDetail.textContent = `페이지 ${data.currentPage}/${data.totalPages} 추출 중...`;
+          progressDetail.textContent = `페이지 ${data.currentPage}/${data.totalPages} 추출 중...${estimatedTimeText}`;
         } else {
-          progressDetail.textContent = data.message || '텍스트를 추출하고 있습니다...';
+          progressDetail.textContent = (data.message || '텍스트를 추출하고 있습니다...') + estimatedTimeText;
         }
         break;
-      
+
       case 'complete':
+        // ✨ 완료 시 타이머 초기화
+        this.pdfStartTime = null;
+        this.pdfLastProgress = 0;
+
         progressText.textContent = 'PDF 추출 완료!';
         progressDetail.textContent = data.message || '추출이 완료되었습니다.';
         // 2초 후 숨김
@@ -170,8 +206,12 @@ class SidePanelController {
           container.classList.add('hidden');
         }, 2000);
         break;
-      
+
       case 'error':
+        // ✨ 에러 시 타이머 초기화
+        this.pdfStartTime = null;
+        this.pdfLastProgress = 0;
+
         progressText.textContent = 'PDF 추출 실패';
         progressDetail.textContent = data.message || '오류가 발생했습니다.';
         progressBar.style.background = 'linear-gradient(90deg, #ef4444 0%, #f87171 100%)';
@@ -181,10 +221,10 @@ class SidePanelController {
           progressBar.style.background = '';
         }, 3000);
         break;
-      
+
       default:
         progressText.textContent = 'PDF 처리 중...';
-        progressDetail.textContent = data.message || '잠시만 기다려주세요...';
+        progressDetail.textContent = (data.message || '잠시만 기다려주세요...') + estimatedTimeText;
     }
 
     console.log('[SidePanel] 진행 상황 업데이트:', data);
