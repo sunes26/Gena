@@ -410,13 +410,19 @@ class AuthManager {
       'auth/operation-not-allowed': '이메일/비밀번호 로그인이 비활성화되어 있습니다.',
       'auth/weak-password': '비밀번호가 너무 약합니다. 최소 8자 이상 입력해주세요.',
       'auth/user-disabled': '비활성화된 계정입니다.',
-      'auth/user-not-found': '가입되지 않은 이메일입니다.',
+      'auth/user-not-found': '등록되지 않은 이메일입니다.',
       'auth/wrong-password': '비밀번호가 올바르지 않습니다.',
+      'auth/invalid-credential': '이메일 또는 비밀번호가 올바르지 않습니다.',
       'auth/too-many-requests': '너무 많은 시도가 있었습니다. 잠시 후 다시 시도해주세요.',
       'auth/network-request-failed': '네트워크 연결을 확인해주세요.'
     };
 
-    return errorMessages[errorCode] || '인증 중 오류가 발생했습니다.';
+    // 디버깅: 에러 코드 로깅
+    if (!errorMessages[errorCode]) {
+      console.warn('[AuthManager] 알 수 없는 Firebase 에러 코드:', errorCode);
+    }
+
+    return errorMessages[errorCode] || '인증 중 오류가 발생했습니다. 이메일과 비밀번호를 확인해주세요.';
   }
 }
 
