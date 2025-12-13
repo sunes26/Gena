@@ -1657,6 +1657,48 @@ class SidePanelController {
     window.uiManager.showError(message);
   }
 
+  /**
+   * ✨ 리셋 시간을 사용자 친화적 형식으로 변환
+   * @param {string} resetTimeISO - ISO 형식의 리셋 시간
+   * @returns {string} - "내일 오전 12시에 초기화됩니다" 형식의 문자열
+   */
+  formatResetTime(resetTimeISO) {
+    if (!resetTimeISO) {
+      return '내일 오전 12시에 초기화됩니다';
+    }
+
+    const resetDate = new Date(resetTimeISO);
+    const now = new Date();
+
+    // 날짜 차이 계산 (일 단위)
+    const resetDay = new Date(resetDate.getFullYear(), resetDate.getMonth(), resetDate.getDate());
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const diffTime = resetDay.getTime() - today.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    // 시간 형식 (오전/오후 12시 형식)
+    const hour = resetDate.getHours();
+    const minute = resetDate.getMinutes();
+    const ampm = hour < 12 ? '오전' : '오후';
+    const displayHour = hour === 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+    const timeStr = minute === 0
+      ? `${ampm} ${displayHour}시`
+      : `${ampm} ${displayHour}시 ${minute}분`;
+
+    // 날짜에 따른 메시지
+    if (diffDays === 0) {
+      return `오늘 ${timeStr}에 초기화됩니다`;
+    } else if (diffDays === 1) {
+      return `내일 ${timeStr}에 초기화됩니다`;
+    } else if (diffDays === 2) {
+      return `모레 ${timeStr}에 초기화됩니다`;
+    } else {
+      const month = resetDate.getMonth() + 1;
+      const day = resetDate.getDate();
+      return `${month}월 ${day}일 ${timeStr}에 초기화됩니다`;
+    }
+  }
+
   showUpgradeModal(type) {
     const existingModal = document.getElementById('upgradeModal');
     if (existingModal) {
@@ -1679,14 +1721,7 @@ class SidePanelController {
     );
 
     const resetTime = window.usageManager.getResetTime();
-    const resetDate = resetTime ? new Date(resetTime) : new Date();
-    const resetTimeText = resetDate.toLocaleTimeString(
-      window.languageManager.getCurrentLanguage(),
-      {
-        hour: '2-digit',
-        minute: '2-digit',
-      }
-    );
+    const resetTimeText = this.formatResetTime(resetTime);
 
     modal.innerHTML = `
       <div class="modal-content upgrade-modal">
@@ -1718,11 +1753,8 @@ class SidePanelController {
               }:</span>
               <span class="info-value">${remaining}회</span>
             </div>
-            <div class="info-row">
-              <span class="info-label">${
-                window.languageManager.getMessage('resetTime') || '초기화 시간'
-              }:</span>
-              <span class="info-value">${resetTimeText}</span>
+            <div class="info-row reset-time-row">
+              <span class="info-value-full">🕐 ${resetTimeText}</span>
             </div>
           </div>
           <div class="premium-benefits">
