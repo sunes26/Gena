@@ -303,7 +303,7 @@ console.log('[ErrorHandler] ✅ Module loaded');
 
 class TokenManager {
   constructor() {
-    this.API_BASE_URL = 'https://api.Gena.com';
+    this.API_BASE_URL = 'https://api.genaai.net';
     this.TOKEN_REFRESH_THRESHOLD = 5 * 60 * 1000;
     this.isRefreshing = false;
     this.refreshSubscribers = [];

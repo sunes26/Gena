@@ -375,7 +375,7 @@ function toggleHistorySection(isPremium) {
       if (upgradeBtn) {
         upgradeBtn.addEventListener('click', () => {
           chrome.tabs.create({ 
-            url: 'https://Gena.com/premium' 
+            url: 'https://genaai.net/premium' 
           });
         });
       }
@@ -840,7 +840,7 @@ async function clearHistory() {
 
 function handleSubscribe() {
   chrome.tabs.create({ 
-    url: 'https://Gena.com/subscribe' 
+    url: 'https://genaai.net/subscribe' 
   });
   
   showMessage(window.languageManager.getMessage('redirectingToSubscription'), 'info');
@@ -944,12 +944,12 @@ function setupEventListeners() {
   
   elements.privacyLink.addEventListener('click', (e) => {
     e.preventDefault();
-    chrome.tabs.create({ url: 'https://Gena.com/privacy' });
+    chrome.tabs.create({ url: 'https://genaai.net/privacy' });
   });
   
   elements.termsLink.addEventListener('click', (e) => {
     e.preventDefault();
-    chrome.tabs.create({ url: 'https://Gena.com/terms' });
+    chrome.tabs.create({ url: 'https://genaai.net/terms' });
   });
 }
 

@@ -461,7 +461,7 @@ class SidePanelController {
         if (upgradeBtn) {
           upgradeBtn.addEventListener('click', () => {
             chrome.tabs.create({
-              url: 'https://Gena.com/premium',
+              url: 'https://genaai.net/premium',
             });
           });
         }
@@ -2047,7 +2047,7 @@ class SidePanelController {
     const upgradeBtn = modal.querySelector('.upgrade-btn');
     upgradeBtn.addEventListener('click', () => {
       chrome.tabs.create({
-        url: 'https://Gena.com/premium',
+        url: 'https://genaai.net/premium',
       });
       modal.remove();
     });

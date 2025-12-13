@@ -16,7 +16,7 @@ const CONFIG = {
    *
    * ✅ 웹 환경 (랜딩 페이지 등):
    *    - localhost / 127.0.0.1 → development
-   *    - gena.com 도메인 → production
+   *    - genaai.net 도메인 → production
    *
    * ℹ️ 기본값: development (안전한 기본값)
    */
@@ -48,8 +48,8 @@ const CONFIG = {
         }
 
         // 프로덕션 도메인
-        if (hostname.includes('gena.com')) {
-          console.log('[Config] Environment: production (gena.com)');
+        if (hostname.includes('genaai.net')) {
+          console.log('[Config] Environment: production (genaai.net)');
           return 'production';
         }
       }
@@ -70,7 +70,7 @@ const CONFIG = {
    */
   API_BASE_URL: {
     development: 'http://localhost:3000',
-    production: 'https://api.gena.com'
+    production: 'https://api.genaai.net'
   },
 
   /**
@@ -78,7 +78,7 @@ const CONFIG = {
    */
   FRONTEND_URL: {
     development: 'http://localhost:3000',
-    production: 'https://gena.com'
+    production: 'https://genaai.net'
   },
   
   /**

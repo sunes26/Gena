@@ -607,7 +607,7 @@ class AppController {
     const upgradeBtn = modal.querySelector('.upgrade-btn');
     upgradeBtn.addEventListener('click', () => {
       chrome.tabs.create({
-        url: 'https://Gena.com/premium',
+        url: 'https://genaai.net/premium',
       });
       modal.remove();
     });
