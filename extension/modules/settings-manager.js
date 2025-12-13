@@ -104,25 +104,60 @@ class SettingsManager {
       if (!this.storageManager) {
         throw new Error('StorageManager not available');
       }
-      
-      const data = await this.storageManager.get('settings', this.DEFAULT_SETTINGS);
-      
+
+      const data = await this.storageManager.get('settings', null);
+
+      // ✨ 처음 설치 시 Chrome 언어 감지
+      let defaultSettings = { ...this.DEFAULT_SETTINGS };
+      if (!data || !data.language) {
+        const chromeLanguage = this.detectChromeLanguage();
+        defaultSettings.language = chromeLanguage;
+        console.log('[SettingsManager] Chrome 언어 감지:', chromeLanguage);
+      }
+
       // 기존 설정 마이그레이션
-      const migratedSettings = this.migrateSettings(data);
-      
-      this.settings = { ...this.DEFAULT_SETTINGS, ...migratedSettings };
-      
+      const migratedSettings = this.migrateSettings(data || {});
+
+      this.settings = { ...defaultSettings, ...migratedSettings };
+
       if (this.settings.apiKey) {
         await this.decryptApiKey();
       }
-      
+
       return this.getSettings();
-      
+
     } catch (error) {
       if (this.errorHandler) {
         this.errorHandler.handle(error, 'SettingsManager.loadSettings');
       }
       throw error;
+    }
+  }
+
+  /**
+   * ✨ Chrome UI 언어 감지
+   */
+  detectChromeLanguage() {
+    try {
+      // Chrome의 현재 언어 가져오기
+      const uiLanguage = chrome.i18n.getUILanguage(); // 예: 'en-US', 'ko', 'ja', 'zh-CN'
+      const langCode = uiLanguage.split('-')[0].toLowerCase(); // 'en', 'ko', 'ja', 'zh'
+
+      // 지원되는 언어인지 확인
+      const supportedLanguages = this.VALIDATION_RULES.language; // ['ko', 'en', 'ja', 'zh']
+
+      if (supportedLanguages.includes(langCode)) {
+        console.log(`[SettingsManager] Chrome 언어 '${uiLanguage}' → '${langCode}' 사용`);
+        return langCode;
+      }
+
+      // 지원하지 않는 언어면 영어로 폴백
+      console.log(`[SettingsManager] Chrome 언어 '${uiLanguage}' 미지원 → 'en' 사용`);
+      return 'en';
+
+    } catch (error) {
+      console.warn('[SettingsManager] Chrome 언어 감지 실패 → 영어로 폴백:', error);
+      return 'en';
     }
   }
 
