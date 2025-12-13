@@ -2194,37 +2194,21 @@ chrome.tabs.onRemoved.addListener((tabId) => {
 });
 
 /**
- * ✨ v5.1.0: 탭 활성화 시 Side Panel 제어
- * - 이전 탭: Side Panel 비활성화 (닫힘)
- * - 현재 탭: Side Panel 복원 체크 (5분 이내면 재열림)
+ * ✨ 탭 활성화 시 처리 (Side Panel 유지)
  */
 chrome.tabs.onActivated.addListener(async (activeInfo) => {
   const newTabId = activeInfo.tabId;
   const windowId = activeInfo.windowId;
 
   try {
-    console.log('[Background] 탭 활성화:', newTabId, '이전:', currentActiveTabId);
+    console.log('[Background] 탭 활성화:', newTabId);
 
-    // ✨ 1. 이전 탭의 Side Panel 비활성화 (닫기 효과)
-    if (currentActiveTabId && currentActiveTabId !== newTabId) {
-      try {
-        await chrome.sidePanel.setOptions({
-          tabId: currentActiveTabId,
-          enabled: false
-        });
-        console.log('[Background] ✅ 이전 탭 Side Panel 닫음:', currentActiveTabId);
-      } catch (err) {
-        // 탭이 이미 닫혔거나 없는 경우 무시
-        console.log('[Background] 이전 탭 닫기 실패 (탭이 없을 수 있음):', err.message);
-      }
-    }
-
-    // ✨ 2. 현재 활성 탭 업데이트
+    // ✨ 현재 활성 탭 업데이트
     currentActiveTabId = newTabId;
 
-    // 3. SPA 자동 주입 (기존 로직)
+    // SPA 자동 주입
     const tab = await chrome.tabs.get(newTabId);
-    
+
     if (!tab || !tab.url) {
       return;
     }
@@ -2247,9 +2231,6 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
         }
       }
     }
-
-    // ✨ 4. Side Panel 복원 체크 (5분 이내면 자동 재열림)
-    await handleSidePanelRestore(newTabId);
 
   } catch (error) {
     console.error('[Background] 탭 활성화 처리 오류:', error);

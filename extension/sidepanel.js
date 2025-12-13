@@ -100,13 +100,7 @@ class SidePanelController {
       // ✅ 깜빡임 방지: 초기화 완료 후 페이드인
       document.body.classList.add('loaded');
 
-      // ✨ 이전 요약 상태 복원 시도
-      const restored = await this.restorePreviousSummary();
-
-      // 복원되지 않았을 때만 자동 요약 체크
-      if (!restored) {
-        await this.checkAutoSummarize();
-      }
+      await this.checkAutoSummarize();
     } catch (error) {
       console.error('[SidePanel] 초기화 오류:', error);
       window.errorHandler.handle(error, 'sidepanel-initialization');
@@ -263,14 +257,8 @@ class SidePanelController {
   setupTabChangeListener() {
   chrome.tabs.onActivated.addListener(async (activeInfo) => {
     console.log('[SidePanel] 탭 변경 감지:', activeInfo.tabId);
-    
-    // ✨ v5.1.0: 다른 탭으로 이동 시 Side Panel 닫기
-    if (this.currentTabId && activeInfo.tabId !== this.currentTabId) {
-      console.log('[SidePanel] 다른 탭으로 이동 → Side Panel 닫기');
-      window.close();
-      return; // 닫힌 후에는 더 이상 실행하지 않음
-    }
-    
+
+    // ✨ 탭 변경 시에도 Side Panel 유지 (닫지 않음)
     this.currentTabId = activeInfo.tabId;
     await this.loadCurrentTab();
   });
