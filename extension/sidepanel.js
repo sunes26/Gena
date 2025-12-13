@@ -837,6 +837,13 @@ class SidePanelController {
 
       console.log('[SidePanel] 현재 탭 URL:', tab.url);
 
+      // ✨ Google Drive/Dropbox 폴더 페이지 감지
+      const urlLower = tab.url.toLowerCase();
+      if ((urlLower.includes('drive.google.com/drive/') && !urlLower.includes('/file/d/')) ||
+          (urlLower.includes('dropbox.com') && urlLower.includes('/home'))) {
+        throw new Error(window.languageManager.getMessage('errorDriveFolderPage'));
+      }
+
       // ✨ PDF 감지: URL 기반 또는 DOM 스캔
       let pdfUrl = null;
       let isPDF = this.isPDFUrl(tab.url);

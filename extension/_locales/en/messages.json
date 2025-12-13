@@ -772,6 +772,12 @@
   },
   "signupPrompt": {
     "message": "Don't have an account? Sign up"
+  },
+  "errorDriveFolderPage": {
+    "message": "Please download the PDF file and open it in your browser"
+  },
+  "errorDriveFolderPageDesc": {
+    "message": "This is a Google Drive folder page. Please open the PDF file directly."
   }
 
 }

@@ -772,6 +772,12 @@
   },
   "signupPrompt": {
     "message": "还没有账户？注册"
+  },
+  "errorDriveFolderPage": {
+    "message": "请下载PDF文件后在浏览器中打开"
+  },
+  "errorDriveFolderPageDesc": {
+    "message": "这是Google云端硬盘文件夹页面。请直接打开PDF文件。"
   }
 
 }

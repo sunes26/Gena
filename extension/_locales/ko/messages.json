@@ -772,6 +772,12 @@
   },
   "signupPrompt": {
     "message": "계정이 없으신가요? 회원가입"
+  },
+  "errorDriveFolderPage": {
+    "message": "PDF 파일을 다운로드 후 웹으로 열어주세요"
+  },
+  "errorDriveFolderPageDesc": {
+    "message": "현재 페이지는 Google Drive 폴더입니다. PDF 파일을 직접 열어주세요."
   }
 
 }

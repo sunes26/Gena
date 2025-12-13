@@ -772,6 +772,12 @@
   },
   "signupPrompt": {
     "message": "アカウントをお持ちでないですか？登録"
+  },
+  "errorDriveFolderPage": {
+    "message": "PDFファイルをダウンロードしてブラウザで開いてください"
+  },
+  "errorDriveFolderPageDesc": {
+    "message": "これはGoogle Driveのフォルダページです。PDFファイルを直接開いてください。"
   }
 
 }
