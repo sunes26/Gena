@@ -130,7 +130,7 @@ const emailTemplates = {
             <p>지금 바로 Chrome 확장프로그램을 설치하고 시작해보세요!</p>
             
             <div style="text-align: center;">
-              <a href="${process.env.FRONTEND_URL || 'https://Gena.com'}" class="button">
+              <a href="${process.env.FRONTEND_URL || 'https://gena.com'}" class="button">
                 시작하기
               </a>
             </div>
@@ -138,7 +138,7 @@ const emailTemplates = {
           
           <div class="footer">
             <p>이 이메일은 Gena 회원가입 시 자동으로 발송되었습니다.</p>
-            <p>문의사항이 있으시면 <a href="mailto:support@Gena.com">support@Gena.com</a>으로 연락주세요.</p>
+            <p>문의사항이 있으시면 <a href="mailto:support@gena.com">support@gena.com</a>으로 연락주세요.</p>
             <p style="margin-top: 20px;">© 2025 Gena. All rights reserved.</p>
           </div>
         </div>
@@ -479,7 +479,7 @@ const emailTemplates = {
             <div class="warning-box">
               <strong>⚠️ 본인이 변경하지 않았다면?</strong>
               <p style="margin: 10px 0 0 0;">
-                즉시 <a href="mailto:support@Gena.com">support@Gena.com</a>으로 연락하시거나,
+                즉시 <a href="mailto:support@gena.com">support@gena.com</a>으로 연락하시거나,
                 계정 보안 설정에서 비밀번호를 다시 변경해주세요.
               </p>
             </div>
@@ -490,7 +490,7 @@ const emailTemplates = {
           </div>
           
           <div class="footer">
-            <p>문의사항이 있으시면 <a href="mailto:support@Gena.com">support@Gena.com</a>으로 연락주세요.</p>
+            <p>문의사항이 있으시면 <a href="mailto:support@gena.com">support@gena.com</a>으로 연락주세요.</p>
             <p style="margin-top: 10px;">© 2025 Gena. All rights reserved.</p>
           </div>
         </div>
@@ -610,7 +610,7 @@ class EmailService {
     }
 
     const mailOptions = {
-      from: process.env.EMAIL_FROM || '"Gena" <noreply@Gena.com>',
+      from: process.env.EMAIL_FROM || '"Gena" <noreply@gena.com>',
       to,
       subject,
       html
@@ -657,7 +657,7 @@ class EmailService {
    * await emailService.sendVerificationEmail('user@example.com', 'John Doe', 'abc123token');
    */
   async sendVerificationEmail(email, name, token) {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://Gena.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://gena.com';
     const verificationLink = `${frontendUrl}/verify-email?token=${token}`;
     
     const { subject, html } = emailTemplates.verification(name, verificationLink);
@@ -676,7 +676,7 @@ class EmailService {
    * await emailService.sendPasswordResetEmail('user@example.com', 'John Doe', 'xyz789token');
    */
   async sendPasswordResetEmail(email, name, token) {
-    const frontendUrl = process.env.FRONTEND_URL || 'https://Gena.com';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://gena.com';
     const resetLink = `${frontendUrl}/reset-password?token=${token}`;
     
     const { subject, html } = emailTemplates.passwordReset(name, resetLink);

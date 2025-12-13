@@ -9,41 +9,60 @@
 const CONFIG = {
   /**
    * 현재 실행 환경 자동 감지
-   * - 크롬 스토어에서 설치된 경우: production
-   * - 로컬에서 로드된 경우: development
+   *
+   * ✅ Chrome Extension 환경:
+   *    - manifest.update_url 존재 → production (크롬 웹스토어 배포)
+   *    - manifest.update_url 없음 → development (로컬 로드)
+   *
+   * ✅ 웹 환경 (랜딩 페이지 등):
+   *    - localhost / 127.0.0.1 → development
+   *    - gena.com 도메인 → production
+   *
+   * ℹ️ 기본값: development (안전한 기본값)
    */
   ENV: (() => {
-    // 크롬 확장 환경 체크
-    if (typeof chrome !== 'undefined' && chrome.runtime) {
-      const manifest = chrome.runtime.getManifest();
-      
-      // update_url이 있으면 크롬 웹스토어에서 설치된 것 (프로덕션)
-      if (manifest.update_url) {
-        return 'production';
-      }
-      
-      // ID가 특정 패턴이면 프로덕션 (선택사항)
-      // if (chrome.runtime.id === 'your-published-extension-id') {
-      //   return 'production';
-      // }
-      
-      return 'development';
-    }
-    
-    // 일반 웹 환경
-    if (typeof window !== 'undefined' && window.location) {
-      const hostname = window.location.hostname;
-      
-      if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    try {
+      // 1. Chrome Extension 환경 체크
+      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getManifest) {
+        const manifest = chrome.runtime.getManifest();
+
+        // update_url이 있으면 크롬 웹스토어에서 설치된 것 (프로덕션)
+        // 참고: https://developer.chrome.com/docs/extensions/mv3/autoupdate/
+        if (manifest.update_url) {
+          console.log('[Config] Environment: production (Chrome Web Store)');
+          return 'production';
+        }
+
+        console.log('[Config] Environment: development (Unpacked Extension)');
         return 'development';
       }
-      
-      if (hostname.includes('Gena.com')) {
-        return 'production';
+
+      // 2. 웹 환경 체크 (랜딩 페이지 등)
+      if (typeof window !== 'undefined' && window.location) {
+        const hostname = window.location.hostname.toLowerCase();
+
+        // 로컬 개발 환경
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+          console.log('[Config] Environment: development (localhost)');
+          return 'development';
+        }
+
+        // 프로덕션 도메인
+        if (hostname.includes('gena.com')) {
+          console.log('[Config] Environment: production (gena.com)');
+          return 'production';
+        }
       }
+
+      // 3. 기본값: development
+      console.log('[Config] Environment: development (default)');
+      return 'development';
+
+    } catch (error) {
+      // 에러 발생 시 안전한 기본값 사용
+      console.warn('[Config] Environment detection failed, using development:', error.message);
+      return 'development';
     }
-    
-    return 'development';
   })(),
   
   /**
@@ -51,15 +70,15 @@ const CONFIG = {
    */
   API_BASE_URL: {
     development: 'http://localhost:3000',
-    production: 'https://api.Gena.com'
+    production: 'https://api.gena.com'
   },
-  
+
   /**
    * 환경별 프론트엔드 URL (이메일 링크 등에 사용)
    */
   FRONTEND_URL: {
     development: 'http://localhost:3000',
-    production: 'https://Gena.com'
+    production: 'https://gena.com'
   },
   
   /**

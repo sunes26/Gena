@@ -134,4 +134,4 @@ scripts/output/
 uploads/
 public/uploads/
 
-SECURITY.md
+# ℹ️ SECURITY.md는 공개되어야 하는 보안 정책 문서이므로 제외하지 않습니다

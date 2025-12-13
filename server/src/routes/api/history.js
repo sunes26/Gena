@@ -17,6 +17,7 @@ const {
 
 // Middleware
 const { authenticate } = require('../../middleware/auth');
+const { historyLimiter } = require('../../middleware/rateLimiter');
 const {
   validate,
   historyValidator,
@@ -83,7 +84,7 @@ const {
  *   }
  * }
  */
-router.get('/statistics', authenticate, async (req, res, next) => {
+router.get('/statistics', authenticate, historyLimiter, async (req, res, next) => {
   try {
     const { userId } = req.user;
     
@@ -150,7 +151,7 @@ router.get('/statistics', authenticate, async (req, res, next) => {
  *   "total": 20
  * }
  */
-router.get('/', authenticate, validate(paginationValidator), async (req, res, next) => {
+router.get('/', authenticate, historyLimiter, validate(paginationValidator), async (req, res, next) => {
   try {
     const { userId } = req.user;
     const limit = parseInt(req.query.limit) || 20;
@@ -292,7 +293,7 @@ router.post('/', authenticate, validate(historyValidator), async (req, res, next
  *   }
  * }
  */
-router.get('/:historyId', authenticate, validate(idValidator), async (req, res, next) => {
+router.get('/:historyId', authenticate, historyLimiter, validate(idValidator), async (req, res, next) => {
   try {
     const { userId } = req.user;
     const { historyId } = req.params;

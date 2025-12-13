@@ -116,12 +116,30 @@ const premiumApiLimiter = createRateLimiter({
 /**
  * 채팅/요약 전용 Rate Limiter
  * 분당 10회 제한 (무료 사용자)
+ *
+ * ℹ️ 하루 3회 요약 제한이 있으므로 10회면 충분
  * 프리미엄 사용자는 제한 없음
  */
 const chatLimiter = createRateLimiter({
   windowMs: RATE_LIMIT.WINDOW_MS,
   max: 10,
-  message: '채팅 요청이 너무 많습니다. 잠시 후 다시 시도해주세요',
+  message: '요약 요청이 너무 많습니다. 잠시 후 다시 시도해주세요 (분당 10회 제한)',
+  skip: (req) => {
+    return req.user?.isPremium === true;
+  }
+});
+
+/**
+ * 히스토리 조회 전용 Rate Limiter
+ * 분당 30회 제한 (무료 사용자)
+ *
+ * ℹ️ 히스토리 조회는 무제한이므로 더 높은 제한 설정
+ * 프리미엄 사용자는 제한 없음
+ */
+const historyLimiter = createRateLimiter({
+  windowMs: RATE_LIMIT.WINDOW_MS,
+  max: 30,
+  message: '히스토리 조회 요청이 너무 많습니다. 잠시 후 다시 시도해주세요 (분당 30회 제한)',
   skip: (req) => {
     return req.user?.isPremium === true;
   }
@@ -130,12 +148,14 @@ const chatLimiter = createRateLimiter({
 /**
  * 인증 관련 Rate Limiter
  * 분당 5회 제한 (모든 사용자)
- * 무차별 대입 공격 방지
+ *
+ * ℹ️ 무차별 대입 공격 방지
+ * 성공한 요청은 카운트하지 않음
  */
 const authLimiter = createRateLimiter({
   windowMs: RATE_LIMIT.WINDOW_MS,
   max: 5,
-  message: '인증 시도가 너무 많습니다. 잠시 후 다시 시도해주세요',
+  message: '인증 시도가 너무 많습니다. 잠시 후 다시 시도해주세요 (분당 5회 제한)',
   keyGenerator: (req) => {
     // 이메일 또는 IP 기반
     return req.body?.email || req.ip;
@@ -184,11 +204,14 @@ const searchLimiter = createRateLimiter({
 /**
  * 글로벌 Rate Limiter
  * IP당 분당 100회 제한 (DDoS 방어)
+ *
+ * ℹ️ 모든 엔드포인트에 적용되는 최상위 제한
+ * 프리미엄/무료 관계없이 IP 기반으로 제한
  */
 const globalLimiter = createRateLimiter({
   windowMs: RATE_LIMIT.WINDOW_MS,
-  max: 100,
-  message: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요',
+  max: parseInt(process.env.RATE_LIMIT_GLOBAL_MAX) || 100,
+  message: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요 (IP당 분당 100회 제한)',
   keyGenerator: (req) => req.ip,
   skip: () => false // 모든 요청에 적용
 });
@@ -315,16 +338,17 @@ module.exports = {
   createSmartRateLimiter,
   combineLimiters,
   createIpLimiter,
-  
+
   // 사전 정의된 Limiters
   apiLimiter,
   premiumApiLimiter,
-  chatLimiter,
-  authLimiter,
+  chatLimiter,           // 요약 API: 분당 10회
+  historyLimiter,        // 히스토리 조회: 분당 30회 (신규)
+  authLimiter,           // 인증 API: 분당 5회
   uploadLimiter,
   premiumUploadLimiter,
   searchLimiter,
-  globalLimiter,
+  globalLimiter,         // 글로벌: IP당 분당 100회
   signupLimiter,
   passwordResetLimiter
 };

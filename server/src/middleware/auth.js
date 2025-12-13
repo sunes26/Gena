@@ -381,14 +381,25 @@ function validateApiKey(req, res, next) {
       );
     }
     
-    // TODO: 실제 API 키 검증 로직 (Firestore 조회)
+    // ℹ️ 현재 구현: 환경변수 기반 검증
+    // 프로덕션 환경에서는 Firestore에 API 키를 저장하고 검증하는 것을 권장:
+    //
+    // const apiKeyDoc = await admin.firestore()
+    //   .collection('api_keys')
+    //   .doc(apiKey)
+    //   .get();
+    //
+    // if (!apiKeyDoc.exists || !apiKeyDoc.data().active) {
+    //   return sendAuthError(res, 401, '유효하지 않은 API 키입니다', 'INVALID_API_KEY');
+    // }
+
     const validApiKeys = process.env.VALID_API_KEYS?.split(',') || [];
-    
+
     if (!validApiKeys.includes(apiKey)) {
       return sendAuthError(
-        res, 
-        401, 
-        '유효하지 않은 API 키입니다', 
+        res,
+        401,
+        '유효하지 않은 API 키입니다',
         'INVALID_API_KEY'
       );
     }

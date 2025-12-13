@@ -158,7 +158,7 @@ async function initializeFirebase() {
       try {
         const testUserId = 'test-user-' + Date.now();
         const testUser = {
-          email: 'test@Gena.com',
+          email: 'test@gena.com',
           extensionId: 'test-extension-id',
           plan: 'free',
           role: 'user',
@@ -187,7 +187,7 @@ async function initializeFirebase() {
         const subRef = db.collection('subscriptions').doc(testUserId);
         await subRef.set(testSubscription);
         
-        console.log('  ✅ 테스트 사용자 생성됨: test@Gena.com');
+        console.log('  ✅ 테스트 사용자 생성됨: test@gena.com');
       } catch (error) {
         console.log('  ⚠️ 테스트 사용자 생성 실패 (이미 존재할 수 있음)');
       }

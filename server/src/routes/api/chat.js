@@ -1,11 +1,12 @@
 /**
  * 채팅 API 라우터
  * OpenAI API를 통한 요약 및 질문 응답 처리
- * 
- * ✨ v2.1 업데이트:
+ *
+ * ✨ v2.2 업데이트:
+ * - ChatService로 비즈니스 로직 분리
  * - 요약 시 상세 정보를 UsageService에 전달
  * - 날짜 → 요약ID → 상세 정보 구조로 저장
- * 
+ *
  * @module routes/api/chat
  */
 
@@ -18,8 +19,7 @@ const {
   ERROR_CODES,
   ERROR_MESSAGES,
   HTTP_STATUS,
-  FEATURE_TYPES,
-  CIRCUIT_BREAKER
+  FEATURE_TYPES
 } = require('../../constants');
 
 // Middleware
@@ -28,150 +28,11 @@ const { chatValidator, validate } = require('../../middleware/validator');
 const { chatLimiter } = require('../../middleware/rateLimiter');
 
 // Services
+const chatService = require('../../services/ChatService');
 const usageService = require('../../services/UsageService');
 const { historyService } = require('../../services/HistoryService');
 
-// Error Classes
-const {
-  ValidationError,
-  OpenAIError,
-  NetworkError
-} = require('../../middleware/errorHandler');
-
-// ===== Circuit Breaker 구현 =====
-
-class CircuitBreaker {
-  constructor(name, options = {}) {
-    this.name = name;
-    this.failureThreshold = options.failureThreshold || CIRCUIT_BREAKER.FAILURE_THRESHOLD;
-    this.timeout = options.timeout || CIRCUIT_BREAKER.TIMEOUT;
-    this.resetTimeout = options.resetTimeout || CIRCUIT_BREAKER.RESET_TIMEOUT;
-    
-    this.state = 'CLOSED';
-    this.failures = 0;
-    this.nextAttempt = Date.now();
-    this.successCount = 0;
-    this.lastFailureTime = null;
-  }
-  
-  async execute(fn) {
-    if (this.state === 'OPEN') {
-      if (Date.now() < this.nextAttempt) {
-        throw new Error(`Circuit breaker is OPEN for ${this.name}. Retry after ${Math.ceil((this.nextAttempt - Date.now()) / 1000)}s`);
-      }
-      this.state = 'HALF_OPEN';
-      console.log(`[Circuit Breaker] ${this.name} is now HALF_OPEN`);
-    }
-    
-    try {
-      const result = await fn();
-      this.onSuccess();
-      return result;
-    } catch (error) {
-      this.onFailure();
-      throw error;
-    }
-  }
-  
-  onSuccess() {
-    this.failures = 0;
-    
-    if (this.state === 'HALF_OPEN') {
-      this.successCount++;
-      if (this.successCount >= CIRCUIT_BREAKER.HALF_OPEN_SUCCESS_THRESHOLD) {
-        this.state = 'CLOSED';
-        this.successCount = 0;
-        console.log(`[Circuit Breaker] ${this.name} is now CLOSED`);
-      }
-    }
-  }
-  
-  onFailure() {
-    this.failures++;
-    this.lastFailureTime = Date.now();
-    
-    if (this.failures >= this.failureThreshold) {
-      this.state = 'OPEN';
-      this.nextAttempt = Date.now() + this.resetTimeout;
-      console.error(`[Circuit Breaker] ${this.name} is now OPEN (failures: ${this.failures})`);
-    }
-  }
-  
-  getState() {
-    return {
-      name: this.name,
-      state: this.state,
-      failures: this.failures,
-      lastFailureTime: this.lastFailureTime
-    };
-  }
-}
-
-const openAICircuitBreaker = new CircuitBreaker('OpenAI', {
-  failureThreshold: CIRCUIT_BREAKER.FAILURE_THRESHOLD,
-  resetTimeout: CIRCUIT_BREAKER.RESET_TIMEOUT
-});
-
-// ===== OpenAI API 호출 함수 =====
-
-async function callOpenAI(model, messages, maxTokens, temperature) {
-  const modelToUse = model || process.env.FALLBACK_MODEL || OPENAI.DEFAULT_MODEL;
-  
-  if (!OPENAI.AVAILABLE_MODELS.includes(modelToUse)) {
-    throw new ValidationError(`지원하지 않는 모델입니다: ${modelToUse}`);
-  }
-  
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), OPENAI.API_TIMEOUT);
-  
-  try {
-    console.log(`[OpenAI] API 호출 시작 - 모델: ${modelToUse}, 메시지 수: ${messages.length}`);
-    
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: modelToUse,
-        messages: messages,
-        temperature: temperature !== undefined ? temperature : OPENAI.DEFAULT_TEMPERATURE,
-        max_tokens: maxTokens || OPENAI.DEFAULT_MAX_TOKENS
-      }),
-      signal: controller.signal
-    });
-    
-    clearTimeout(timeout);
-    
-    if (!response.ok) {
-      const error = await response.json();
-      console.error('[OpenAI] API 오류:', {
-        status: response.status,
-        error: error.error?.message
-      });
-      
-      throw new OpenAIError(
-        `OpenAI API error: ${response.status} - ${error.error?.message || 'Unknown error'}`
-      );
-    }
-    
-    const data = await response.json();
-    console.log(`[OpenAI] API 호출 성공 - 토큰 사용: ${data.usage?.total_tokens || 'N/A'}`);
-    
-    return data;
-    
-  } catch (error) {
-    clearTimeout(timeout);
-    
-    if (error.name === 'AbortError') {
-      console.error('[OpenAI] API 타임아웃');
-      throw new NetworkError(ERROR_MESSAGES.OPENAI_TIMEOUT);
-    }
-    
-    throw error;
-  }
-}
+// ===== Circuit Breaker와 OpenAI 호출은 ChatService로 이동됨 =====
 
 // ===== POST / 엔드포인트 =====
 
@@ -230,7 +91,7 @@ router.post('/',
               '히스토리 클라우드 저장',
               '우선 지원'
             ],
-            link: 'https://Gena.com/pricing'
+            link: 'https://gena.com/pricing'
           }
         });
       }
@@ -266,10 +127,8 @@ router.post('/',
         });
       }
       
-      // ===== 2. OpenAI API 호출 (Circuit Breaker 포함) =====
-      const apiResponse = await openAICircuitBreaker.execute(async () => {
-        return await callOpenAI(model, messages, max_tokens, temperature);
-      });
+      // ===== 2. OpenAI API 호출 (Circuit Breaker 포함, ChatService 사용) =====
+      const apiResponse = await chatService.chat(model, messages, max_tokens, temperature);
       
       // 🆕 요약 결과 텍스트 추출
       const summaryText = apiResponse.choices[0]?.message?.content || '';
@@ -359,8 +218,8 @@ router.post('/',
 // ===== Circuit Breaker 상태 조회 엔드포인트 =====
 
 router.get('/circuit-breaker', (req, res) => {
-  const state = openAICircuitBreaker.getState();
-  
+  const state = chatService.getCircuitBreakerState();
+
   res.json({
     success: true,
     circuitBreaker: state,

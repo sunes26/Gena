@@ -51,11 +51,12 @@ service cloud.firestore {
     
     /**
      * 특정 역할 확인
+     * ℹ️ 현재 사용되지 않음 - 필요시 주석 해제
      */
-    function hasRole(role) {
-      return isAuthenticated() && 
-             request.auth.token.role == role;
-    }
+    // function hasRole(role) {
+    //   return isAuthenticated() &&
+    //          request.auth.token.role == role;
+    // }
     
     /**
      * 문자열 유효성 검증
@@ -84,10 +85,11 @@ service cloud.firestore {
     
     /**
      * 배열 유효성 검증
+     * ℹ️ 현재 사용되지 않음 - 필요시 주석 해제
      */
-    function isValidArray(arr, maxLen) {
-      return arr is list && arr.size() <= maxLen;
-    }
+    // function isValidArray(arr, maxLen) {
+    //   return arr is list && arr.size() <= maxLen;
+    // }
     
     // ========================================
     // 1. /users/{userId} - 사용자 프로필 및 데이터
@@ -294,8 +296,10 @@ service cloud.firestore {
     }
     
     // 테스트용 (_test 컬렉션)
+    // ⚠️ 보안상 프로덕션에서는 비활성화
     match /_test/{document} {
-      allow read, write: if true; // 개발 환경에서만 사용
+      // 관리자만 접근 가능 (개발 시에만 임시로 true로 변경 가능)
+      allow read, write: if isAdmin();
     }
     
     // 기본: 명시적으로 허용되지 않은 모든 접근 거부

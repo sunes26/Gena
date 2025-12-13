@@ -98,7 +98,7 @@ router.get('/', (req, res) => {
       note: '대부분의 엔드포인트는 JWT 인증이 필요합니다'
     },
     documentation: [
-      'https://docs.Gena.com/api'
+      'https://docs.gena.com/api'
     ],
     timestamp: new Date().toISOString()
   });

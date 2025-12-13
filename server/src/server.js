@@ -312,8 +312,12 @@ process.on('unhandledRejection', (reason, promise) => {
   console.error('  Reason:', reason);
   
   // 프로덕션에서는 로깅 서비스에 전송하는 것을 권장
+  // ℹ️ 로깅 서비스 통합 시 추가:
+  // - Google Cloud Logging: https://cloud.google.com/logging
+  // - Sentry: https://sentry.io
+  // - Datadog: https://www.datadoghq.com
   if (process.env.NODE_ENV === ENVIRONMENTS.PRODUCTION) {
-    // TODO: 로깅 서비스(Cloud Logging, Sentry 등)에 전송
+    console.error('⚠️ 프로덕션 환경: 로깅 서비스 미설정 - console.error만 사용 중');
   }
 });
 
@@ -329,8 +333,9 @@ process.on('uncaughtException', (error) => {
   console.error('  Stack:', error.stack);
   
   // 프로덕션에서는 로깅 후 프로세스 종료
+  // ℹ️ 로깅 서비스 통합 권장 (Cloud Logging, Sentry 등)
   if (process.env.NODE_ENV === ENVIRONMENTS.PRODUCTION) {
-    // TODO: Cloud Logging에 전송
+    console.error('⚠️ 로깅 서비스 미설정 - console.error만 사용 중');
     console.error('프로세스를 종료합니다...');
     process.exit(1);
   } else {
