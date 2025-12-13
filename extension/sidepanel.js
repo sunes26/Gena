@@ -68,7 +68,7 @@ class SidePanelController {
       if (!isAuthenticated) {
         console.log('[Auth] 로그인 필요 - 안내 화면 표시');
         this.showLoginRequiredScreen();
-        
+
         // ✅ 로그인 화면도 페이드인
         document.body.classList.add('loaded');
         return;
@@ -100,12 +100,15 @@ class SidePanelController {
       // ✅ 깜빡임 방지: 초기화 완료 후 페이드인
       document.body.classList.add('loaded');
 
+      // ✨ 이전 요약 상태 복원 시도
+      await this.restorePreviousSummary();
+
       await this.checkAutoSummarize();
     } catch (error) {
       console.error('[SidePanel] 초기화 오류:', error);
       window.errorHandler.handle(error, 'sidepanel-initialization');
       this.showError('initializationError');
-      
+
       // ✅ 에러 발생 시에도 페이지 표시
       document.body.classList.add('loaded');
     }
@@ -1351,6 +1354,86 @@ class SidePanelController {
     }
   }
 
+  /**
+   * ✨ 이전 요약 복원 (페이지 재방문 시)
+   */
+  async restorePreviousSummary() {
+    try {
+      if (!this.currentTabId) {
+        console.log('[SidePanel] Tab ID가 없어서 복원 불가');
+        return;
+      }
+
+      console.log('[SidePanel] 이전 요약 복원 시도:', this.currentTabId);
+
+      // 1. Background에서 상태 조회
+      const response = await chrome.runtime.sendMessage({
+        action: 'getSidePanelState',
+        tabId: this.currentTabId
+      });
+
+      if (!response || !response.success || !response.state) {
+        console.log('[SidePanel] 복원할 상태 없음');
+        return;
+      }
+
+      const state = response.state;
+
+      if (!state.hasSummary) {
+        console.log('[SidePanel] 요약이 저장되지 않은 상태');
+        return;
+      }
+
+      console.log('[SidePanel] 상태 발견:', state);
+
+      // 2. 히스토리에서 가장 최근 요약 검색 (현재 URL 기준)
+      const currentUrl = this.currentPageInfo.url;
+
+      if (!currentUrl) {
+        console.warn('[SidePanel] 현재 URL 없음');
+        return;
+      }
+
+      const allHistory = await window.historyManager.getAllHistory();
+
+      // 현재 URL과 일치하는 가장 최근 히스토리 찾기
+      const matchingHistory = allHistory.find(item => item.url === currentUrl);
+
+      if (!matchingHistory) {
+        console.log('[SidePanel] 히스토리에서 일치하는 요약을 찾을 수 없음');
+        return;
+      }
+
+      console.log('[SidePanel] ✅ 이전 요약 발견:', matchingHistory.id);
+
+      // 3. 요약 복원
+      this.currentSummary = matchingHistory.summary;
+      this.currentHistoryId = matchingHistory.id;
+
+      // 4. UI 업데이트
+      window.uiManager.displaySummary(this.currentSummary);
+
+      // 5. Q&A 초기화 (이전 대화 내용도 복원)
+      const pageContent = matchingHistory.pageContent || '';
+      await window.qaManager.initialize(matchingHistory.id, pageContent);
+
+      // Q&A 히스토리 복원
+      if (matchingHistory.qaHistory && matchingHistory.qaHistory.length > 0) {
+        window.qaManager.restoreQAHistory(matchingHistory.qaHistory);
+      }
+
+      console.log('[SidePanel] ✅ 이전 요약 복원 완료');
+
+      // 복원 완료 토스트 메시지
+      this.showToast('이전 요약을 불러왔습니다');
+
+    } catch (error) {
+      console.error('[SidePanel] 요약 복원 오류:', error);
+      window.errorHandler.handle(error, 'restore-previous-summary');
+      // 에러가 발생해도 사용자 경험을 방해하지 않도록 조용히 처리
+    }
+  }
+
   async askQuestion() {
     const questionInput = window.uiManager.getElement('questionInput');
     const questionText = questionInput.value.trim();
@@ -1436,6 +1519,7 @@ class SidePanelController {
         title: this.currentPageInfo.title,
         url: this.currentPageInfo.url,
         summary: this.currentSummary,
+        pageContent: this.currentPageContent, // ✨ 페이지 콘텐츠 저장 (Q&A 복원용)
         qaHistory: [],
         metadata: {
           domain: this.currentPageInfo.domain,
