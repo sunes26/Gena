@@ -425,6 +425,9 @@
   "errorDailyLimit": {
     "message": "Daily usage limit exceeded"
   },
+  "rateLimitCleared": {
+    "message": "Rate limit cleared. Please try again."
+  },
   "errorApiNotConfigured": {
     "message": "API not configured"
   },

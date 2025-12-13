@@ -425,6 +425,9 @@
   "errorDailyLimit": {
     "message": "超出今日使用限制"
   },
+  "rateLimitCleared": {
+    "message": "速率限制已解除。请重试。"
+  },
   "errorApiNotConfigured": {
     "message": "API未配置"
   },

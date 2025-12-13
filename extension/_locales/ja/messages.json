@@ -425,6 +425,9 @@
   "errorDailyLimit": {
     "message": "今日の使用制限を超えました"
   },
+  "rateLimitCleared": {
+    "message": "レート制限が解除されました。もう一度お試しください。"
+  },
   "errorApiNotConfigured": {
     "message": "APIが設定されていません"
   },

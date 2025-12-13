@@ -44,6 +44,10 @@ class SidePanelController {
     // ✨ Service Worker Keep-Alive
     this.keepAliveInterval = null;
     this.progressListener = null;
+
+    // ✨ Rate Limit Countdown
+    this.rateLimitCountdown = null;
+    this.rateLimitTimer = null;
   }
 
   async initialize() {
@@ -1269,7 +1273,13 @@ class SidePanelController {
     } catch (error) {
       console.error('[SidePanel] 요약 오류:', error);
       window.errorHandler.handle(error, 'summarize-page');
-      this.showError('errorSummarize');
+
+      // ✨ Rate Limit 에러인 경우 카운트다운 표시
+      if (error.statusCode === 429 && error.retryAfter) {
+        this.handleRateLimitError(error.retryAfter);
+      } else {
+        this.showError('errorSummarize');
+      }
     } finally {
       window.uiManager.showLoading(false);
     }
@@ -1537,6 +1547,74 @@ class SidePanelController {
     } else {
       window.uiManager.showError(messageKey);
     }
+  }
+
+  /**
+   * ✨ Rate Limit 에러 처리 (카운트다운 포함)
+   * @param {number} retryAfter - 재시도 가능까지 남은 초
+   */
+  handleRateLimitError(retryAfter) {
+    console.log(`[SidePanel] Rate limit hit - retry after ${retryAfter} seconds`);
+
+    // 기존 타이머 정리
+    if (this.rateLimitTimer) {
+      clearInterval(this.rateLimitTimer);
+      this.rateLimitTimer = null;
+    }
+
+    this.rateLimitCountdown = retryAfter;
+
+    // 요약 버튼 비활성화
+    const summarizeBtn = window.uiManager.getElement('summarizeBtn');
+    if (summarizeBtn) {
+      summarizeBtn.disabled = true;
+    }
+
+    // 초기 메시지 표시
+    this.displayRateLimitMessage();
+
+    // 카운트다운 타이머 시작
+    this.rateLimitTimer = setInterval(() => {
+      this.rateLimitCountdown--;
+
+      if (this.rateLimitCountdown <= 0) {
+        // 카운트다운 완료
+        clearInterval(this.rateLimitTimer);
+        this.rateLimitTimer = null;
+        this.rateLimitCountdown = null;
+
+        // 버튼 다시 활성화
+        if (summarizeBtn) {
+          summarizeBtn.disabled = false;
+        }
+
+        // 완료 메시지
+        const clearedMessage = window.languageManager.getMessage('rateLimitCleared') || 'Rate Limit이 해제되었습니다. 다시 시도해주세요.';
+        window.uiManager.showToast(clearedMessage);
+      } else {
+        // 카운트다운 업데이트
+        this.displayRateLimitMessage();
+      }
+    }, 1000);
+  }
+
+  /**
+   * ✨ Rate Limit 카운트다운 메시지 표시
+   */
+  displayRateLimitMessage() {
+    const seconds = this.rateLimitCountdown;
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+
+    let timeText;
+    if (minutes > 0) {
+      timeText = `${minutes}분 ${remainingSeconds}초`;
+    } else {
+      timeText = `${remainingSeconds}초`;
+    }
+
+    const message = `분당 10회 요약 제한을 초과했습니다. ${timeText} 후 다시 시도해주세요.`;
+    window.uiManager.showError(message);
   }
 
   showUpgradeModal(type) {

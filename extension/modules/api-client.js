@@ -130,7 +130,23 @@ class ApiClient {
       // API 에러 응답 처리
       if (!response.ok) {
         const errorMessage = data.error?.message || data.message || `HTTP ${response.status} 오류가 발생했습니다.`;
-        throw new Error(errorMessage);
+        const error = new Error(errorMessage);
+
+        // 429 Rate Limit 에러인 경우 retryAfter 정보 추가
+        if (response.status === 429) {
+          // Retry-After 헤더에서 시간 추출 (초 단위)
+          const retryAfterHeader = response.headers.get('Retry-After');
+          const retryAfter = retryAfterHeader ? parseInt(retryAfterHeader, 10) : (data.retryAfter || 60);
+
+          error.statusCode = 429;
+          error.retryAfter = retryAfter;
+
+          if (this.debug) {
+            console.log(`[ApiClient] Rate limit hit - retry after ${retryAfter} seconds`);
+          }
+        }
+
+        throw error;
       }
 
       if (this.debug) {

@@ -27,6 +27,10 @@ class AppController {
     this.isPremium = false;
     this.initialized = false;
     this.usageLoaded = false;
+
+    // ✨ Rate Limit Countdown
+    this.rateLimitCountdown = null;
+    this.rateLimitTimer = null;
   }
 
   async initialize() {
