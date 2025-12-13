@@ -101,9 +101,12 @@ class SidePanelController {
       document.body.classList.add('loaded');
 
       // ✨ 이전 요약 상태 복원 시도
-      await this.restorePreviousSummary();
+      const restored = await this.restorePreviousSummary();
 
-      await this.checkAutoSummarize();
+      // 복원되지 않았을 때만 자동 요약 체크
+      if (!restored) {
+        await this.checkAutoSummarize();
+      }
     } catch (error) {
       console.error('[SidePanel] 초기화 오류:', error);
       window.errorHandler.handle(error, 'sidepanel-initialization');
@@ -1356,12 +1359,13 @@ class SidePanelController {
 
   /**
    * ✨ 이전 요약 복원 (페이지 재방문 시)
+   * @returns {boolean} 복원 성공 여부
    */
   async restorePreviousSummary() {
     try {
       if (!this.currentTabId) {
         console.log('[SidePanel] Tab ID가 없어서 복원 불가');
-        return;
+        return false;
       }
 
       console.log('[SidePanel] 이전 요약 복원 시도:', this.currentTabId);
@@ -1374,14 +1378,14 @@ class SidePanelController {
 
       if (!response || !response.success || !response.state) {
         console.log('[SidePanel] 복원할 상태 없음');
-        return;
+        return false;
       }
 
       const state = response.state;
 
       if (!state.hasSummary) {
         console.log('[SidePanel] 요약이 저장되지 않은 상태');
-        return;
+        return false;
       }
 
       console.log('[SidePanel] 상태 발견:', state);
@@ -1391,7 +1395,7 @@ class SidePanelController {
 
       if (!currentUrl) {
         console.warn('[SidePanel] 현재 URL 없음');
-        return;
+        return false;
       }
 
       const allHistory = await window.historyManager.getAllHistory();
@@ -1401,7 +1405,7 @@ class SidePanelController {
 
       if (!matchingHistory) {
         console.log('[SidePanel] 히스토리에서 일치하는 요약을 찾을 수 없음');
-        return;
+        return false;
       }
 
       console.log('[SidePanel] ✅ 이전 요약 발견:', matchingHistory.id);
@@ -1417,20 +1421,15 @@ class SidePanelController {
       const pageContent = matchingHistory.pageContent || '';
       await window.qaManager.initialize(matchingHistory.id, pageContent);
 
-      // Q&A 히스토리 복원
-      if (matchingHistory.qaHistory && matchingHistory.qaHistory.length > 0) {
-        window.qaManager.restoreQAHistory(matchingHistory.qaHistory);
-      }
-
       console.log('[SidePanel] ✅ 이전 요약 복원 완료');
 
-      // 복원 완료 토스트 메시지
-      this.showToast('이전 요약을 불러왔습니다');
+      return true;
 
     } catch (error) {
       console.error('[SidePanel] 요약 복원 오류:', error);
       window.errorHandler.handle(error, 'restore-previous-summary');
       // 에러가 발생해도 사용자 경험을 방해하지 않도록 조용히 처리
+      return false;
     }
   }
 
