@@ -2,7 +2,7 @@
 
 > AI 기반 웹페이지 요약 및 질문-답변 Chrome Extension
 
-[![Version](https://img.shields.io/badge/version-5.1.0-blue.svg)](https://github.com/yourusername/Gena)
+[![Version](https://img.shields.io/badge/version-5.2.0-blue.svg)](https://github.com/yourusername/Gena)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-Coming%20Soon-orange.svg)]()
 [![Firebase](https://img.shields.io/badge/Firebase-Firestore-orange.svg)](https://firebase.google.com/)
@@ -47,6 +47,8 @@
 - 🔄 **Service Worker Keep-Alive**: PDF 처리 시 안정적인 백그라운드 작업
 - 🔔 **Side Panel 자동 복원**: 탭 전환 후 복귀 시 자동 재열림 (v5.1.0) ✨
 - 📛 **스마트 배지**: 5분 이후 복귀 시 요약 보기 배지 표시 (v5.1.0) ✨
+- 🔒 **보안 강화**: JWT SECRET 512비트, Firestore 보안 규칙 강화 (v5.2.0) ✨
+- ⚡ **성능 최적화**: ChatService 분리, Rate Limit 최적화 (v5.2.0) ✨
 
 ### 타겟 사용자
 
@@ -62,7 +64,7 @@
 - ✅ 요약 길이 자동 최적화 (콘텐츠 길이 기반)
 - ✅ 로컬 히스토리 저장
 - ✅ 4개 언어 지원 (한국어, 영어, 일본어, 중국어)
-- ✅ Rate Limiting (분당 30회)
+- ✅ Rate Limiting (요약 분당 10회, 히스토리 분당 30회)
 - ✅ Modern Side Panel UI
 - ✅ Side Panel 자동 복원 (v5.1.0) ✨
 - ✅ Extension context 에러 복구 (v5.1.0) ✨
@@ -110,13 +112,18 @@
   - Vercel
 
 ### 보안
-- **인증**: Firebase Auth (LOCAL persistence) + JWT Token
+- **인증**: Firebase Auth (LOCAL persistence) + JWT Token (512비트 SECRET)
 - **데이터 암호화**: Firestore 자동 암호화 (AES-256)
 - **비밀번호 해싱**: bcrypt (10 rounds)
-- **입력 검증**: express-validator (v7.0.1)
-- **보안 헤더**: helmet (v7.0.0)
-- **Rate Limiting**: express-rate-limit (v7.1.5)
-- **Circuit Breaker**: 커스텀 구현 (5회 실패 시 차단)
+- **입력 검증**: express-validator (v7.2.1)
+- **보안 헤더**: helmet (v7.2.0)
+- **Rate Limiting**:
+  - 요약 API: 분당 10회 (무료), 무제한 (프리미엄)
+  - 히스토리 조회: 분당 30회 (무료), 무제한 (프리미엄)
+  - 인증 API: 분당 5회 (모든 사용자)
+  - Global IP: 분당 100회 (DDoS 방지)
+- **Circuit Breaker**: ChatService 구현 (5회 실패 시 차단)
+- **Firestore 보안 규칙**: 관리자/사용자 권한 분리, _test 컬렉션 보호
 
 ## 🏗 시스템 아키텍처
 ```
@@ -577,6 +584,7 @@ Gena/
         │
         ├── services/
         │   ├── AuthService.js     # Firebase Auth 서비스 (v3.0.0)
+        │   ├── ChatService.js     # 채팅/요약 서비스 (v1.0.0) ✨ 신규
         │   ├── EmailService.js    # 이메일 발송 서비스
         │   ├── TokenService.js    # 토큰 관리 서비스
         │   ├── UsageService.js    # 사용량 추적 (v2.1.0)
@@ -623,9 +631,13 @@ DELETE /api/auth/account             - 계정 삭제
 
 ### 채팅/요약 API (`/api/chat`)
 ```
-POST /api/chat                  - 채팅/요약 요청 (OpenAI API)
+POST /api/chat                  - 채팅/요약 요청 (ChatService 사용, Circuit Breaker 적용)
 GET  /api/chat/circuit-breaker  - Circuit Breaker 상태 조회
 ```
+
+**Rate Limit:**
+- 무료 사용자: 분당 10회 (하루 3회 요약 제한 고려)
+- 프리미엄 사용자: 무제한
 
 ### 사용량 조회 API (`/api/usage`)
 ```
@@ -646,7 +658,35 @@ POST   /api/history/:historyId/qa  - Q&A 추가
 DELETE /api/history/:historyId     - 히스토리 삭제 (soft/hard)
 ```
 
-## 🆕 최신 업데이트 (v5.1.0) ✨
+**Rate Limit:**
+- 무료 사용자: 분당 30회 (무제한 조회 보호)
+- 프리미엄 사용자: 무제한
+
+## 🆕 최신 업데이트 (v5.2.0) ✨
+
+### 보안 강화
+- 🔒 **JWT SECRET 강화**: 32자 → 88자 (512비트 엔트로피)
+- 🔒 **Firestore 보안 규칙 강화**: _test 컬렉션 관리자 전용 접근
+- 🔒 **미사용 함수 제거**: hasRole(), isValidArray() 주석 처리
+- 🔒 **도메인 통일**: 모든 도메인명 소문자로 통일 (gena.com)
+
+### 성능 최적화
+- ⚡ **ChatService 분리**: 비즈니스 로직 165줄 → 서비스로 이동
+- ⚡ **Circuit Breaker**: ChatService에 통합 (5회 실패 시 차단)
+- ⚡ **Rate Limit 최적화**: 엔드포인트별 맞춤 설정
+  - 요약 API: 분당 10회 (무료), 무제한 (프리미엄)
+  - 히스토리 조회: 분당 30회 (무료), 무제한 (프리미엄)
+  - 인증 API: 분당 5회 (모든 사용자)
+  - Global IP: 분당 100회 (DDoS 방지)
+
+### 코드 품질 개선
+- ✨ **TODO 주석 개선**: 실행 가능한 가이드라인으로 변경
+- ✨ **환경 감지 개선**: 에러 핸들링 및 로깅 추가
+- ✨ **.gitignore 수정**: SECURITY.md 제외 제거
+
+---
+
+## 🆕 v5.1.0 업데이트 ✨
 
 ### Side Panel 자동 복원 기능
 - ✨ **탭 전환 시 Side Panel 자동 닫힘**: 다른 탭 이동 시 window.close() 호출
@@ -803,7 +843,34 @@ DELETE /api/history/:historyId     - 히스토리 삭제 (soft/hard)
 
 **Made with ❤️ by Gena Team**
 
-**Version**: 5.1.0 | **Last Updated**: 2025-01-11
+**Version**: 5.2.0 | **Last Updated**: 2025-12-13
+
+---
+
+## 🎉 v5.2.0 하이라이트
+
+### 🔒 보안 개선사항
+
+1. **JWT SECRET 강화**: 256비트 → 512비트 엔트로피 (보안 강도 4배 향상)
+2. **Firestore 보안 규칙**: _test 컬렉션 공개 접근 차단 → 관리자 전용
+3. **도메인 통일**: 모든 도메인명 소문자로 통일하여 보안 정책 일관성 향상
+
+### ⚡ 성능 개선사항
+
+1. **ChatService 분리**: routes/api/chat.js에서 165줄 비즈니스 로직 제거
+2. **Circuit Breaker 통합**: ChatService에 OpenAI API 장애 복구 로직 통합
+3. **Rate Limit 최적화**:
+   - 요약 API: 10회/분 (하루 3회 제한 고려)
+   - 히스토리: 30회/분 (무제한 조회 보호)
+   - 인증: 5회/분 (무차별 대입 방지)
+   - Global: 100회/분 (DDoS 방지)
+
+### 🎨 코드 품질
+
+- ✅ TODO 주석 → 실행 가능한 가이드라인
+- ✅ 환경 감지 로직 에러 핸들링 강화
+- ✅ 미사용 함수 정리 (주석 처리)
+- ✅ .gitignore 수정 (SECURITY.md 공개)
 
 ---
 
