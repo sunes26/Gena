@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat:*)",
+      "Bash(tree:*)",
+      "Bash(npm run firebase:deploy:*)",
+      "Bash(openssl rand:*)",
+      "Bash(find:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nrefactor: 보안 강화 및 코드 품질 개선\n\n주요 변경사항:\n- Firestore 보안 규칙 강화 (_test 컬렉션 접근 제한, 미사용 함수 제거)\n- JWT_SECRET 강화 (32자 → 88자, 512비트 엔트로피)\n- ChatService 분리 (비즈니스 로직을 routes에서 service로 이동)\n- Rate Limit 최적화 (요약 API 10회, 히스토리 30회, 인증 5회)\n- 도메인명 소문자 통일 (Gena.com → gena.com)\n- TODO 주석 개선 (로깅 서비스, API 키 검증 가이드라인 추가)\n- 환경 감지 로직 개선 (에러 핸들링, 명확한 주석)\n- .gitignore 수정 (SECURITY.md 제외 제거)\n\n보안 개선:\n- Firestore rules: _test 컬렉션을 관리자만 접근 가능하게 변경\n- JWT SECRET: 보안 강도 4배 향상\n- Rate Limit: DDoS 방지 및 무한 재시도 차단\n\n코드 품질 개선:\n- ChatService.js 신규 생성 (Circuit Breaker 포함)\n- routes/api/chat.js 간소화 (165줄 감소)\n- historyLimiter 추가 (분당 30회)\n- 모든 Rate Limiter에 명확한 주석 추가\n\n🤖 Generated with Claude Code (https://claude.com/claude-code)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n)\")"
+    ]
+  }
+}
