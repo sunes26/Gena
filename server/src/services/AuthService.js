@@ -15,6 +15,7 @@
  */
 
 const { getFirestore, getAdmin, isFirebaseInitialized } = require('../config/firebase');
+const { maskUserId } = require('../utils/privacy');
 const {
   ValidationError,
   AuthenticationError,
@@ -453,22 +454,29 @@ class AuthService {
       // updatedAt 추가
       sanitizedUpdates.updatedAt = new Date();
 
-      // Firebase Auth 프로필도 업데이트 (displayName만)
-      if (sanitizedUpdates.name) {
-        await this.auth.updateUser(userId, {
-          displayName: sanitizedUpdates.name
-        });
-        console.log(`✅ Firebase Auth displayName 업데이트: ${userId}`);
-      }
-
-      // Firestore 업데이트
+      // 1. Firestore 업데이트 먼저 수행 (SSOT)
       await userRef.update(sanitizedUpdates);
+      console.log(`✅ Firestore 프로필 업데이트 성공: ${maskUserId(userId)}`);
+
+      // 2. Firebase Auth 동기화 (실패해도 Firestore는 이미 성공)
+      if (sanitizedUpdates.name) {
+        try {
+          await this.auth.updateUser(userId, {
+            displayName: sanitizedUpdates.name
+          });
+          console.log(`✅ Firebase Auth displayName 동기화 성공: ${maskUserId(userId)}`);
+        } catch (authError) {
+          // Firebase Auth 동기화 실패는 치명적이지 않음 (Firestore가 SSOT)
+          console.warn(`⚠️ Firebase Auth 동기화 실패 (Firestore는 성공): ${maskUserId(userId)}`, authError.message);
+          // 계속 진행 (에러 던지지 않음)
+        }
+      }
 
       // 업데이트된 사용자 데이터 조회
       const updatedDoc = await userRef.get();
       const updatedData = updatedDoc.data();
 
-      console.log(`✅ 프로필 업데이트 성공: ${userId}`);
+      console.log(`✅ 프로필 업데이트 완료: ${maskUserId(userId)}`);
       return this._sanitizeUserData(updatedData);
 
     } catch (error) {

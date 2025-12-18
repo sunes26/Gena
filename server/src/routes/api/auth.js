@@ -17,6 +17,9 @@ const express = require('express');
 const router = express.Router();
 const admin = require('firebase-admin');
 
+// Utils
+const { maskUserId } = require('../../utils/privacy');
+
 // Constants
 const {
   HTTP_STATUS,
@@ -192,7 +195,7 @@ router.get('/me',
   asyncHandler(async (req, res) => {
     const { userId } = req.user;
     
-    console.log(`[Auth Me] 사용자 정보 조회: ${userId}`);
+    console.log(`[Auth Me] 사용자 정보 조회: ${maskUserId(userId)}`);
     
     const user = await authService.getUserById(userId);
     
@@ -217,15 +220,15 @@ router.put('/profile',
     const { userId } = req.user;
     const updates = req.body;
     
-    console.log(`[Auth Profile] 프로필 업데이트: ${userId}`);
-    
+    console.log(`[Auth Profile] 프로필 업데이트: ${maskUserId(userId)}`);
+
     if (!updates || Object.keys(updates).length === 0) {
       throw new ValidationError('업데이트할 정보를 제공해주세요');
     }
-    
+
     const updatedUser = await authService.updateProfile(userId, updates);
-    
-    console.log(`✅ [Auth Profile] 프로필 업데이트 성공: ${userId}`);
+
+    console.log(`✅ [Auth Profile] 프로필 업데이트 성공: ${maskUserId(userId)}`);
     
     res.json({
       success: true,
@@ -250,7 +253,7 @@ router.post('/change-password',
     const { userId } = req.user;
     const { newPassword, confirmPassword } = req.body;
     
-    console.log(`[Auth Change Password] 비밀번호 변경 시도: ${userId}`);
+    console.log(`[Auth Change Password] 비밀번호 변경 시도: ${maskUserId(userId)}`);
     
     if (!newPassword || !confirmPassword) {
       throw new ValidationError('모든 필드를 입력해주세요');
@@ -276,7 +279,7 @@ router.post('/change-password',
       }
     }
     
-    console.log(`✅ [Auth Change Password] 비밀번호 변경 성공: ${userId}`);
+    console.log(`✅ [Auth Change Password] 비밀번호 변경 성공: ${maskUserId(userId)}`);
     
     res.json({
       success: true,
@@ -347,7 +350,7 @@ router.post('/verify-email',
   asyncHandler(async (req, res) => {
     const { userId, emailVerified } = req.user;
     
-    console.log(`[Auth Verify Email] 이메일 인증 확인: ${userId}`);
+    console.log(`[Auth Verify Email] 이메일 인증 확인: ${maskUserId(userId)}`);
     
     if (emailVerified) {
       return res.json({
@@ -363,7 +366,7 @@ router.post('/verify-email',
       // Firestore 업데이트
       await authService.updateEmailVerificationStatus(userId, true);
       
-      console.log(`✅ [Auth Verify Email] 이메일 인증 완료: ${userId}`);
+      console.log(`✅ [Auth Verify Email] 이메일 인증 완료: ${maskUserId(userId)}`);
       
       return res.json({
         success: true,
@@ -546,7 +549,7 @@ router.delete('/account',
       // 2. Firebase Authentication 사용자 삭제
       await authService.auth.deleteUser(userId);
       
-      console.log(`✅ [Auth Delete Account] 계정 삭제 완료: ${userId}`);
+      console.log(`✅ [Auth Delete Account] 계정 삭제 완료: ${maskUserId(userId)}`);
       
       res.json({
         success: true,

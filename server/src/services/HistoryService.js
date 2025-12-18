@@ -165,7 +165,21 @@ class HistoryService {
    */
   _isValidUrl(url) {
     try {
-      new URL(url);
+      const parsedUrl = new URL(url);
+
+      // 위험한 스키마 차단 (XSS, 파일 접근 등)
+      const dangerousProtocols = ['javascript:', 'data:', 'file:', 'vbscript:', 'about:'];
+      if (dangerousProtocols.some(protocol => parsedUrl.protocol === protocol)) {
+        console.warn(`⚠️ 위험한 URL 스키마 차단: ${parsedUrl.protocol}`);
+        return false;
+      }
+
+      // HTTP/HTTPS만 허용
+      if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+        console.warn(`⚠️ 허용되지 않은 URL 스키마: ${parsedUrl.protocol}`);
+        return false;
+      }
+
       return true;
     } catch {
       return false;
@@ -300,7 +314,6 @@ async saveHistory(userId, historyData) {
         wordCount: historyData.metadata?.wordCount || 0,
         tags: historyData.metadata?.tags || []
       },
-      timestamp: Date.now(), // 🆕 추가: JavaScript timestamp
       createdAt: now,
       updatedAt: now,
       deletedAt: null
@@ -364,12 +377,12 @@ async getHistory(userId, options = {}) {
   try {
     const limit = Math.min(options.limit || DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
     
-    // 🔧 timestamp 필드로 정렬 (실제 Firestore 데이터에 맞춤)
+    // 🔧 createdAt 필드로 정렬
     let query = this.db
       .collection('users')
       .doc(userId)
       .collection('history')
-      .orderBy('timestamp', 'desc')
+      .orderBy('createdAt', 'desc')
       .limit(limit + 1);
     
     if (options.startAfter) {
@@ -548,16 +561,31 @@ async getHistory(userId, options = {}) {
       if (data.deletedAt) {
         throw new NotFoundError('삭제된 히스토리입니다');
       }
-      
+
+      // QA 히스토리 크기 확인
+      const currentQAHistory = data.qaHistory || [];
+      const MAX_QA = LIMITS.MAX_QA_PER_HISTORY || 50;
+
       // QA 추가
       const newQA = {
         question: question.trim(),
         answer: answer.trim(),
-        timestamp: admin.firestore.FieldValue.serverTimestamp()
+        timestamp: Date.now() // 정렬 가능한 타임스탬프
       };
-      
+
+      let updatedQAHistory;
+
+      if (currentQAHistory.length >= MAX_QA) {
+        // 최대 개수 도달: 가장 오래된 항목 제거
+        updatedQAHistory = [...currentQAHistory.slice(1), newQA];
+        console.log(`⚠️ QA 히스토리 최대 개수(${MAX_QA}) 도달: 가장 오래된 항목 제거`);
+      } else {
+        // 단순 추가
+        updatedQAHistory = [...currentQAHistory, newQA];
+      }
+
       await docRef.update({
-        qaHistory: admin.firestore.FieldValue.arrayUnion(newQA),
+        qaHistory: updatedQAHistory,
         updatedAt: admin.firestore.FieldValue.serverTimestamp()
       });
       

@@ -414,10 +414,21 @@ router.delete('/:historyId', authenticate, validate(deleteValidator), async (req
   try {
     const { userId } = req.user;
     const { historyId } = req.params;
-    const hardDelete = req.query.hard === 'true';
-    
-    console.log(`[History Delete] 삭제 요청: ${userId} - ${historyId} (hard: ${hardDelete})`);
-    
+
+    // Hard delete는 보안상 이유로 비활성화 (soft delete만 사용)
+    // GDPR "잊혀질 권리" 요청은 별도의 관리자 도구를 통해 처리
+    const hardDelete = false;
+
+    if (req.query.hard === 'true') {
+      console.warn(`⚠️ [History Delete] Hard delete 요청 차단: ${userId} - ${historyId}`);
+      return res.status(403).json({
+        success: false,
+        message: '완전 삭제는 지원하지 않습니다. 삭제된 항목은 30일 후 자동으로 영구 삭제됩니다.'
+      });
+    }
+
+    console.log(`[History Delete] 삭제 요청: ${userId} - ${historyId}`);
+
     // HistoryService에서 삭제
     await historyService.deleteHistory(userId, historyId, hardDelete);
     

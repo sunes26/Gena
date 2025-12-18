@@ -30,16 +30,7 @@ service cloud.firestore {
       return isAuthenticated() && 
              request.auth.token.email_verified == true;
     }
-    
-    /**
-     * 프리미엄 사용자 확인
-     * 커스텀 클레임 사용 (서버에서 설정)
-     */
-    function isPremiumUser() {
-      return isAuthenticated() && 
-             request.auth.token.isPremium == true;
-    }
-    
+
     /**
      * 관리자 권한 확인
      * 커스텀 클레임 사용
@@ -138,7 +129,15 @@ service cloud.firestore {
         allow update: if isOwner(userId) &&
                         isEmailVerified() &&
                         request.resource.data.userId == userId &&
-                        request.resource.data.createdAt == resource.data.createdAt;
+                        request.resource.data.createdAt == resource.data.createdAt &&
+                        // deletedAt 필드는 서버(Admin SDK)만 수정 가능
+                        (!request.resource.data.keys().hasAny(['deletedAt']) ||
+                         request.resource.data.deletedAt == resource.data.deletedAt) &&
+                        // updatedAt 필드는 반드시 업데이트되어야 하며, 과거보다 미래여야 함
+                        request.resource.data.keys().hasAny(['updatedAt']) &&
+                        request.resource.data.updatedAt is timestamp &&
+                        (!resource.data.keys().hasAny(['updatedAt']) ||
+                         request.resource.data.updatedAt > resource.data.updatedAt);
         
         // 삭제: 허용 안 함 (소프트 삭제만 사용)
         allow delete: if false;
@@ -166,26 +165,6 @@ service cloud.firestore {
         
         // 삭제: 허용 안 함
         allow delete: if false;
-      }
-      
-      // ========================================
-      // 1-3. /users/{userId}/usage/{document}
-      // 사용량 추적 (확장 프로그램용)
-      // ========================================
-      match /usage/{document=**} {
-        // 읽기/쓰기: 본인만
-        allow read, write: if isOwner(userId) && isEmailVerified();
-      }
-      
-      // ========================================
-      // 1-4. /users/{userId}/tokens/{tokenId}
-      // 비밀번호 재설정, 이메일 인증 토큰
-      // ⚠️ Firebase Auth를 사용하므로 이 컬렉션은 더 이상 필요 없음
-      // 삭제 예정
-      // ========================================
-      match /tokens/{tokenId} {
-        // 모든 접근 차단 (Firebase Auth가 처리)
-        allow read, write: if false;
       }
     }
     
@@ -252,41 +231,9 @@ service cloud.firestore {
     match /webhook_logs/{logId} {
       allow read, write: if false;
     }
-    
+
     // ========================================
-    // 6. 프리미엄 전용 기능 예시
-    // ========================================
-    
-    // PDF 요약 기록 (프리미엄 전용)
-    match /users/{userId}/pdf_summaries/{summaryId} {
-      // 읽기/쓰기: 프리미엄 사용자만
-      allow read, write: if isOwner(userId) && 
-                           isEmailVerified() &&
-                           isPremiumUser();
-    }
-    
-    // ========================================
-    // 7. 관리자 전용 컬렉션
-    // ========================================
-    
-    // 시스템 통계
-    match /stats/{document=**} {
-      allow read: if isAdmin();
-      allow write: if false;
-    }
-    
-    // 사용자 신고
-    match /reports/{reportId} {
-      // 생성: 인증된 사용자
-      allow create: if isAuthenticated() && isEmailVerified();
-      // 읽기: 관리자만
-      allow read: if isAdmin();
-      // 수정/삭제: 관리자만
-      allow update, delete: if isAdmin();
-    }
-    
-    // ========================================
-    // 8. 기타 시스템 컬렉션
+    // 6. 기타 시스템 컬렉션
     // ========================================
     
     // 헬스체크 (테스트용)
@@ -296,10 +243,10 @@ service cloud.firestore {
     }
     
     // 테스트용 (_test 컬렉션)
-    // ⚠️ 보안상 프로덕션에서는 비활성화
+    // 프로덕션 보안: 클라이언트 접근 완전 차단
+    // Admin SDK는 이 규칙을 우회하므로 서버 연결 테스트는 계속 작동
     match /_test/{document} {
-      // 관리자만 접근 가능 (개발 시에만 임시로 true로 변경 가능)
-      allow read, write: if isAdmin();
+      allow read, write: if false;
     }
     
     // 기본: 명시적으로 허용되지 않은 모든 접근 거부
@@ -339,11 +286,21 @@ service cloud.firestore {
              newData.createdAt == oldData.createdAt &&
              // email 변경 불가 (Firebase Auth에서 관리)
              newData.email == oldData.email &&
-             // updatedAt 필수
+             // updatedAt 필수 (과거보다 미래여야 함)
              newData.keys().hasAny(['updatedAt']) &&
              newData.updatedAt is timestamp &&
+             (!oldData.keys().hasAny(['updatedAt']) ||
+              newData.updatedAt > oldData.updatedAt) &&
              // role 변경 불가 (관리자만 가능)
-             (newData.role == oldData.role || request.auth.token.admin == true);
+             (newData.role == oldData.role || request.auth.token.admin == true) &&
+             // isPremium 변경 불가 (관리자 또는 서버만 가능)
+             (!newData.keys().hasAny(['isPremium']) ||
+              newData.isPremium == oldData.isPremium ||
+              request.auth.token.admin == true) &&
+             // subscriptionPlan 변경 불가 (관리자 또는 서버만 가능)
+             (!newData.keys().hasAny(['subscriptionPlan']) ||
+              newData.subscriptionPlan == oldData.subscriptionPlan ||
+              request.auth.token.admin == true);
     }
     
     /**

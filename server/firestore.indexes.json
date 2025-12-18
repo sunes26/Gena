@@ -149,24 +149,6 @@
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "isPremium",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "date",
-          "order": "DESCENDING"
-        }
-      ]
-    },
-    {
-      "collectionGroup": "daily",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "userId",
-          "order": "ASCENDING"
-        },
-        {
           "fieldPath": "date",
           "order": "ASCENDING"
         },
@@ -189,10 +171,6 @@
         },
         {
           "order": "DESCENDING",
-          "queryScope": "COLLECTION"
-        },
-        {
-          "arrayConfig": "CONTAINS",
           "queryScope": "COLLECTION"
         }
       ]

@@ -1,9 +1,9 @@
 /**
  * Firestore 기반 사용량 추적 서비스
  * 사용자의 일일 요약/질문 횟수를 추적하고 관리합니다.
- * 
+ *
  * 데이터 구조:
- * /usage/{userId}/daily/{YYYY-MM-DD}
+ * /users/{userId}/daily/{YYYY-MM-DD}
  * {
  *   userId: string,
  *   date: string,
@@ -14,7 +14,7 @@
  *   createdAt: Timestamp,
  *   updatedAt: Timestamp
  * }
- * 
+ *
  * @module UsageService
  */
 
@@ -36,6 +36,12 @@ console.log('🔧 [UsageService] FREE_USER_DAILY_LIMIT 최종값:', FREE_USER_DA
  * @type {number}
  */
 const CACHE_TTL = 60000; // 1분
+
+/**
+ * 최대 캐시 항목 수 (메모리 누수 방지)
+ * @type {number}
+ */
+const MAX_CACHE_SIZE = 1000;
 
 /**
  * 사용량 데이터 보관 기간 (일)
@@ -188,6 +194,13 @@ class UsageService {
    * @param {Object} data - 저장할 데이터
    */
   _setCache(cacheKey, data) {
+    // 최대 크기 초과 시 가장 오래된 항목 삭제 (LRU)
+    if (this.cache.size >= MAX_CACHE_SIZE) {
+      const firstKey = this.cache.keys().next().value;
+      this.cache.delete(firstKey);
+      console.log(`⚠️ 캐시 크기 제한(${MAX_CACHE_SIZE}) 도달: 가장 오래된 항목 삭제`);
+    }
+
     this.cache.set(cacheKey, {
       data: data,
       expiry: Date.now() + CACHE_TTL
@@ -245,7 +258,7 @@ class UsageService {
     
     try {
       const docRef = this.db
-        .collection('usage')
+        .collection('users')
         .doc(userId)
         .collection('daily')
         .doc(today);
@@ -391,7 +404,7 @@ class UsageService {
     
     try {
       const docRef = this.db
-        .collection('usage')
+        .collection('users')
         .doc(userId)
         .collection('daily')
         .doc(today);
@@ -510,7 +523,7 @@ class UsageService {
       }
       
       const dailyRef = this.db
-        .collection('usage')
+        .collection('users')
         .doc(userId)
         .collection('daily');
       
@@ -645,9 +658,9 @@ class UsageService {
       const cutoffDateStr = this._formatDate(cutoffDate);
       
       console.log(`🗄️ 아카이브 시작: ${cutoffDateStr} 이전 데이터`);
-      
-      const usageCollectionRef = this.db.collection('usage');
-      const usersSnapshot = await usageCollectionRef.listDocuments();
+
+      const usersCollectionRef = this.db.collection('users');
+      const usersSnapshot = await usersCollectionRef.listDocuments();
       
       let archivedCount = 0;
       const batchSize = 500;
@@ -662,25 +675,37 @@ class UsageService {
           .where('archived', '!=', true)
           .get();
         
-        oldDocsSnapshot.forEach((doc) => {
+        for (const doc of oldDocsSnapshot.docs) {
           batch.update(doc.ref, {
             archived: true,
             archivedAt: admin.firestore.FieldValue.serverTimestamp()
           });
-          
+
           batchCount++;
           archivedCount++;
-          
+
           if (batchCount >= batchSize) {
-            batch.commit();
+            try {
+              await batch.commit();
+              console.log(`✅ 배치 커밋 성공: ${batchSize}개 문서`);
+            } catch (batchError) {
+              console.error(`❌ 배치 커밋 실패: ${batchCount}개 항목 미처리`, batchError);
+              throw new Error(`배치 작업 실패: ${batchError.message}`);
+            }
             batch = this.db.batch();
             batchCount = 0;
           }
-        });
+        }
       }
-      
+
       if (batchCount > 0) {
-        await batch.commit();
+        try {
+          await batch.commit();
+          console.log(`✅ 최종 배치 커밋 성공: ${batchCount}개 문서`);
+        } catch (batchError) {
+          console.error(`❌ 최종 배치 커밋 실패: ${batchCount}개 항목 미처리`, batchError);
+          throw new Error(`최종 배치 작업 실패: ${batchError.message}`);
+        }
       }
       
       console.log(`✅ 아카이브 완료: ${archivedCount}개 문서`);
