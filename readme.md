@@ -847,6 +847,420 @@ DELETE /api/history/:historyId     - 히스토리 삭제 (soft/hard)
 
 ---
 
+## 🚀 프로덕션 배포 가이드
+
+### 개요
+
+Gena 서버는 **Google Cloud Run**에 배포되어 있으며, **Secret Manager**를 통해 보안 강화가 적용되었습니다.
+
+### 배포 정보
+
+| 항목 | 내용 |
+|------|------|
+| **플랫폼** | Google Cloud Run |
+| **리전** | asia-northeast1 (도쿄) |
+| **프로덕션 URL** | https://api.genaai.net |
+| **프로젝트 ID** | badaai |
+| **도메인 제공자** | 가비아 (Gabia) |
+| **SSL 인증서** | Google 관리형 (자동 갱신) |
+| **환경** | Production |
+
+---
+
+### 📦 Google Cloud Run 배포
+
+#### 사전 요구사항
+
+1. **Google Cloud SDK 설치**
+   ```bash
+   # Windows (Chocolatey)
+   choco install gcloudsdk
+
+   # macOS
+   brew install google-cloud-sdk
+
+   # Linux
+   curl https://sdk.cloud.google.com | bash
+   ```
+
+2. **gcloud 초기화**
+   ```bash
+   gcloud init
+   gcloud auth login
+   gcloud config set project badaai
+   gcloud config set run/region asia-northeast1
+   ```
+
+3. **필수 API 활성화**
+   ```bash
+   gcloud services enable run.googleapis.com
+   gcloud services enable cloudbuild.googleapis.com
+   gcloud services enable artifactregistry.googleapis.com
+   gcloud services enable secretmanager.googleapis.com
+   ```
+
+#### 배포 단계
+
+##### 1. 환경 변수 준비
+
+`.env` 파일에서 다음 변수 확인:
+```bash
+# 필수 환경 변수
+OPENAI_API_KEY=sk-proj-...
+JWT_SECRET=<512비트 랜덤 문자열>
+ALLOWED_EXTENSION_IDS=<Chrome Extension ID>
+ALLOWED_ORIGINS=https://genaai.net
+FREE_USER_DAILY_LIMIT=3
+FIREBASE_PROJECT_ID=badaai
+NODE_ENV=production
+```
+
+##### 2. Secret Manager 설정
+
+**2-1. Secrets 생성**
+
+```powershell
+# OPENAI_API_KEY Secret 생성
+"<your-openai-api-key>" | gcloud secrets create openai-api-key --data-file=-
+
+# JWT_SECRET Secret 생성
+"<your-jwt-secret>" | gcloud secrets create jwt-secret --data-file=-
+```
+
+**2-2. 서비스 계정 권한 부여**
+
+```powershell
+# 서비스 계정 이메일 변수 설정
+$SA = "203450855233-compute@developer.gserviceaccount.com"
+
+# OPENAI_API_KEY 권한
+gcloud secrets add-iam-policy-binding openai-api-key `
+  --member="serviceAccount:$SA" `
+  --role="roles/secretmanager.secretAccessor"
+
+# JWT_SECRET 권한
+gcloud secrets add-iam-policy-binding jwt-secret `
+  --member="serviceAccount:$SA" `
+  --role="roles/secretmanager.secretAccessor"
+```
+
+##### 3. Cloud Run 배포
+
+```powershell
+# 환경 변수 설정
+$ENV_VARS = "NODE_ENV=production,ALLOWED_EXTENSION_IDS=<your-extension-id>,ALLOWED_ORIGINS=https://genaai.net,FREE_USER_DAILY_LIMIT=3,FIREBASE_PROJECT_ID=badaai"
+
+# Cloud Run 배포 (Secret Manager 연동)
+gcloud run deploy gena-api `
+  --source . `
+  --region asia-northeast1 `
+  --platform managed `
+  --allow-unauthenticated `
+  --memory 512Mi `
+  --cpu 1 `
+  --timeout 60s `
+  --update-secrets OPENAI_API_KEY=openai-api-key:latest `
+  --update-secrets JWT_SECRET=jwt-secret:latest `
+  --set-env-vars $ENV_VARS
+```
+
+**배포 시간**: 약 3-5분
+
+##### 4. 배포 확인
+
+```powershell
+# 헬스체크
+curl https://gena-api-<project-number>.asia-northeast1.run.app/health
+
+# 서비스 정보 조회
+gcloud run services describe gena-api --region asia-northeast1
+```
+
+---
+
+### 🌐 커스텀 도메인 설정
+
+#### 1. 도메인 소유권 인증
+
+**Google Search Console에서 인증**:
+1. https://search.google.com/search-console 접속
+2. "속성 추가" → "도메인" 선택
+3. `genaai.net` 입력
+4. TXT 레코드를 DNS에 추가
+5. "확인" 버튼 클릭
+
+#### 2. DNS CNAME 레코드 추가
+
+**가비아 DNS 설정**:
+1. My가비아 로그인
+2. 서비스 관리 → 도메인 → genaai.net 선택
+3. DNS 관리 → 레코드 추가
+4. 다음 정보 입력:
+   ```
+   타입: CNAME
+   호스트: api
+   값: ghs.googlehosted.com.
+   TTL: 3600
+   ```
+5. 저장
+
+#### 3. Cloud Run 도메인 매핑 생성
+
+```powershell
+gcloud beta run domain-mappings create `
+  --service gena-api `
+  --domain api.genaai.net `
+  --region asia-northeast1
+```
+
+#### 4. SSL 인증서 발급 대기
+
+- **소요 시간**: 15분~1시간
+- **확인 방법**:
+  ```powershell
+  curl https://api.genaai.net/health
+  ```
+- **상태**: 정상 응답 시 발급 완료
+
+#### 5. manifest.json 확인
+
+Extension의 `manifest.json`이 이미 올바르게 설정되어 있는지 확인:
+
+```json
+{
+  "externally_connectable": {
+    "matches": [
+      "https://api.genaai.net/*",
+      "https://genaai.net/*"
+    ]
+  }
+}
+```
+
+---
+
+### 🔐 보안 설정
+
+#### Firebase Admin SDK 인증
+
+Cloud Run은 **Application Default Credentials (ADC)**를 사용합니다.
+
+**firebase.js 설정 확인** (`server/src/config/firebase.js`):
+
+```javascript
+// Method 4: Cloud Run ADC (프로덕션)
+else if (process.env.NODE_ENV === 'production' && process.env.K_SERVICE) {
+  console.log('🔑 방법 4: Application Default Credentials (ADC) 사용 (Cloud Run)');
+  credential = admin.credential.applicationDefault();
+  console.log('✅ Cloud Run ADC로 인증 완료');
+}
+```
+
+**중요**: `serviceAccountKey.json` 파일은 컨테이너에 포함되지 않습니다. Cloud Run이 자동으로 서비스 계정을 제공합니다.
+
+#### Secret Manager 장점
+
+| 항목 | 평문 환경변수 | Secret Manager |
+|------|--------------|----------------|
+| **보안** | ❌ 누구나 조회 가능 | ✅ IAM 권한 필요 |
+| **버전 관리** | ❌ 없음 | ✅ 버전별 관리 |
+| **감사 추적** | ❌ 없음 | ✅ Cloud Audit Logs |
+| **자동 로테이션** | ❌ 수동 재배포 | ✅ 자동 업데이트 |
+| **Git 노출 위험** | ⚠️ 높음 | ✅ 없음 |
+
+---
+
+### 📊 모니터링 및 로그
+
+#### Cloud Run 로그 확인
+
+```powershell
+# 최근 로그 조회
+gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=gena-api" --limit=50
+
+# 에러 로그만 조회
+gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=gena-api AND severity>=ERROR" --limit=20
+
+# 실시간 로그 스트리밍
+gcloud alpha logging tail "resource.type=cloud_run_revision"
+```
+
+#### 서비스 상태 확인
+
+```powershell
+# 서비스 정보
+gcloud run services describe gena-api --region asia-northeast1
+
+# 리비전 목록
+gcloud run revisions list --service gena-api --region asia-northeast1
+
+# 도메인 매핑 확인
+gcloud beta run domain-mappings list --region asia-northeast1
+```
+
+#### 헬스체크 엔드포인트
+
+```bash
+GET https://api.genaai.net/health
+```
+
+**응답 예시**:
+```json
+{
+  "status": "healthy",
+  "timestamp": "2025-12-18T15:11:36.583Z",
+  "environment": "production",
+  "uptime": 120,
+  "services": {
+    "usageService": { "available": true, "mode": "Firestore" },
+    "historyService": { "available": true, "mode": "Firestore" }
+  },
+  "memory": {
+    "used": 29691256,
+    "total": 34181120,
+    "percentage": 87
+  },
+  "version": "2.0.0"
+}
+```
+
+---
+
+### 💰 비용 최적화
+
+#### Cloud Run 요금
+
+| 리소스 | 무료 할당량 | 초과 시 비용 |
+|--------|------------|-------------|
+| **요청** | 2백만 요청/월 | $0.40 / 백만 요청 |
+| **CPU** | 180,000 vCPU-초/월 | $0.00002400 / vCPU-초 |
+| **메모리** | 360,000 GiB-초/월 | $0.00000250 / GiB-초 |
+| **네트워크** | 1 GiB 송신/월 | $0.12 / GiB |
+
+#### Secret Manager 요금
+
+| 항목 | 비용 |
+|------|------|
+| **Secret 저장** | $0.06 / secret / 월 |
+| **Secret 액세스** | $0.03 / 10,000회 |
+
+**예상 월 비용**: $1-20 (일반적인 사용량 기준)
+
+#### 비용 절감 팁
+
+1. **최소 인스턴스 0 유지** (기본값)
+2. **타임아웃 최적화** (현재 60초)
+3. **메모리 적정화** (512Mi)
+4. **불필요한 리전 서비스 삭제**
+
+---
+
+### 🔧 트러블슈팅
+
+#### 배포 실패
+
+**1. Dockerfile 누락 오류**
+```
+unable to prepare context: lstat /workspace/Dockerfile: no such file or directory
+```
+
+**해결책**: `.dockerignore`와 `.gcloudignore`에서 Dockerfile 제외 해제
+```bash
+# .dockerignore
+# Dockerfile  # 주석 처리!
+
+# .gcloudignore
+# Dockerfile  # 주석 처리!
+```
+
+**2. 컨테이너 시작 실패**
+```
+Container failed to start and listen on PORT=8080
+```
+
+**해결책**:
+- 환경 변수 누락 확인 (`ALLOWED_EXTENSION_IDS` 등)
+- 로그 확인: `gcloud logging read ...`
+- Firebase ADC 설정 확인
+
+**3. Secret 접근 권한 오류**
+```
+Permission denied on secret: openai-api-key
+```
+
+**해결책**: 서비스 계정에 `roles/secretmanager.secretAccessor` 역할 부여
+```powershell
+gcloud secrets add-iam-policy-binding openai-api-key `
+  --member="serviceAccount:203450855233-compute@developer.gserviceaccount.com" `
+  --role="roles/secretmanager.secretAccessor"
+```
+
+#### SSL 인증서 문제
+
+**1. 인증서 발급 지연**
+- **정상**: 15분~1시간 소요
+- **확인**: `curl https://api.genaai.net/health` 주기적 실행
+
+**2. DNS 전파 지연**
+```powershell
+# DNS 확인
+nslookup api.genaai.net
+
+# 예상 출력
+# Name: ghs.googlehosted.com
+# Aliases: api.genaai.net
+```
+
+#### 환경 변수 문제
+
+**PowerShell 줄바꿈 오류**
+
+❌ **잘못된 예**:
+```powershell
+--set-env-vars "ALLOWED_EXTENSION_IDS=poplg
+mdicaojjnondpdlamjcjipgdjnb"
+```
+→ 변수 이름에 공백 포함됨: `ALLOWED_EXTE  NSION_IDS`
+
+✅ **올바른 예**:
+```powershell
+# 변수 사용
+$ENV_VARS = "NODE_ENV=production,ALLOWED_EXTENSION_IDS=poplgmdicaojjnondpdlamjcjipgdjnb"
+--set-env-vars $ENV_VARS
+```
+
+---
+
+### 🔄 배포 후 작업
+
+#### Extension 배포
+
+**수정 필요 없음**: Extension은 이미 `api.genaai.net`으로 설정되어 있음.
+
+**Chrome Web Store 배포**:
+1. Extension 파일 압축
+2. Chrome Developer Dashboard 업로드
+3. 심사 대기 (보통 1-3일)
+
+---
+
+### 📚 추가 자료
+
+#### 공식 문서
+- [Cloud Run 공식 문서](https://cloud.google.com/run/docs)
+- [Secret Manager 가이드](https://cloud.google.com/secret-manager/docs)
+- [커스텀 도메인 설정](https://cloud.google.com/run/docs/mapping-custom-domains)
+- [Firebase Admin SDK ADC](https://firebase.google.com/docs/admin/setup#initialize-sdk)
+
+#### 관련 파일
+- `server/Dockerfile` - Cloud Run 최적화
+- `server/.dockerignore` - Docker 빌드 제외 목록
+- `server/.gcloudignore` - gcloud 업로드 제외 목록
+- `server/src/config/firebase.js` - Firebase ADC 설정
+- `server/firestore.rules` - Firestore 보안 규칙
+
+---
+
 ## 🎉 v5.3.0 하이라이트 (2025-12-18)
 
 ### 🔄 사용량 추적 시스템 마이그레이션
