@@ -320,9 +320,11 @@ async saveHistory(userId, historyData) {
     };
     
     await historyRef.set(newHistory);
-    
-    console.log(`📚 히스토리 저장: ${userId} - ${historyRef.id}`);
-    
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`📚 히스토리 저장: ${userId} - ${historyRef.id}`);
+    }
+
     return historyRef.id;
     
   } catch (error) {
@@ -588,9 +590,11 @@ async getHistory(userId, options = {}) {
         qaHistory: updatedQAHistory,
         updatedAt: admin.firestore.FieldValue.serverTimestamp()
       });
-      
-      console.log(`💬 QA 추가: ${userId} - ${historyId}`);
-      
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`💬 QA 추가: ${userId} - ${historyId}`);
+      }
+
     } catch (error) {
       console.error('❌ addQA 오류:', error.message);
       throw error;
@@ -647,14 +651,18 @@ async getHistory(userId, options = {}) {
       if (hardDelete) {
         // Hard delete: 완전 삭제
         await docRef.delete();
-        console.log(`🗑️ 히스토리 완전 삭제: ${userId} - ${historyId}`);
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`🗑️ 히스토리 완전 삭제: ${userId} - ${historyId}`);
+        }
       } else {
         // Soft delete: deletedAt 설정
         await docRef.update({
           deletedAt: admin.firestore.FieldValue.serverTimestamp(),
           updatedAt: admin.firestore.FieldValue.serverTimestamp()
         });
-        console.log(`🗑️ 히스토리 soft delete: ${userId} - ${historyId}`);
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`🗑️ 히스토리 soft delete: ${userId} - ${historyId}`);
+        }
       }
       
     } catch (error) {

@@ -26,9 +26,7 @@ const admin = require('firebase-admin');
  * 허용 범위: 1-100
  * @type {number}
  */
-console.log('🔧 [UsageService] process.env.FREE_USER_DAILY_LIMIT:', process.env.FREE_USER_DAILY_LIMIT);
 const FREE_USER_DAILY_LIMIT = parseInt(process.env.FREE_USER_DAILY_LIMIT) || 3;
-console.log('🔧 [UsageService] FREE_USER_DAILY_LIMIT 최종값:', FREE_USER_DAILY_LIMIT);
 /**
  * 캐시 유효 기간 (밀리초)
  * 허용 범위: 30000(30초) - 300000(5분)
@@ -315,9 +313,11 @@ class UsageService {
       const limit = isPremium ? Infinity : FREE_USER_DAILY_LIMIT;
       const current = result.total_count;
       const remaining = isPremium ? Infinity : Math.max(0, limit - current);
-      
-      console.log(`📊 사용량 추적: ${userId} - ${type} (${current}/${limit})`);
-      
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`📊 사용량 추적: ${userId} - ${type} (${current}/${limit})`);
+      }
+
       return {
         current,
         limit,
@@ -647,8 +647,10 @@ class UsageService {
           deletedCount++;
         }
       }
-      
-      console.log(`🗑️ 메모리 정리: ${deletedCount}개 항목 삭제`);
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`🗑️ 메모리 정리: ${deletedCount}개 항목 삭제`);
+      }
       return deletedCount;
     }
     
@@ -656,8 +658,10 @@ class UsageService {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - DATA_RETENTION_DAYS);
       const cutoffDateStr = this._formatDate(cutoffDate);
-      
-      console.log(`🗄️ 아카이브 시작: ${cutoffDateStr} 이전 데이터`);
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`🗄️ 아카이브 시작: ${cutoffDateStr} 이전 데이터`);
+      }
 
       const usersCollectionRef = this.db.collection('users');
       const usersSnapshot = await usersCollectionRef.listDocuments();

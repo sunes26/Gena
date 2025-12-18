@@ -225,14 +225,16 @@ function printServerInfo(port, host, isCloudRun) {
     console.log(`🔗 로컬 URL: ${localUrl}`);
   }
   
-  console.log(`=`.repeat(60));
-  console.log(`🔧 서비스 상태:`);
-  console.log(`   🔐 JWT 인증: 활성화`);
-  console.log(`   🔥 Firebase: ${usageService.isAvailable() ? 'Firestore' : 'Memory 모드'}`);
-  console.log(`   📊 UsageService: 활성화`);
-  console.log(`   📚 HistoryService: ${historyService.isAvailable() ? '활성화' : '비활성화'}`);
-  console.log(`   👤 AuthService: ${authService.isAvailable() ? '활성화' : '비활성화'}`);
-  console.log(`=`.repeat(60));
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`=`.repeat(60));
+    console.log(`🔧 서비스 상태:`);
+    console.log(`   🔐 JWT 인증: 활성화`);
+    console.log(`   🔥 Firebase: ${usageService.isAvailable() ? 'Firestore' : 'Memory 모드'}`);
+    console.log(`   📊 UsageService: 활성화`);
+    console.log(`   📚 HistoryService: ${historyService.isAvailable() ? '활성화' : '비활성화'}`);
+    console.log(`   👤 AuthService: ${authService.isAvailable() ? '활성화' : '비활성화'}`);
+    console.log(`=`.repeat(60));
+  }
   console.log(`📡 주요 엔드포인트:`);
   console.log(`   🏠 GET  /         (API 정보)`);
   console.log(`   ❤️  GET  /health  (헬스체크)`);
