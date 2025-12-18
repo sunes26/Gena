@@ -37,13 +37,14 @@ COPY --from=dependencies --chown=nodejs:nodejs /app/node_modules ./node_modules
 # 애플리케이션 소스 복사
 COPY --chown=nodejs:nodejs . .
 
-# 🔥 Firebase 서비스 계정 키 복사 (프로덕션 필수)
-# ⚠️ 주의: .dockerignore에서 serviceAccountKey.json 제외 필요
-COPY --chown=nodejs:nodejs serviceAccountKey.json /serviceAccountKey.json
+# 🔥 Firebase 인증 방법:
+# - Cloud Run: 기본 서비스 계정 사용 (ADC - Application Default Credentials)
+# - 로컬 개발: serviceAccountKey.json 사용 (별도로 마운트)
+# ⚠️ 보안: serviceAccountKey.json은 이미지에 포함하지 않음!
 
 # ===== 환경변수 기본값 설정 =====
 ENV NODE_ENV=production
-ENV PORT=3000
+# PORT는 Cloud Run이 동적으로 할당 (기본값: 8080)
 
 # 애플리케이션 설정
 ENV FREE_USER_DAILY_LIMIT=3
@@ -53,11 +54,11 @@ ENV RATE_LIMIT_MAX_REQUESTS=30
 ENV CACHE_TTL=60000
 
 # ===== 헬스체크 설정 =====
-HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
-    CMD node -e "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+# Cloud Run은 자체 헬스체크를 사용하므로 HEALTHCHECK 비활성화
+# HEALTHCHECK는 Cloud Run에서 무시됨
 
-# 포트 노출
-EXPOSE 3000
+# 포트 노출 (Cloud Run은 8080이 기본값)
+EXPOSE 8080
 
 # 비루트 사용자로 전환 (보안 강화)
 USER nodejs

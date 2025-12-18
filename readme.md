@@ -2,7 +2,7 @@
 
 > AI 기반 웹페이지 요약 및 질문-답변 Chrome Extension
 
-[![Version](https://img.shields.io/badge/version-5.2.0-blue.svg)](https://github.com/yourusername/Gena)
+[![Version](https://img.shields.io/badge/version-5.3.0-blue.svg)](https://github.com/yourusername/Gena)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-Coming%20Soon-orange.svg)]()
 [![Firebase](https://img.shields.io/badge/Firebase-Firestore-orange.svg)](https://firebase.google.com/)
@@ -843,7 +843,144 @@ DELETE /api/history/:historyId     - 히스토리 삭제 (soft/hard)
 
 **Made with ❤️ by Gena Team**
 
-**Version**: 5.2.0 | **Last Updated**: 2025-12-13
+**Version**: 5.3.0 | **Last Updated**: 2025-12-18
+
+---
+
+## 🎉 v5.3.0 하이라이트 (2025-12-18)
+
+### 🔄 사용량 추적 시스템 마이그레이션
+
+#### 데이터 구조 통합
+- **변경 전**: `/usage/{userId}/daily/{date}` (분리된 컬렉션)
+- **변경 후**: `/users/{userId}/daily/{date}` (통합된 구조)
+- **마이그레이션 완료**: 8개 문서 (2명의 사용자, 100% 성공)
+- **다운타임**: 없음
+
+#### 변경 사유
+1. **데이터 일관성 향상**: 모든 사용자 데이터를 `/users` 컬렉션 아래로 통합
+2. **Security Rules 단순화**: 중복 규칙 제거, 관리 복잡도 감소
+3. **유지보수성 개선**: 서브컬렉션으로 관리하여 orphaned documents 자동 방지
+
+#### 코드 변경사항
+- `UsageService.js`: 4개 메서드 경로 업데이트
+- `firestore.rules`: 불필요한 `/users/{userId}/usage` 규칙 삭제
+- 문법 오류 수정: `forEach` → `for...of` (async/await 지원)
+
+### 🧹 코드베이스 정리
+
+#### 삭제된 Firestore Rules (6개)
+```javascript
+❌ /users/{userId}/tokens          // Firebase Auth로 대체
+❌ /users/{userId}/usage            // 중복 규칙 (마이그레이션 완료)
+❌ /users/{userId}/pdf_summaries    // 미구현 기능
+❌ /stats                           // 미구현 관리자 기능
+❌ /reports                         // 미구현 관리자 기능
+❌ isPremiumUser() 함수             // 미사용 헬퍼 함수
+```
+
+#### 삭제된 파일 (4개)
+```
+❌ server/src/services/TokenService.js           // 미사용 서비스
+❌ server/src/scripts/cleanup-usage-collection.js    // 일회성 마이그레이션
+❌ server/src/scripts/migrate-usage-to-users.js      // 일회성 마이그레이션
+❌ server/src/scripts/verify-usage-migration.js      // 검증 스크립트
+```
+
+#### 유지된 스크립트
+```
+✅ server/src/scripts/cleanup-orphaned-docs.js   // 유지보수용 스크립트
+```
+
+### 🔒 보안 및 데이터 무결성
+
+#### 마이그레이션 검증 완료
+- ✅ `/usage` 컬렉션 완전히 비어있음
+- ✅ `/users/{userId}/daily` 경로에 8개 문서 정상 존재
+- ✅ UsageService 정상 초기화
+- ✅ 경로 변경 검증 완료 (`collection('users')` 사용)
+
+#### 배포 완료
+```bash
+✅ Firestore Rules 배포 완료 (경고 없음)
+✅ 데이터 마이그레이션 완료
+✅ 서버 동작 검증 완료
+```
+
+### 📊 최종 Firestore 구조 (v5.3.0)
+
+#### 사용 중인 Collections
+```
+/users/{userId}
+  ├── /history/{historyId}        # 요약 히스토리
+  ├── /daily/{date}                # 일일 사용량 (통합 완료) ✨
+  └── (기본 사용자 정보)
+
+/subscription/{subscriptionId}     # Paddle 구독 (웹사이트)
+/payments/{paymentId}              # 결제 내역 (웹사이트)
+/pending_transactions/{transactionId}  # 임시 트랜잭션 (웹사이트)
+
+/webhook_events/{eventId}          # 웹훅 이벤트 (웹사이트)
+/processed_webhook_events/{eventId}  # 처리된 웹훅 (웹사이트)
+/webhook_logs/{logId}              # 웹훅 로그 (웹사이트)
+
+/_health/{document}                # 헬스체크
+/_test/{document}                  # 테스트용
+```
+
+### 🎯 마이그레이션 영향
+
+#### Before & After 비교
+| 항목 | Before | After |
+|------|--------|-------|
+| 사용량 컬렉션 | `/usage` 별도 | `/users` 통합 |
+| Security Rules | 8개 규칙 | 2개 규칙 |
+| 코드 파일 | TokenService 포함 | 불필요 파일 삭제 |
+| 마이그레이션 스크립트 | 3개 유지 | 모두 삭제 |
+| Firestore Rules 경고 | 1개 경고 | 0개 경고 |
+
+#### 성능 및 비용 영향
+- **읽기/쓰기 비용**: 동일 (경로만 변경)
+- **인덱스**: 기존 daily 인덱스 활용 (변경 없음)
+- **보안**: 향상 (불필요한 규칙 제거)
+- **유지보수**: 개선 (코드베이스 정리)
+
+### 📝 마이그레이션 이력
+
+```bash
+# 마이그레이션 실행
+2025-12-18 16:56 - migrate-usage-to-users.js 생성
+2025-12-18 16:59 - cleanup-usage-collection.js 생성
+2025-12-18 17:03 - verify-usage-migration.js 생성
+
+# 마이그레이션 결과
+✅ 8개 문서 마이그레이션 완료
+✅ /usage 컬렉션 정리 완료
+✅ 검증 완료
+
+# 코드 정리
+2025-12-18 17:15 - Firestore Rules 배포 (미사용 규칙 삭제)
+2025-12-18 17:30 - isPremiumUser() 함수 삭제 및 재배포
+2025-12-18 18:32 - 마이그레이션 스크립트 삭제
+```
+
+### 🔍 최종 검토 결과
+
+#### Firestore Rules
+- ✅ 모든 헬퍼 함수 사용 중
+- ✅ 미사용 규칙 모두 정리
+- ✅ 경고 없이 컴파일 성공
+- ✅ 실제 사용 중인 컬렉션만 보호
+
+#### Firestore Indexes
+- ✅ history 인덱스 6개 (HistoryService 사용)
+- ✅ daily 인덱스 3개 (UsageService 사용)
+- ✅ 모든 인덱스 유효하며 배포됨
+
+#### 서버 코드 보안
+- ✅ 코드 주입 취약점 없음
+- ✅ 환경 변수 사용 안전
+- ✅ JSON 파싱 안전 (try-catch 블록)
 
 ---
 

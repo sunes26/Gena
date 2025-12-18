@@ -84,29 +84,35 @@ async function initializeFirebase() {
     // 방법 3: FIREBASE_SERVICE_ACCOUNT_KEY 환경변수 (JSON 문자열)
     else if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
       console.log('📁 방법 3: FIREBASE_SERVICE_ACCOUNT_KEY 환경변수 사용');
-      
+
       try {
         let serviceAccountStr = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
-        
+
         // 작은따옴표로 감싸진 경우 제거
         if (serviceAccountStr.startsWith("'") && serviceAccountStr.endsWith("'")) {
           serviceAccountStr = serviceAccountStr.slice(1, -1);
         }
-        
+
         const serviceAccount = JSON.parse(serviceAccountStr);
-        
+
         // private_key의 줄바꿈 문자 복원
         if (serviceAccount.private_key) {
           serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, '\n');
         }
-        
+
         credential = admin.credential.cert(serviceAccount);
         initMethod = 'FIREBASE_SERVICE_ACCOUNT_KEY';
       } catch (parseError) {
         throw new Error(`FIREBASE_SERVICE_ACCOUNT_KEY 파싱 실패: ${parseError.message}`);
       }
     }
-    // 방법 4: Firebase Emulator (개발 환경)
+    // 방법 4: Application Default Credentials (Cloud Run, GCE, GKE)
+    else if (process.env.NODE_ENV === 'production' && process.env.K_SERVICE) {
+      console.log('☁️  방법 4: Application Default Credentials (Cloud Run)');
+      credential = admin.credential.applicationDefault();
+      initMethod = 'ADC (Cloud Run)';
+    }
+    // 방법 5: Firebase Emulator (개발 환경)
     else if (process.env.NODE_ENV === 'development') {
       console.log('⚠️  방법 4: Firebase Emulator 모드 (개발 환경)');
       

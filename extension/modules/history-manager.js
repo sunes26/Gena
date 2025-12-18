@@ -74,6 +74,27 @@ class HistoryManager {
       if (!item.url || typeof item.url !== 'string') {
         throw new Error('유효하지 않은 URL입니다');
       }
+
+      // URL 형식 및 보안 검증
+      try {
+        const parsedUrl = new URL(item.url);
+
+        // 위험한 스키마 차단 (XSS, 파일 접근 등)
+        const dangerousProtocols = ['javascript:', 'data:', 'file:', 'vbscript:', 'about:'];
+        if (dangerousProtocols.includes(parsedUrl.protocol)) {
+          throw new Error('허용되지 않은 URL 형식입니다');
+        }
+
+        // HTTP/HTTPS만 허용
+        if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+          throw new Error('HTTP 또는 HTTPS URL만 허용됩니다');
+        }
+      } catch (urlError) {
+        if (urlError.message.includes('허용되지 않은') || urlError.message.includes('HTTP')) {
+          throw urlError;
+        }
+        throw new Error('유효하지 않은 URL 형식입니다');
+      }
       
       if (!item.summary || typeof item.summary !== 'string' || item.summary.length > 10000) {
         throw new Error('유효하지 않은 요약입니다');
@@ -199,10 +220,9 @@ async fetchFromCloud(options = {}) {
         }
       };
     }) || [];
-    
+
     console.log(`[HistoryManager] 서버에서 ${items.length}개 가져옴`);
-    console.log(`[HistoryManager] 첫 번째 아이템 샘플:`, items[0]); // 🔧 추가
-    
+
     return {
       items,
       total: serverData.total || items.length,

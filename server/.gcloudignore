@@ -67,9 +67,10 @@ backup/
 .DS_Store
 Thumbs.db
 
-# ===== Docker 관련 (GCP에서 빌드하므로) =====
-Dockerfile
-.dockerignore
+# ===== Docker 관련 =====
+# Dockerfile은 Cloud Run 배포 시 필요하므로 제외하지 않음!
+# Dockerfile  # 주석 처리!
+# .dockerignore  # 주석 처리!
 docker-compose.yml
 
 # ===== 기획 및 설계 문서 =====
