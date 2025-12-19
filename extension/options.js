@@ -79,10 +79,7 @@ const elements = {
   subscriptionTitle: document.querySelector('.subscription-title'),
   subscriptionDescription: document.querySelector('.subscription-description'),
   subscriptionBadge: document.querySelector('.subscription-badge'),
-  subscriptionFeatures: document.querySelector('.subscription-features'),
-
-  // ✨ v5.1.0: Side Panel 설정 요소
-  autoReopenCheckbox: document.getElementById('autoReopenCheckbox')
+  subscriptionFeatures: document.querySelector('.subscription-features')
 };
 
 let appState = {
@@ -444,11 +441,6 @@ function updateUIFromSettings() {
   elements.languageSelect.value = settings.language;
   elements.themeSelect.value = settings.theme;
 
-  // ✨ v5.1.0: Side Panel 자동 재열림 설정
-  if (elements.autoReopenCheckbox) {
-    elements.autoReopenCheckbox.checked = settings.autoReopenSidePanel !== false; // 기본값 true
-    console.log('[Options] autoReopenSidePanel UI 업데이트:', elements.autoReopenCheckbox.checked);
-  }
 }
 
 /**
@@ -475,17 +467,11 @@ function collectAndValidateSettings() {
     throw new Error(`테마 설정: ${themeValidation.error}`);
   }
 
-  // ✨ v5.1.0: autoReopenSidePanel 수집
   const settings = {
     language: languageValidation.sanitized,
     theme: themeValidation.sanitized
   };
 
-  if (elements.autoReopenCheckbox) {
-    settings.autoReopenSidePanel = elements.autoReopenCheckbox.checked;
-    console.log('[Options] autoReopenSidePanel 수집:', settings.autoReopenSidePanel);
-  }
-  
   return settings;
 }
 

@@ -35,8 +35,7 @@ class SettingsManager {
       summaryLength: 'medium',
       model: 'gpt-4o-mini',
       useProxy: true,
-      proxyUrl: 'http://localhost:3000/api/chat',
-      autoReopenSidePanel: true // ✨ v5.1.0 추가
+      proxyUrl: 'http://localhost:3000/api/chat'
     };
     
     this.VALIDATION_RULES = {
@@ -212,13 +211,7 @@ class SettingsManager {
       migrated.proxyUrl = 'http://localhost:3000/api/chat';
       console.log('[SettingsManager] proxyUrl 업데이트: /api/chat 엔드포인트');
     }
-    
-    // ✨ v5.1.0: autoReopenSidePanel 기본값 설정
-    if (migrated.autoReopenSidePanel === undefined) {
-      migrated.autoReopenSidePanel = true;
-      console.log('[SettingsManager] autoReopenSidePanel 기본값 설정: true');
-    }
-    
+
     // 제거된 설정 정리
     delete migrated.autoSummarize;
     delete migrated.saveHistory;
@@ -354,10 +347,6 @@ class SettingsManager {
       throw new Error('useProxy must be a boolean');
     }
 
-    // ✨ v5.1.0: autoReopenSidePanel 검증
-    if (settings.autoReopenSidePanel !== undefined && typeof settings.autoReopenSidePanel !== 'boolean') {
-      throw new Error('autoReopenSidePanel must be a boolean');
-    }
   }
 
   /**
@@ -504,13 +493,6 @@ class SettingsManager {
    */
   isContextMenuEnabled() {
     return true;
-  }
-
-  /**
-   * ✨ v5.1.0: Side Panel 자동 재열림 여부
-   */
-  shouldAutoReopenSidePanel() {
-    return this.settings.autoReopenSidePanel !== false; // 기본값 true
   }
 
   /**

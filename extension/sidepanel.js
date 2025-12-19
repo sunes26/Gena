@@ -258,9 +258,12 @@ class SidePanelController {
   chrome.tabs.onActivated.addListener(async (activeInfo) => {
     console.log('[SidePanel] 탭 변경 감지:', activeInfo.tabId);
 
-    // ✨ 탭 변경 시에도 Side Panel 유지 (닫지 않음)
+    // ✨ 탭 변경 시 이전 요약 유지 (초기화 X)
+    // 새로운 탭 정보만 업데이트
     this.currentTabId = activeInfo.tabId;
     await this.loadCurrentTab();
+
+    console.log('[SidePanel] ℹ️ 탭 전환 완료 - 이전 요약 유지됨');
   });
 
   chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
@@ -2061,6 +2064,20 @@ class SidePanelController {
 
   setupEventListeners() {
     const elements = window.uiManager.elements;
+
+    // ✨ 요약하기 버튼 이벤트 리스너 추가
+    if (elements.summarizeBtn) {
+      elements.summarizeBtn.addEventListener('click', async () => {
+        console.log('[SidePanel] 요약하기 버튼 클릭');
+
+        // 1. UI 초기화 (이전 요약 내용 제거)
+        this.currentSummary = null;
+        window.uiManager.reset();
+
+        // 2. 요약 시작
+        await this.summarizePage();
+      });
+    }
 
     if (elements.copyBtn) {
       elements.copyBtn.addEventListener('click', () => this.copySummary());

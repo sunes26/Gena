@@ -110,11 +110,11 @@ class TokenManager {
       }
 
       await chrome.storage.local.set({ tokens: tokenData });
-      
+
       console.log('[TokenManager] ✅ Tokens saved successfully');
 
-      // 토큰 갱신 알람 설정
-      this.scheduleTokenRefresh(accessToken);
+      // ✨ 토큰 갱신 알람은 background.js의 TokenRefreshManager가 관리
+      // scheduleTokenRefresh() 호출 제거 (충돌 방지)
       
     } catch (error) {
       console.error('[TokenManager] Save tokens error:', error);
@@ -269,27 +269,15 @@ class TokenManager {
 
   /**
    * 토큰 갱신 알람 예약
+   * @deprecated v2.1.0 - background.js의 TokenRefreshManager가 자동 갱신을 관리합니다.
    * @param {string} accessToken - 액세스 토큰
    */
   scheduleTokenRefresh(accessToken) {
-    const timeUntilExpiry = this.getTimeUntilExpiry(accessToken);
-    
-    if (timeUntilExpiry <= 0) {
-      console.warn('[TokenManager] Token already expired');
-      return;
-    }
+    // ✨ v2.1.0: 이 메서드는 더 이상 사용되지 않습니다.
+    // background.js의 TokenRefreshManager가 3분마다 체크하여
+    // 만료 10분 전부터 자동으로 토큰을 갱신합니다.
 
-    // 만료 5분 전에 알람 설정 (최소 1분 이상 남은 경우에만)
-    const refreshTime = Math.max(
-      1, // 최소 1분
-      Math.floor((timeUntilExpiry - this.TOKEN_REFRESH_THRESHOLD) / 60000) // 분 단위
-    );
-
-    chrome.alarms.create('token-refresh', {
-      delayInMinutes: refreshTime
-    });
-
-    console.log(`[TokenManager] Token refresh scheduled in ${refreshTime} minutes`);
+    console.log('[TokenManager] ℹ️ scheduleTokenRefresh() is deprecated - TokenRefreshManager handles auto-refresh');
   }
 
   /**

@@ -1,11 +1,16 @@
 /**
  * extension\modules\auth-manager.js
  * Firebase Authentication 기반 인증 관리자
- * 
- * @version 4.0.0 - Firebase 자동 토큰 갱신 추가
- * 
+ *
+ * @version 4.1.0 - 로그인 유지 기능 개선
+ *
+ * ✨ v4.1.0 주요 변경사항:
+ * - rememberMe에 따른 동적 Firebase Persistence 설정
+ *   - rememberMe = true → LOCAL (브라우저 닫아도 로그인 유지)
+ *   - rememberMe = false → SESSION (브라우저 닫으면 로그아웃)
+ *
  * ✨ v4.0.0 주요 변경사항:
- * - Firebase Persistence 설정 추가 (영구 로그인)
+ * - Firebase Persistence 설정 추가
  * - onIdTokenChanged 리스너 추가 (자동 토큰 갱신)
  * - Refresh Token 저장 로직 추가
  */
@@ -23,7 +28,7 @@ class AuthManager {
     this.debug = (typeof CONFIG !== 'undefined' && CONFIG) ? CONFIG.isDebug() : false;
     
     if (this.debug) {
-      console.log('[AuthManager] Initialized with Firebase Auth v4.0.0');
+      console.log('[AuthManager] Initialized with Firebase Auth v4.1.0');
     }
   }
 
@@ -44,9 +49,10 @@ class AuthManager {
       // Firebase Auth 인스턴스
       this.firebaseAuth = firebase.auth();
       
-      // ✨ 1. 영구 로그인 설정 (LOCAL persistence)
-      await this.firebaseAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-      console.log('✅ Firebase Persistence 설정: LOCAL (영구 로그인)');
+      // ✨ 1. 기본 로그인 설정 (SESSION persistence - 브라우저 닫으면 로그아웃)
+      // 실제 persistence는 login() 메서드에서 rememberMe 값에 따라 동적 설정
+      await this.firebaseAuth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
+      console.log('✅ Firebase Persistence 기본값: SESSION (브라우저 세션 유지)');
       
       // 언어 설정
       this.firebaseAuth.languageCode = 'ko';
@@ -218,6 +224,7 @@ class AuthManager {
   /**
    * 로그인 - Firebase Authentication 사용
    * ✨ v4.0.0: Firebase Refresh Token 저장 추가
+   * ✨ v4.1.0: rememberMe에 따른 동적 Persistence 설정
    */
   async login(email, password, rememberMe = false) {
     if (!this.validateEmail(email)) {
@@ -230,8 +237,17 @@ class AuthManager {
 
     try {
       console.log('[AuthManager] Firebase 로그인 시도:', email);
-      
-      // 1️⃣ Firebase Authentication 로그인
+      console.log('[AuthManager] 로그인 상태 유지:', rememberMe ? 'ON (영구 로그인)' : 'OFF (세션만 유지)');
+
+      // 1️⃣ rememberMe에 따라 Firebase Persistence 설정
+      const persistence = rememberMe
+        ? firebase.auth.Auth.Persistence.LOCAL   // 브라우저 닫아도 로그인 유지
+        : firebase.auth.Auth.Persistence.SESSION; // 브라우저 닫으면 로그아웃
+
+      await this.firebaseAuth.setPersistence(persistence);
+      console.log('✅ Firebase Persistence 설정:', rememberMe ? 'LOCAL' : 'SESSION');
+
+      // 2️⃣ Firebase Authentication 로그인
       const userCredential = await this.firebaseAuth.signInWithEmailAndPassword(
         email.trim().toLowerCase(),
         password
@@ -239,30 +255,30 @@ class AuthManager {
       
       const user = userCredential.user;
       console.log('✅ Firebase 로그인 성공:', user.uid);
-      
-      // 2️⃣ Firebase ID Token 가져오기
+
+      // 3️⃣ Firebase ID Token 가져오기
       const idToken = await user.getIdToken();
-      
-      // ✨ 3️⃣ Firebase Refresh Token 가져오기 (중요!)
+
+      // ✨ 4️⃣ Firebase Refresh Token 가져오기 (중요!)
       const firebaseRefreshToken = user.refreshToken;
       console.log('✅ Firebase Refresh Token 획득');
-      
-      // 4️⃣ 서버에 로그인 알림 (선택사항)
+
+      // 5️⃣ 서버에 로그인 알림 (선택사항)
       try {
         await this.apiClient.post('/api/auth/login', {
           idToken
         }, { skipAuth: true });
-        
+
         console.log('✅ 서버 로그인 완료');
       } catch (serverError) {
         console.warn('⚠️ 서버 로그인 실패 (Firebase는 성공):', serverError.message);
       }
-      
-      // ✨ 5️⃣ ID Token과 Refresh Token 모두 저장
+
+      // ✨ 6️⃣ ID Token과 Refresh Token 모두 저장
       await this.tokenManager.saveTokens(idToken, firebaseRefreshToken);
       console.log('✅ 토큰 저장 완료 (Access + Refresh)');
-      
-      // 6️⃣ 로그인 상태 유지 설정
+
+      // 7️⃣ 로그인 상태 유지 설정 저장 (디버깅용)
       await this.saveRememberMe(rememberMe);
       
       this.currentUser = user;

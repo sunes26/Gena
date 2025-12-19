@@ -1091,19 +1091,21 @@ class TokenRefreshManager {
     this.tokenManager = tokenMgr;
     this.isOnline = true;
     this.lastRefreshAttempt = 0;
-    this.MIN_REFRESH_INTERVAL = 60000;
+    this.MIN_REFRESH_INTERVAL = 60000; // 1분 (중복 갱신 방지)
+    this.REFRESH_BEFORE_EXPIRY = 10 * 60 * 1000; // 만료 10분 전에 갱신
   }
 
   async setupTokenRefreshAlarm() {
     try {
       await chrome.alarms.clear('token-refresh');
-      
+
+      // ✨ 3분마다 체크 (더 정확한 타이밍)
       chrome.alarms.create('token-refresh', {
-        delayInMinutes: 5,
-        periodInMinutes: 5
+        delayInMinutes: 1, // 1분 후 첫 체크
+        periodInMinutes: 3 // 이후 3분마다 체크
       });
-      
-      console.log('[TokenRefresh] Alarm set to check every 5 minutes');
+
+      console.log('[TokenRefresh] ✅ Alarm set: 첫 체크 1분 후, 이후 3분마다');
     } catch (error) {
       console.error('[TokenRefresh] Setup alarm error:', error);
       errorHandler.handle(error, 'setup-token-refresh-alarm');
@@ -1118,40 +1120,54 @@ class TokenRefreshManager {
       }
 
       const now = Date.now();
-      
+
+      // 중복 갱신 방지 (1분 이내 재시도 차단)
       if (now - this.lastRefreshAttempt < this.MIN_REFRESH_INTERVAL) {
-        console.log('[TokenRefresh] Too soon to refresh again');
+        console.log('[TokenRefresh] ⏭️ Too soon to refresh again');
         return;
       }
 
       const refreshToken = await tokenManager.getRefreshToken();
-      
+
       if (!refreshToken) {
+        console.log('[TokenRefresh] ℹ️ No refresh token found (user not logged in)');
         return;
       }
 
-      const hasValidToken = await tokenManager.hasValidToken();
-      
-      if (!hasValidToken) {
-        console.log('[TokenRefresh] Token expired, attempting refresh...');
-        
+      // ✨ 토큰 만료 시점 정확히 계산
+      const accessToken = await tokenManager.getAccessToken();
+
+      if (!accessToken) {
+        console.log('[TokenRefresh] ℹ️ No access token found');
+        return;
+      }
+
+      const timeUntilExpiry = tokenManager.getTimeUntilExpiry(accessToken);
+      const expiryMinutes = Math.floor(timeUntilExpiry / 60000);
+
+      console.log(`[TokenRefresh] 🕐 Token expires in ${expiryMinutes} minutes`);
+
+      // ✨ 만료 10분 전부터 갱신 시도
+      if (timeUntilExpiry <= this.REFRESH_BEFORE_EXPIRY) {
+        console.log('[TokenRefresh] ⚠️ Token expiring soon, attempting refresh...');
+
         this.lastRefreshAttempt = now;
-        
+
         try {
           await tokenManager.refreshAccessToken();
-          console.log('[TokenRefresh] Token refreshed successfully');
+          console.log('[TokenRefresh] ✅ Token refreshed successfully');
           this.notifyTokenRefreshSuccess();
-          
+
         } catch (refreshError) {
-          console.error('[TokenRefresh] Refresh failed:', refreshError);
+          console.error('[TokenRefresh] ❌ Refresh failed:', refreshError);
           this.notifyTokenRefreshFailure();
           errorHandler.handle(refreshError, 'auto-refresh-token');
         }
       } else {
-        console.log('[TokenRefresh] Token is still valid');
+        console.log('[TokenRefresh] ✅ Token is still valid');
       }
     } catch (error) {
-      console.error('[TokenRefresh] Check and refresh error:', error);
+      console.error('[TokenRefresh] ❌ Check and refresh error:', error);
       errorHandler.handle(error, 'check-and-refresh-token');
     }
   }
@@ -1227,18 +1243,6 @@ class SidePanelStateManager {
   }
 
   /**
-   * 자동 재열림 여부 체크
-   */
-  shouldAutoReopen(state) {
-    if (!state || !state.hasSummary) {
-      return false;
-    }
-
-    const elapsed = Date.now() - state.lastAccessed;
-    return elapsed < this.REOPEN_TIMEOUT;
-  }
-
-  /**
    * 배지 표시 여부 체크
    */
   shouldShowBadge(state) {
@@ -1306,8 +1310,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
           maxScrolls: 3,
           autoExtract: false,
           useProxy: true,
-          proxyUrl: 'http://localhost:3000/api/chat',
-          autoReopenSidePanel: true
+          proxyUrl: 'http://localhost:3000/api/chat'
         }
       });
       
@@ -2054,107 +2057,6 @@ async function handleClearSidePanelState(request, sender, sendResponse) {
     console.error('[Background] Side Panel 상태 삭제 오류:', error);
     errorHandler.handle(error, 'clear-sidepanel-state');
     sendResponse({ success: false, error: error.message });
-  }
-}
-
-/**
- * ✨ v5.1.0: Side Panel 복원 처리
- * - 5분 이내: Side Panel 활성화 + 자동 열기
- * - 5분 이후: 배지 표시
- */
-async function handleSidePanelRestore(tabId) {
-  try {
-    console.log('[Background] ========== Side Panel 복원 시작 ==========');
-    console.log('[Background] 대상 탭 ID:', tabId);
-    
-    // 설정 확인
-    const result = await chrome.storage.local.get('settings');
-    const settings = result.settings || {};
-    
-    console.log('[Background] autoReopenSidePanel 설정:', settings.autoReopenSidePanel);
-    
-    if (settings.autoReopenSidePanel === false) {
-      console.log('[Background] ❌ Side Panel 자동 재열림 비활성화됨');
-      return;
-    }
-
-    // 탭 상태 조회
-    const state = await sidePanelStateManager.getPanelState(tabId);
-    
-    console.log('[Background] 탭 상태:', state);
-    
-    if (!state || !state.hasSummary) {
-      console.log('[Background] ❌ 탭 상태 없음 또는 요약 없음');
-      return;
-    }
-
-    const elapsed = Date.now() - state.lastAccessed;
-    const shouldReopen = sidePanelStateManager.shouldAutoReopen(state);
-    const shouldShowBadge = sidePanelStateManager.shouldShowBadge(state);
-
-    console.log('[Background] 복원 체크:', {
-      tabId,
-      elapsedSeconds: Math.floor(elapsed / 1000),
-      shouldReopen,
-      shouldShowBadge
-    });
-
-    if (shouldReopen) {
-      // ✨ 5분 이내: Side Panel 활성화 + 자동 열기
-      console.log('[Background] ✅ 5분 이내 복귀 → Side Panel 자동 재열림');
-
-      try {
-        // 1) 탭에서 Side Panel 활성화
-        await chrome.sidePanel.setOptions({
-          tabId: tabId,
-          path: 'sidepanel.html',
-          enabled: true
-        });
-        console.log('[Background] ✅ Side Panel 활성화 완료');
-
-        // 2) Side Panel 열기
-        const tab = await chrome.tabs.get(tabId);
-        await chrome.sidePanel.open({ windowId: tab.windowId });
-        console.log('[Background] ✅ Side Panel 열기 완료');
-
-        // 3) 상태 업데이트
-        await sidePanelStateManager.savePanelState(tabId, true);
-        console.log('[Background] ✅ 상태 업데이트 완료');
-
-      } catch (openError) {
-        console.error('[Background] ❌ Side Panel 열기 실패:', openError);
-      }
-
-    } else if (shouldShowBadge) {
-      // ✨ 5분 이후: 배지 표시
-      console.log('[Background] 📛 5분 이후 복귀 → 배지 표시');
-
-      try {
-        // Content Script 주입 확인
-        const isInjected = await contentScriptManager.check(tabId);
-        console.log('[Background] Content Script 주입 상태:', isInjected);
-        
-        if (!isInjected) {
-          console.log('[Background] Content Script 주입 중...');
-          await contentScriptManager.inject(tabId);
-        }
-
-        // 배지 표시 메시지 전송
-        await chrome.tabs.sendMessage(tabId, {
-          action: 'showSummaryBadge'
-        });
-        console.log('[Background] ✅ 배지 표시 메시지 전송 완료');
-
-      } catch (badgeError) {
-        console.error('[Background] ❌ 배지 표시 실패:', badgeError);
-      }
-    }
-
-    console.log('[Background] ========== Side Panel 복원 종료 ==========');
-
-  } catch (error) {
-    console.error('[Background] ❌ Side Panel 복원 오류:', error);
-    errorHandler.handle(error, 'handle-sidepanel-restore');
   }
 }
 

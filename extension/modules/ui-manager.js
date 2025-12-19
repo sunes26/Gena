@@ -599,6 +599,54 @@ class UIManager {
   }
 
   /**
+   * ✨ 탭 전환 시 UI 완전 초기화
+   * 모든 요약 내용, Q&A 히스토리, 입력 필드를 초기 상태로 리셋
+   */
+  reset() {
+    try {
+      console.log('[UIManager] UI 초기화 시작');
+
+      // 1. 요약 내용 초기화
+      if (this.elements.summaryText) {
+        this.elements.summaryText.textContent = '';
+        this.elements.summaryText.innerHTML = '';
+      }
+
+      // 2. 요약/질문 섹션 숨기기
+      this.resetSections();
+
+      // 3. Q&A 히스토리 초기화
+      if (this.elements.qaHistoryList) {
+        this.elements.qaHistoryList.innerHTML = '';
+      }
+      this.elements.qaHistory?.classList.add('hidden');
+
+      // 4. 입력 필드 초기화
+      this.clearQuestionInput();
+
+      // 5. 로딩 상태 해제
+      this.showLoading(false);
+
+      // 6. 버튼 상태 복원
+      if (this.elements.summarizeBtn) {
+        this.elements.summarizeBtn.disabled = false;
+        const buttonText = this.elements.summarizeBtn.querySelector('span:last-child');
+        if (buttonText) {
+          buttonText.textContent = window.languageManager.getMessage('summarizeButton');
+        }
+      }
+
+      if (this.elements.askBtn) {
+        this.elements.askBtn.disabled = false;
+      }
+
+      console.log('[UIManager] ✅ UI 초기화 완료');
+    } catch (error) {
+      window.errorHandler.handle(error, 'UIManager.reset');
+    }
+  }
+
+  /**
    * 버튼 비활성화 상태
    */
   disablePage() {
