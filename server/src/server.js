@@ -25,13 +25,13 @@ const {
 // Configuration
 const { initializeFirebase, testConnection } = require('./config/firebase');
 
-// Services
-const usageService = require('./services/UsageService');
-const { historyService } = require('./services/HistoryService');
-const authService = require('./services/AuthService');
-
 // Express App
 const createApp = require('./app');
+
+// Services - Firebase 초기화 후 로드됨
+let usageService;
+let historyService;
+let authService;
 
 // ===== 환경변수 검증 =====
 
@@ -137,7 +137,7 @@ async function startServer() {
     console.log('🔥 Firebase 초기화 중...');
     await initializeFirebase();
     console.log('✅ Firebase 초기화 완료');
-    
+
     // Firebase 연결 테스트 (선택적)
     if (process.env.TEST_FIREBASE_CONNECTION === 'true') {
       console.log('🔍 Firebase 연결 테스트 중...');
@@ -146,28 +146,35 @@ async function startServer() {
         console.warn('⚠️ Firebase 연결 테스트 실패 - 계속 진행');
       }
     }
-    
-    // 🔥 **중요: Firebase 초기화 후 서비스 재초기화**
-    console.log('🔄 서비스 재초기화 중...');
-    
-    // UsageService 재초기화
+
+    // 🔥 **중요: Firebase 초기화 후 서비스 로드 및 초기화**
+    console.log('🔄 서비스 로드 및 초기화 중...');
+
+    // Firebase 초기화 완료 후 서비스 로드
+    usageService = require('./services/UsageService');
+    const historyServiceModule = require('./services/HistoryService');
+    historyService = historyServiceModule.historyService;
+    authService = require('./services/AuthService');
+
+    // 각 서비스 초기화
     try {
+      console.log('🔄 UsageService 재초기화 시작...');
       await usageService.initialize();
       console.log('✅ UsageService 재초기화 완료');
     } catch (error) {
       console.warn('⚠️ UsageService 재초기화 실패:', error.message);
     }
-    
-    // HistoryService 재초기화
+
     try {
+      console.log('🔄 HistoryService 재초기화 시작...');
       await historyService.initialize();
       console.log('✅ HistoryService 재초기화 완료');
     } catch (error) {
       console.warn('⚠️ HistoryService 재초기화 실패:', error.message);
     }
-    
-    // AuthService 재초기화
+
     try {
+      console.log('🔄 AuthService 재초기화 시작...');
       await authService.initialize();
       console.log('✅ AuthService 재초기화 완료');
     } catch (error) {

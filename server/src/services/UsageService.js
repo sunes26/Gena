@@ -61,7 +61,7 @@ class UsageService {
      * @private
      */
     this.db = null;
-    
+
     /**
      * 메모리 캐시 (Firestore 읽기 비용 절감)
      * 구조: Map<string, {data: Object, expiry: number}>
@@ -69,7 +69,7 @@ class UsageService {
      * @private
      */
     this.cache = new Map();
-    
+
     /**
      * Fallback 메모리 저장소 (Firestore 실패 시)
      * 구조: Map<string, {count: number, timestamp: number}>
@@ -77,15 +77,16 @@ class UsageService {
      * @private
      */
     this.fallbackStore = new Map();
-    
+
     /**
      * Firestore 사용 가능 여부
      * @type {boolean}
      * @private
      */
     this.isFirestoreAvailable = false;
-    
-    this._initializeFirestore();
+
+    // Firestore 초기화는 initialize() 메서드에서 수행
+    // (Firebase가 초기화된 후 호출됨)
     this._startCleanupScheduler();
   }
   
@@ -115,15 +116,14 @@ class UsageService {
   /**
    * 서비스 재초기화
    * Firebase가 초기화된 후 호출하여 Firestore 연결을 재시도
-   * 
+   *
    * @async
    * @returns {Promise<void>}
-   * 
+   *
    * @example
    * await usageService.initialize();
    */
   async initialize() {
-    console.log('🔄 UsageService 재초기화 시작...');
     await this._initializeFirestore();
   }
   

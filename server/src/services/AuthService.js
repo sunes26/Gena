@@ -62,8 +62,8 @@ class AuthService {
      */
     this.isFirestoreAvailable = false;
 
-    // Firebase 초기화 (생성자에서 시도)
-    this._initializeFirebase();
+    // Firebase 초기화는 initialize() 메서드에서 수행
+    // (Firebase가 초기화된 후 호출됨)
   }
 
   /**

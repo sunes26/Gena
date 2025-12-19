@@ -114,15 +114,16 @@ class HistoryService {
      * @private
      */
     this.db = null;
-    
+
     /**
      * Firestore 사용 가능 여부
      * @type {boolean}
      * @private
      */
     this.isFirestoreAvailable = false;
-    
-    this._initializeFirestore();
+
+    // Firestore 초기화는 initialize() 메서드에서 수행
+    // (Firebase가 초기화된 후 호출됨)
   }
   
   /**
@@ -145,15 +146,14 @@ class HistoryService {
   /**
    * 서비스 재초기화
    * Firebase가 초기화된 후 호출하여 Firestore 연결을 재시도
-   * 
+   *
    * @async
    * @returns {Promise<void>}
-   * 
+   *
    * @example
    * await historyService.initialize();
    */
   async initialize() {
-    console.log('🔄 HistoryService 재초기화 시작...');
     await this._initializeFirestore();
   }
   

@@ -8,15 +8,27 @@
 const express = require('express');
 const router = express.Router();
 
-// Services (헬스체크용)
-const usageService = require('../services/UsageService');
-const { historyService } = require('../services/HistoryService');
-
 // API 라우터 Import
 const authRouter = require('./api/auth');
 const chatRouter = require('./api/chat');
 const usageRouter = require('./api/usage');
 const historyRouter = require('./api/history');
+
+// Services - 헬스체크에서 동적으로 로드
+// (Firebase 초기화 후 require하기 위해 lazy loading 사용)
+let usageService;
+let historyService;
+
+function getServices() {
+  if (!usageService) {
+    usageService = require('../services/UsageService');
+  }
+  if (!historyService) {
+    const historyServiceModule = require('../services/HistoryService');
+    historyService = historyServiceModule.historyService;
+  }
+  return { usageService, historyService };
+}
 
 // ===== 루트 엔드포인트 =====
 
@@ -144,7 +156,10 @@ router.get('/', (req, res) => {
  */
 router.get('/health', (req, res) => {
   const memoryUsage = process.memoryUsage();
-  
+
+  // 서비스 동적 로드 (Firebase 초기화 후)
+  const { usageService, historyService } = getServices();
+
   // 서비스 상태 확인
   const services = {
     usageService: {
