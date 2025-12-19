@@ -215,6 +215,15 @@ class I18nManager {
   }
 
   /**
+   * 언어 변경 (changeLocale의 별칭 - 더 직관적인 이름)
+   * @param {string} language - 새로운 언어 코드
+   * @returns {Promise<boolean>} - 성공 여부
+   */
+  async changeLanguage(language) {
+    return this.changeLocale(language);
+  }
+
+  /**
    * 페이지의 모든 data-i18n 속성을 가진 요소의 텍스트 업데이트
    */
   updatePageText() {

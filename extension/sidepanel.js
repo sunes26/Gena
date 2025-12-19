@@ -78,6 +78,18 @@ class SidePanelController {
       await window.settingsManager.initialize();
       await window.historyManager.initialize();
 
+      // ✨ SettingsManager의 language 설정을 I18nManager에 동기화
+      const settings = window.settingsManager.getSettings();
+      const currentLocale = window.languageManager.getCurrentLocale();
+
+      if (settings.language && settings.language !== currentLocale) {
+        console.log(`[SidePanel] 언어 동기화: ${currentLocale} → ${settings.language}`);
+        await window.languageManager.changeLanguage(settings.language);
+      }
+
+      // ✨ 사이드패널 제목 설정 (언어별)
+      document.title = window.languageManager.getMessage('appTitle') || 'Gena';
+
       this.updateUITexts();
       await this.loadCurrentTab();
       await window.qaManager.initialize();
@@ -671,6 +683,8 @@ class SidePanelController {
 
         if (newSettings.language !== oldSettings.language) {
           window.languageManager.changeLanguage(newSettings.language).then(() => {
+            // ✨ 사이드패널 제목 업데이트
+            document.title = window.languageManager.getMessage('appTitle') || 'Gena';
             this.updateUITexts();
             this.updateUsageDisplay();
             window.languageManager.applyLanguageFont();

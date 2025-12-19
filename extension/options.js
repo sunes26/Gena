@@ -387,7 +387,16 @@ async function initialize() {
     await window.languageManager.initialize();
     await window.settingsManager.initialize();
     await window.historyManager.initialize();
-    
+
+    // ✨ SettingsManager의 language 설정을 I18nManager에 동기화
+    const settings = window.settingsManager.getSettings();
+    const currentLocale = window.languageManager.getCurrentLocale();
+
+    if (settings.language && settings.language !== currentLocale) {
+      console.log(`[Options] 언어 동기화: ${currentLocale} → ${settings.language}`);
+      await window.languageManager.changeLanguage(settings.language);
+    }
+
     // 🆕 syncManager 초기화
     if (window.syncManager) {
       await window.syncManager.initialize();
@@ -395,7 +404,7 @@ async function initialize() {
     } else {
       console.warn('[Options] syncManager를 찾을 수 없습니다');
     }
-    
+
     // ✅ 프리미엄 상태 확인 및 히스토리 섹션 + 구독 섹션 제어
     await checkPremiumAndToggleHistory();
     

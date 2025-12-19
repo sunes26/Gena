@@ -336,6 +336,14 @@ class LanguageManager {
   }
 
   /**
+   * 현재 언어 가져오기
+   * @returns {string} - 현재 언어 코드
+   */
+  getCurrentLocale() {
+    return this.currentLanguage;
+  }
+
+  /**
    * 전체 UI 업데이트
    */
   updateUI() {

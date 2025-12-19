@@ -1106,6 +1106,19 @@ class TokenRefreshManager {
       });
 
       console.log('[TokenRefresh] ✅ Alarm set: 첫 체크 1분 후, 이후 3분마다');
+
+      // 디버깅: 현재 토큰 상태 확인
+      try {
+        const tokenInfo = await tokenManager.getTokenInfo();
+        if (tokenInfo.isAuthenticated) {
+          console.log('[TokenRefresh] 📊 현재 토큰 상태:', {
+            만료까지: `${tokenInfo.timeUntilExpiryMinutes}분`,
+            만료시각: tokenInfo.expiresAt
+          });
+        }
+      } catch (e) {
+        console.warn('[TokenRefresh] 토큰 정보 조회 실패:', e.message);
+      }
     } catch (error) {
       console.error('[TokenRefresh] Setup alarm error:', error);
       errorHandler.handle(error, 'setup-token-refresh-alarm');
