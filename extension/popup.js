@@ -40,10 +40,28 @@ class AppController {
 
     try {
       console.log('[Popup] 초기화 시작');
-      
+
       // ✅ [Hotfix] JS 초기화 시작 시점에 강제로 너비 고정
-      document.documentElement.style.width = '380px';
-      document.body.style.width = '380px';
+      document.documentElement.style.width = '320px';
+      document.body.style.width = '320px';
+      document.documentElement.style.height = '360px';
+      document.body.style.height = '360px';
+
+      // ✨ 제한된 페이지 확인 (최우선)
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (tab && window.isRestrictedPage && window.isRestrictedPage(tab.url)) {
+        console.log('[Popup] 제한된 페이지 감지 - 경고만 표시:', tab.url);
+        await window.languageManager.initialize();
+        this.showRestrictedPageWarning(tab.url);
+        document.body.classList.add('loaded');
+        this.initialized = true;
+        return;
+      }
+
+      // ✅ 제한된 페이지가 아니면 popup을 닫음 (overlay로 전환)
+      console.log('[Popup] 일반 페이지 - popup 닫기');
+      window.close();
+      return;
 
       const isAuthenticated = await this.checkAuthStatusDirect();
 
@@ -439,13 +457,68 @@ class AppController {
 
       if (window.isRestrictedPage(tab.url)) {
         window.uiManager.disablePage();
-        this.showToast('errorRestrictedPage');
+        this.showRestrictedPageWarning(tab.url);
       }
     } catch (error) {
       console.error('[Popup] 탭 정보 로드 오류:', error);
       window.errorHandler.handle(error, 'load-current-tab');
       this.showError('errorExtractContent');
     }
+  }
+
+  showRestrictedPageWarning(url) {
+    console.log('[Popup] 제한된 페이지 감지:', url);
+
+    // ✨ Update warning title and message with i18n
+    const warningTitle = document.getElementById('warningTitle');
+    const warningMessage = document.getElementById('warningMessage');
+
+    let pageType = chrome.i18n.getMessage('restrictedPageTitle');
+    let description = chrome.i18n.getMessage('restrictedPageMessage');
+
+    if (url.startsWith('chrome://')) {
+      pageType = chrome.i18n.getMessage('chromeInternalPage');
+      description = chrome.i18n.getMessage('chromeInternalPageDesc');
+    } else if (url.startsWith('chrome-extension://')) {
+      pageType = chrome.i18n.getMessage('extensionPage');
+      description = chrome.i18n.getMessage('extensionPageDesc');
+    } else if (url.startsWith('edge://')) {
+      pageType = chrome.i18n.getMessage('edgePage');
+      description = chrome.i18n.getMessage('edgePageDesc');
+    } else if (url.includes('chrome.google.com/webstore') || url.includes('microsoftedge.microsoft.com/addons')) {
+      pageType = chrome.i18n.getMessage('webStorePage');
+      description = chrome.i18n.getMessage('webStorePageDesc');
+    }
+
+    if (warningTitle) warningTitle.textContent = pageType;
+    if (warningMessage) warningMessage.textContent = description;
+
+    const summarizeBtn = document.getElementById('summarizeBtn');
+    if (summarizeBtn) {
+      summarizeBtn.disabled = true;
+      const buttonText = summarizeBtn.querySelector('span[data-i18n]');
+      if (buttonText) {
+        buttonText.textContent = chrome.i18n.getMessage('summaryUnavailable');
+      }
+    }
+
+    const infoMessage = document.querySelector('.info-message');
+    if (infoMessage) {
+      infoMessage.innerHTML = `
+        <span class="material-icons">block</span>
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+          <span style="font-weight: 600;">${pageType}</span>
+          <span style="font-size: 12px; opacity: 0.9;">${description}</span>
+        </div>
+      `;
+      infoMessage.style.background = 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)';
+      infoMessage.style.color = 'white';
+      infoMessage.style.display = 'flex';
+      infoMessage.style.gap = '12px';
+      infoMessage.style.alignItems = 'center';
+    }
+
+    // Toast 제거 - 팝업만 표시
   }
 
   handlePDFPage() {
@@ -467,7 +540,7 @@ class AppController {
         }
 
         if (buttonText) {
-          buttonText.textContent = 'PDF 요약 (프리미엄)';
+          buttonText.textContent = chrome.i18n.getMessage('pdfSummaryPremium');
         }
       }
 
@@ -475,7 +548,7 @@ class AppController {
       if (infoMessage) {
         infoMessage.innerHTML = `
           <span class="material-icons">info</span>
-          <span>PDF 요약은 프리미엄 전용 기능입니다</span>
+          <span>${chrome.i18n.getMessage('pdfPremiumOnly')}</span>
         `;
         infoMessage.style.background =
           'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
@@ -488,7 +561,7 @@ class AppController {
         summarizeBtn.disabled = false;
         const buttonText = summarizeBtn.querySelector('span[data-i18n]');
         if (buttonText) {
-          buttonText.textContent = 'PDF 요약하기';
+          buttonText.textContent = chrome.i18n.getMessage('pdfSummarize');
         }
       }
     }
@@ -496,7 +569,7 @@ class AppController {
 
   async summarizePage() {
     try {
-      console.log('[Popup] 요약 버튼 클릭 - Side Panel 열기');
+      console.log('[Popup] 요약 버튼 클릭 - Overlay Panel 열기');
 
       if (this.currentPageInfo.isPDF && !this.isPremium) {
         console.log('[Popup] PDF 요약 차단 - 업그레이드 모달 표시');
@@ -506,7 +579,7 @@ class AppController {
 
       await chrome.storage.local.set({
         autoSummarize: true,
-        summaryLength: window.settingsManager.getSummaryLength(),
+        summaryLength: this.currentPageInfo.isPDF ? 'detailed' : window.settingsManager.getSummaryLength(),
       });
 
       const [tab] = await chrome.tabs.query({
@@ -514,18 +587,51 @@ class AppController {
         currentWindow: true,
       });
 
-      if (chrome.sidePanel && chrome.sidePanel.open) {
-        await chrome.sidePanel.open({ windowId: tab.windowId });
-      } else {
-        chrome.tabs.create({
-          url: chrome.runtime.getURL('sidepanel.html'),
-        });
-      }
+      // ✨ 오버레이 패널 열기 (Background를 통해)
+      try {
+        console.log('[Popup] Background에 오버레이 토글 요청');
+        console.log('[Popup] 대상 탭 ID:', tab.id);
+        console.log('[Popup] 페이지 URL:', tab.url);
 
-      window.close();
+        const response = await chrome.runtime.sendMessage({
+          action: 'toggleOverlay',
+          tabId: tab.id
+        });
+
+        console.log('[Popup] 응답 받음:', response);
+
+        if (response && response.success) {
+          console.log('[Popup] 오버레이 열기 성공 ✅');
+          // 성공 시에만 팝업 닫기
+          window.close();
+        } else {
+          console.error('[Popup] 오버레이 토글 실패 - 응답:', response);
+          throw new Error(response?.error || '오버레이 토글 실패');
+        }
+      } catch (error) {
+        console.error('[Popup] 오버레이 열기 실패:', error);
+        console.error('[Popup] 오류 상세:', error.message, error.stack);
+
+        // 🚫 임시로 폴백 비활성화 (디버깅 목적)
+        // TODO: 디버깅 완료 후 폴백 복원
+        alert(chrome.i18n.getMessage('overlayOpenFailed') + error.message + chrome.i18n.getMessage('checkConsole'));
+
+        // 오류 발생 시 팝업을 닫지 않음 (사용자가 오류를 볼 수 있도록)
+        return;
+
+        /* 폴백: 오버레이가 실패하면 Side Panel 열기
+        if (chrome.sidePanel && chrome.sidePanel.open) {
+          await chrome.sidePanel.open({ windowId: tab.windowId });
+        } else {
+          chrome.tabs.create({
+            url: chrome.runtime.getURL('sidepanel.html'),
+          });
+        }
+        */
+      }
     } catch (error) {
-      console.error('[Popup] Side Panel 열기 오류:', error);
-      window.errorHandler.handle(error, 'open-side-panel-for-summary');
+      console.error('[Popup] 요약 실행 오류:', error);
+      window.errorHandler.handle(error, 'open-overlay-for-summary');
       this.showError('errorSummarize');
     }
   }
@@ -543,7 +649,7 @@ class AppController {
     modal.innerHTML = `
       <div class="modal-content upgrade-modal" style="max-width: 420px;">
         <div class="modal-header">
-          <h2>PDF 요약 기능</h2>
+          <h2>${chrome.i18n.getMessage('pdfFeatureTitle')}</h2>
           <button class="icon-btn close-modal">
             <span class="material-icons">close</span>
           </button>
@@ -552,44 +658,43 @@ class AppController {
           <div class="upgrade-icon" style="margin-bottom: 24px;">
             <span class="material-icons" style="font-size: 64px; color: #667eea;">picture_as_pdf</span>
           </div>
-          <h3 style="margin-bottom: 16px; font-size: 20px; color: #212121;">PDF 요약은 프리미엄 전용 기능입니다</h3>
+          <h3 style="margin-bottom: 16px; font-size: 20px; color: #212121;">${chrome.i18n.getMessage('pdfPremiumOnly')}</h3>
           <p class="upgrade-description" style="margin-bottom: 24px; color: #757575; line-height: 1.6;">
-            프리미엄으로 업그레이드하면<br>
-            PDF 문서를 무제한으로 요약할 수 있습니다
+            ${chrome.i18n.getMessage('pdfUpgradeDescription').replace('\\n', '<br>')}
           </p>
           <div class="premium-benefits" style="text-align: left; margin-bottom: 24px; padding: 20px; background: #f5f5f5; border-radius: 12px;">
-            <h4 style="margin-bottom: 12px; font-size: 16px; color: #212121;">✨ 프리미엄 혜택</h4>
+            <h4 style="margin-bottom: 12px; font-size: 16px; color: #212121;">${chrome.i18n.getMessage('premiumBenefits')}</h4>
             <ul style="list-style: none; padding: 0; margin: 0;">
               <li style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
                 <span class="material-icons" style="color: #4CAF50; font-size: 20px;">check_circle</span>
-                <span style="color: #616161;">PDF 문서 무제한 요약</span>
+                <span style="color: #616161;">${chrome.i18n.getMessage('benefitUnlimitedPDF')}</span>
               </li>
               <li style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
                 <span class="material-icons" style="color: #4CAF50; font-size: 20px;">check_circle</span>
-                <span style="color: #616161;">웹페이지 무제한 요약</span>
+                <span style="color: #616161;">${chrome.i18n.getMessage('benefitUnlimitedWeb')}</span>
               </li>
               <li style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
                 <span class="material-icons" style="color: #4CAF50; font-size: 20px;">check_circle</span>
-                <span style="color: #616161;">무제한 질문 기능</span>
+                <span style="color: #616161;">${chrome.i18n.getMessage('benefitUnlimitedQuestions')}</span>
               </li>
               <li style="display: flex; align-items: center; gap: 8px;">
                 <span class="material-icons" style="color: #4CAF50; font-size: 20px;">check_circle</span>
-                <span style="color: #616161;">우선 지원</span>
+                <span style="color: #616161;">${chrome.i18n.getMessage('benefitPrioritySupport')}</span>
               </li>
             </ul>
           </div>
           <div class="upgrade-price" style="margin-bottom: 24px;">
             <span class="price" style="font-size: 32px; font-weight: 700; color: #2196F3;">$4.99</span>
-            <span class="period" style="color: #757575;">/ 월</span>
+            <span class="period" style="color: #757575;">${chrome.i18n.getMessage('pricePerMonth')}</span>
           </div>
         </div>
         <div class="modal-footer" style="display: flex; gap: 12px; padding: 16px 24px;">
           <button class="secondary-btn close-modal" style="flex: 1; padding: 12px; border: 1px solid #e0e0e0; background: white; border-radius: 8px; cursor: pointer; font-weight: 500; color: #616161;">
-            나중에
+            ${chrome.i18n.getMessage('buttonLater')}
           </button>
           <button class="primary-btn upgrade-btn" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 8px;">
             <span class="material-icons" style="font-size: 20px;">workspace_premium</span>
-            업그레이드
+            ${chrome.i18n.getMessage('buttonUpgrade')}
           </button>
         </div>
       </div>

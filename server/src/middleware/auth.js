@@ -89,16 +89,28 @@ async function authenticate(req, res, next) {
     
     // 2. Firebase ID Token 검증
     const decodedToken = await authService.verifyIdToken(token);
-    
+
     // 3. Firestore에서 사용자 추가 정보 조회
     const userData = await authService.getUserById(decodedToken.uid);
-    
+
+    // ✨ 3-1. Firebase Auth의 email_verified가 true이면 Firestore도 자동 동기화
+    if (decodedToken.email_verified && !userData.emailVerified) {
+      try {
+        await authService.updateEmailVerificationStatus(decodedToken.uid, true);
+        console.log(`✅ [Auth Sync] 이메일 인증 상태 자동 동기화: ${decodedToken.email} (emailVerified: true)`);
+        // userData도 업데이트
+        userData.emailVerified = true;
+      } catch (syncError) {
+        console.error('⚠️ [Auth Sync] 이메일 인증 상태 동기화 실패 (무시):', syncError.message);
+      }
+    }
+
     // 4. 이메일 인증 필수 체크
     if (!decodedToken.email_verified) {
       return sendAuthError(
-        res, 
-        403, 
-        '이메일 인증이 필요합니다. 이메일을 확인해주세요', 
+        res,
+        403,
+        '이메일 인증이 필요합니다. 이메일을 확인해주세요',
         'EMAIL_NOT_VERIFIED'
       );
     }
@@ -189,10 +201,22 @@ async function optionalAuth(req, res, next) {
     
     // 3. Firebase ID Token 검증
     const decodedToken = await authService.verifyIdToken(token);
-    
+
     // 4. Firestore에서 추가 정보 조회
     const userData = await authService.getUserById(decodedToken.uid);
-    
+
+    // ✨ 4-1. Firebase Auth의 email_verified가 true이면 Firestore도 자동 동기화
+    if (decodedToken.email_verified && !userData.emailVerified) {
+      try {
+        await authService.updateEmailVerificationStatus(decodedToken.uid, true);
+        console.log(`✅ [Auth Sync] 이메일 인증 상태 자동 동기화: ${decodedToken.email} (emailVerified: true)`);
+        // userData도 업데이트
+        userData.emailVerified = true;
+      } catch (syncError) {
+        console.error('⚠️ [Auth Sync] 이메일 인증 상태 동기화 실패 (무시):', syncError.message);
+      }
+    }
+
     // 5. 사용자 정보 저장
     req.user = {
       userId: decodedToken.uid,

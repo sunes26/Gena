@@ -23,7 +23,7 @@ const {
 } = require('../../constants');
 
 // Middleware
-const { optionalAuth } = require('../../middleware/auth');
+const { authenticate } = require('../../middleware/auth');
 const { chatValidator, validate } = require('../../middleware/validator');
 const { chatLimiter } = require('../../middleware/rateLimiter');
 
@@ -39,22 +39,22 @@ const { historyService } = require('../../services/HistoryService');
 /**
  * 채팅/요약 요청 처리
  * ✨ 수정: 요약 상세 정보를 UsageService에 전달
- * 
+ *
  * @route POST /api/chat
- * @middleware optionalAuth - JWT 인증 선택적 (있으면 사용, 없으면 익명)
+ * @middleware authenticate - JWT 인증 필수 (이메일 인증 필수)
  * @middleware validate(chatValidator) - 요청 데이터 검증
  * @middleware chatLimiter - Rate limiting
  */
-router.post('/', 
-  optionalAuth,
-  validate(chatValidator), 
-  chatLimiter, 
+router.post('/',
+  authenticate,
+  validate(chatValidator),
+  chatLimiter,
   async (req, res, next) => {
     try {
-      // 사용자 정보 처리
-      const userId = req.user?.userId || `guest_${Date.now()}`;
-      const email = req.user?.email || 'anonymous@guest.com';
-      const isPremium = req.user?.isPremium || false;
+      // 사용자 정보 처리 (인증 필수)
+      const userId = req.user.userId;
+      const email = req.user.email;
+      const isPremium = req.user.isPremium || false;
       
       const { model, messages, max_tokens, temperature } = req.body;
       

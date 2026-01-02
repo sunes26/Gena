@@ -74,9 +74,9 @@ class QAManager {
   setHistoryId(historyId) {
     try {
       if (!historyId || typeof historyId !== 'string') {
-        throw new Error('유효하지 않은 히스토리 ID입니다');
+        throw new Error(chrome.i18n.getMessage('invalidHistoryId'));
       }
-      
+
       this.currentHistoryId = historyId;
       console.log('[QAManager] 히스토리 ID 설정:', this.currentHistoryId);
       
@@ -93,21 +93,21 @@ class QAManager {
 async processQuestion(question) {
   try {
     if (!question || typeof question !== 'string') {
-      throw new Error('유효하지 않은 질문입니다');
+      throw new Error(chrome.i18n.getMessage('invalidQuestion'));
     }
     
     const trimmedQuestion = question.trim();
     
     if (trimmedQuestion.length === 0) {
-      throw new Error('질문을 입력해주세요');
+      throw new Error(chrome.i18n.getMessage('questionRequired'));
     }
     
     if (trimmedQuestion.length > 2000) {
-      throw new Error('질문이 너무 깁니다 (최대 2000자)');
+      throw new Error(chrome.i18n.getMessage('questionTooLong'));
     }
 
     if (!this.currentContext) {
-      throw new Error('컨텍스트가 설정되지 않았습니다');
+      throw new Error(chrome.i18n.getMessage('contextNotSet'));
     }
 
     window.uiManager.showProcessingAnswer();
@@ -119,11 +119,11 @@ async processQuestion(question) {
     );
     
     if (!answer || typeof answer !== 'string') {
-      throw new Error('유효하지 않은 답변입니다');
+      throw new Error(chrome.i18n.getMessage('invalidAnswer'));
     }
     
     if (answer.length > 10000) {
-      throw new Error('답변이 너무 깁니다');
+      throw new Error(chrome.i18n.getMessage('answerTooLong'));
     }
     
     await this.addToSessionHistory(trimmedQuestion, answer);
@@ -208,12 +208,12 @@ async processQuestion(question) {
   async clearCurrentSession(clearFromHistory = false) {
     try {
       if (clearFromHistory && this.currentHistoryId) {
-        const confirmed = confirm('히스토리에 저장된 질문/답변도 삭제하시겠습니까?');
+        const confirmed = confirm(chrome.i18n.getMessage('confirmDeleteQA'));
         
         if (confirmed) {
           try {
             await window.historyManager.clearQAHistory(this.currentHistoryId);
-            window.uiManager.showToast('질문/답변 기록이 삭제되었습니다');
+            window.uiManager.showToast(chrome.i18n.getMessage('qaHistoryDeleted'));
           } catch (error) {
             throw error;
           }
@@ -225,7 +225,7 @@ async processQuestion(question) {
       
     } catch (error) {
       window.errorHandler.handle(error, 'QAManager.clearCurrentSession');
-      window.uiManager.showError('기록 삭제에 실패했습니다');
+      window.uiManager.showError(chrome.i18n.getMessage('deleteHistoryFailed'));
     }
   }
 
@@ -286,9 +286,9 @@ async processQuestion(question) {
   async loadHistoryQA(historyId) {
     try {
       if (!historyId || typeof historyId !== 'string') {
-        throw new Error('유효하지 않은 히스토리 ID입니다');
+        throw new Error(chrome.i18n.getMessage('invalidHistoryId'));
       }
-      
+
       const qaHistory = await window.historyManager.getQAHistory(historyId);
       return qaHistory;
       

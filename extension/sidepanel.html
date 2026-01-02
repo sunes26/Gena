@@ -84,6 +84,22 @@
         </button>
       </div>
       <div id="summaryText" class="summary-text-modern"></div>
+
+      <!-- ✨ v6.3 - 요약 품질 피드백 -->
+      <div id="summaryFeedback" class="summary-feedback hidden">
+        <p class="feedback-question" data-i18n="summaryFeedbackQuestion">이 요약이 도움이 되었나요?</p>
+        <div class="feedback-buttons">
+          <button id="feedbackGood" class="feedback-btn feedback-btn-good">
+            <span class="feedback-icon">👍</span>
+            <span data-i18n="feedbackGood">도움됨</span>
+          </button>
+          <button id="feedbackBad" class="feedback-btn feedback-btn-bad">
+            <span class="feedback-icon">👎</span>
+            <span data-i18n="feedbackBad">개선 필요</span>
+          </button>
+        </div>
+        <p id="feedbackThankYou" class="feedback-thank-you hidden" data-i18n="feedbackThankYou">피드백 감사합니다!</p>
+      </div>
     </div>
 
     <!-- Question Section -->
@@ -142,7 +158,6 @@
   
   <!-- 2️⃣ 유틸리티 모듈 -->
   <script src="modules/utils.js"></script>
-  <script src="modules/validation.js"></script>
   <script src="modules/security.js"></script>
   <script src="modules/error-handler.js"></script>
   

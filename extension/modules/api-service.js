@@ -153,9 +153,38 @@ class APIService {
   }
 
   /**
-   * ✨ v6.0 - maxTokens 파라미터 추가
+   * ✨ v6.3 - 콘텐츠 길이에 따른 요약 길이 자동 조정
    */
-  async summarizeText(content, length = 'medium', pageInfo = null, maxTokens = 1000) {
+  getOptimalSummaryLength(contentLength) {
+    if (contentLength < 1000) return 'short';
+    if (contentLength < 3000) return 'medium';
+    if (contentLength < 7000) return 'detailed';
+    if (contentLength < 15000) return 'very_detailed';
+    return 'ultra_detailed';
+  }
+
+  /**
+   * ✨ v6.3 - 콘텐츠 및 요약 길이에 따른 maxTokens 자동 계산
+   */
+  calculateMaxTokens(contentLength, summaryLength) {
+    const baseTokens = {
+      'short': 300,
+      'medium': 600,
+      'detailed': 1200,
+      'very_detailed': 2000,
+      'ultra_detailed': 3000
+    };
+
+    // 콘텐츠가 매우 길면 추가 토큰 할당
+    const extraTokens = Math.min(Math.floor(contentLength / 5000) * 200, 1000);
+
+    return baseTokens[summaryLength] + extraTokens;
+  }
+
+  /**
+   * ✨ v6.3 - 자동 길이 조정 + 동적 maxTokens 계산
+   */
+  async summarizeText(content, length = null, pageInfo = null, maxTokens = null) {
     try {
       const contentValidation = window.validateInput(content, {
         type: 'string',
@@ -168,6 +197,14 @@ class APIService {
         throw new Error(contentValidation.error);
       }
 
+      const contentLength = contentValidation.sanitized.length;
+
+      // ✨ v6.3 - length가 null이면 자동 조정
+      if (!length || length === 'auto') {
+        length = this.getOptimalSummaryLength(contentLength);
+        console.log(`[APIService] 자동 길이 조정: ${contentLength}자 → ${length}`);
+      }
+
       // ✨ v6.0 - very_detailed, ultra_detailed 추가
       const lengthValidation = window.validateInput(length, {
         type: 'string',
@@ -178,9 +215,15 @@ class APIService {
         length = 'medium';
       }
 
+      // ✨ v6.3 - maxTokens가 null이면 자동 계산
+      if (!maxTokens) {
+        maxTokens = this.calculateMaxTokens(contentLength, length);
+        console.log(`[APIService] 자동 maxTokens 계산: ${maxTokens}`);
+      }
+
       const cacheKey = this.generateCacheKey(contentValidation.sanitized, 'summarizeText', length);
       const cachedResult = this.cacheGet(cacheKey);
-      
+
       if (cachedResult) {
         console.log('[APIService] 캐시에서 요약 결과 반환');
         return cachedResult;
@@ -188,10 +231,10 @@ class APIService {
 
       const config = await this.getApiConfig();
       const messages = this.buildSummaryMessages(contentValidation.sanitized, length);
-      
-      // ✨ v6.0 - maxTokens 전달
+
+      // ✨ v6.3 - 동적으로 계산된 maxTokens 전달
       const response = await this.callOpenAI(messages, config, 0, pageInfo, maxTokens);
-      
+
       this.cacheSet(cacheKey, response);
       return response;
 
@@ -1310,9 +1353,17 @@ ${config.example}
           );
         }
         
+        // ✨ v6.3 - Circuit Breaker 에러 처리
+        if (errorData.code === 'CIRCUIT_BREAKER_OPEN' || errorData.message === 'CIRCUIT_BREAKER_OPEN') {
+          const seconds = errorData.remainingSeconds || errorData.retryAfter || 30;
+          const message = window.languageManager?.getMessage('circuitBreakerOpen')?.replace('{seconds}', seconds) ||
+            `AI 서비스가 일시적으로 과부하 상태입니다.\n${seconds}초 후에 다시 시도해주세요.`;
+          throw new Error(message);
+        }
+
         throw new Error(
           errorData.message ||
-          errorData.error?.message || 
+          errorData.error?.message ||
           (errorData.details ? JSON.stringify(errorData.details) : null) ||
           `API 요청 실패: ${response.status}`
         );

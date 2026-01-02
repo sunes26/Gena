@@ -324,6 +324,7 @@ class TokenManager {
       timeUntilExpiryMinutes: Math.floor(timeUntilExpiry / 60000),
       expiresAt: decoded?.exp ? new Date(decoded.exp * 1000).toISOString() : null,
       hasRefreshToken: !!refreshToken,
+      emailVerified: decoded?.email_verified || false,
       user: {
         id: decoded?.sub || decoded?.userId,
         email: decoded?.email

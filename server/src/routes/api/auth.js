@@ -563,4 +563,168 @@ router.delete('/account',
   })
 );
 
+/**
+ * 언어 설정 저장
+ * POST /api/auth/language
+ */
+router.post('/language',
+  authenticate,
+  asyncHandler(async (req, res) => {
+    const userId = req.user.uid;
+    const { language } = req.body;
+
+    console.log(`[Auth Language] 언어 설정 저장 요청: ${maskUserId(userId)}, language: ${language}`);
+
+    // language가 null이면 브라우저 언어 사용 (설정 삭제)
+    // language가 문자열이면 해당 언어로 설정
+    const updateData = {
+      language: language || null,
+      updatedAt: new Date()
+    };
+
+    try {
+      await authService.db.collection('users').doc(userId).update(updateData);
+
+      console.log(`✅ [Auth Language] 언어 설정 저장 완료: ${maskUserId(userId)}`);
+
+      res.json({
+        success: true,
+        language: language || null
+      });
+
+    } catch (error) {
+      console.error('[Auth Language] 저장 실패:', error);
+      throw new DatabaseError('언어 설정 저장 중 오류가 발생했습니다');
+    }
+  })
+);
+
+/**
+ * 언어 설정 조회
+ * GET /api/auth/language
+ */
+router.get('/language',
+  authenticate,
+  asyncHandler(async (req, res) => {
+    const userId = req.user.uid;
+
+    console.log(`[Auth Language] 언어 설정 조회 요청: ${maskUserId(userId)}`);
+
+    try {
+      const userDoc = await authService.db.collection('users').doc(userId).get();
+
+      if (!userDoc.exists) {
+        throw new NotFoundError('사용자를 찾을 수 없습니다');
+      }
+
+      const userData = userDoc.data();
+      const language = userData.language || null;
+
+      console.log(`✅ [Auth Language] 언어 설정 조회 완료: ${maskUserId(userId)}, language: ${language}`);
+
+      res.json({
+        success: true,
+        language: language
+      });
+
+    } catch (error) {
+      console.error('[Auth Language] 조회 실패:', error);
+      throw new DatabaseError('언어 설정 조회 중 오류가 발생했습니다');
+    }
+  })
+);
+
+// ===== POST /generate-web-login-token - 1회용 웹 로그인 토큰 생성 =====
+
+/**
+ * 1회용 웹 로그인 토큰 생성
+ * 확장 프로그램에서 웹사이트로 자동 로그인하기 위한 토큰 생성
+ *
+ * @route POST /api/auth/generate-web-login-token
+ * @middleware authenticate
+ *
+ * @returns {Object} token - 1회용 로그인 토큰 (5분 유효)
+ * @returns {string} redirectUrl - 웹사이트 리다이렉트 URL
+ *
+ * @example
+ * // Extension에서 호출
+ * const response = await fetch('/api/auth/generate-web-login-token', {
+ *   headers: { Authorization: `Bearer ${idToken}` }
+ * });
+ * const { token, redirectUrl } = await response.json();
+ * // 새 탭으로 웹사이트 열기
+ * chrome.tabs.create({ url: redirectUrl });
+ */
+router.post('/generate-web-login-token',
+  authenticate,
+  authLimiter,
+  asyncHandler(async (req, res) => {
+    const { userId, email } = req.user;
+
+    console.log(`[Auth Web Login Token] 토큰 생성 요청: ${email}`);
+
+    // 1회용 토큰 생성
+    const token = await authService.generateOneTimeLoginToken(userId);
+
+    // 웹사이트 URL (환경 변수에서 가져오기)
+    const websiteUrl = process.env.WEBSITE_URL || 'https://genaai.net';
+    const redirectUrl = `${websiteUrl}/auth/token-login?token=${token}`;
+
+    console.log(`✅ [Auth Web Login Token] 토큰 생성 성공: ${maskUserId(userId)}`);
+
+    res.json({
+      success: true,
+      token,
+      redirectUrl
+    });
+  })
+);
+
+// ===== POST /verify-web-login-token - 1회용 웹 로그인 토큰 검증 =====
+
+/**
+ * 1회용 웹 로그인 토큰 검증 및 자동 로그인
+ * 웹사이트에서 토큰을 검증하고 Firebase 커스텀 토큰 반환
+ *
+ * @route POST /api/auth/verify-web-login-token
+ * @middleware authLimiter
+ *
+ * @body {string} token - 1회용 로그인 토큰
+ *
+ * @returns {Object} user - 사용자 정보
+ * @returns {string} customToken - Firebase 커스텀 토큰 (signInWithCustomToken 사용)
+ *
+ * @example
+ * // 웹사이트에서 호출
+ * const response = await fetch('/api/auth/verify-web-login-token', {
+ *   method: 'POST',
+ *   body: JSON.stringify({ token })
+ * });
+ * const { customToken, user } = await response.json();
+ * // Firebase signInWithCustomToken(customToken)
+ */
+router.post('/verify-web-login-token',
+  authLimiter,
+  asyncHandler(async (req, res) => {
+    const { token } = req.body;
+
+    if (!token) {
+      throw new ValidationError('토큰이 필요합니다');
+    }
+
+    console.log('[Auth Verify Web Login Token] 토큰 검증 요청');
+
+    // 토큰 검증 및 사용자 정보 + 커스텀 토큰 반환
+    const result = await authService.verifyOneTimeLoginToken(token);
+
+    console.log(`✅ [Auth Verify Web Login Token] 검증 성공: ${result.user.email}`);
+
+    res.json({
+      success: true,
+      user: result.user,
+      customToken: result.customToken
+    });
+  })
+);
+
 module.exports = router;

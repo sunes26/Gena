@@ -488,28 +488,76 @@ async function saveSettings() {
   try {
     const previousLanguage = window.settingsManager.getSetting('language');
     const newSettings = collectAndValidateSettings();
-    
+
     console.log('[Options] 설정 저장 중...', newSettings);
-    
+
     await window.settingsManager.saveSettings(newSettings);
-    
+
     if (previousLanguage !== newSettings.language) {
       await window.languageManager.changeLanguage(newSettings.language);
       updateSelectOptions();
-      
+
       // ✅ 언어 변경 시 UI 업데이트
       updateHistoryOverlayText();
-      
+
       // ✅ 구독 UI도 다시 체크하여 업데이트
       await checkPremiumAndToggleHistory();
+
+      // ✅ 로그인 상태라면 서버에도 언어 설정 저장
+      try {
+        await saveLanguageToServer(newSettings.language);
+      } catch (serverError) {
+        console.warn('[Options] 서버 언어 설정 저장 실패:', serverError);
+        // 로컬 저장은 성공했으므로 계속 진행
+      }
     }
-    
+
     showMessage(window.languageManager.getMessage('toastSettingsSaved'), 'success');
-    
+
   } catch (error) {
     console.error('[Options] 설정 저장 오류:', error);
     window.errorHandler.handle(error, 'save-settings');
     showMessage(error.message || window.languageManager.getMessage('toastError'), 'error');
+  }
+}
+
+/**
+ * 서버에 언어 설정 저장 (로그인된 경우에만)
+ */
+async function saveLanguageToServer(language) {
+  try {
+    // 토큰 확인
+    const response = await chrome.runtime.sendMessage({ action: 'checkTokenStatus' });
+
+    if (!response || !response.isAuthenticated || !response.token) {
+      console.log('[Options] 로그인되지 않음 - 서버 언어 저장 스킵');
+      return;
+    }
+
+    console.log('[Options] 서버에 언어 설정 저장:', language);
+
+    const API_BASE_URL = window.CONFIG.getApiUrl();
+    const endpoint = `${API_BASE_URL}/api/auth/language`;
+
+    const apiResponse = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${response.token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ language: language || null })
+    });
+
+    if (!apiResponse.ok) {
+      throw new Error(`서버 응답 오류: ${apiResponse.status}`);
+    }
+
+    const result = await apiResponse.json();
+    console.log('[Options] ✅ 서버 언어 설정 저장 완료:', result);
+
+  } catch (error) {
+    console.error('[Options] 서버 언어 설정 저장 실패:', error);
+    throw error;
   }
 }
 

@@ -152,6 +152,21 @@ class UIManager {
       
       this.elements.summaryResult?.classList.remove('hidden');
       this.elements.questionSection?.classList.remove('hidden');
+
+      // ✨ v6.3 - 피드백 섹션 표시
+      const feedbackSection = document.getElementById('summaryFeedback');
+      if (feedbackSection) {
+        feedbackSection.classList.remove('hidden');
+
+        // 초기화: 버튼과 질문 표시, 감사 메시지 숨김
+        const feedbackButtons = feedbackSection.querySelector('.feedback-buttons');
+        const feedbackQuestion = feedbackSection.querySelector('.feedback-question');
+        const thankYouMessage = document.getElementById('feedbackThankYou');
+
+        if (feedbackButtons) feedbackButtons.classList.remove('hidden');
+        if (feedbackQuestion) feedbackQuestion.classList.remove('hidden');
+        if (thankYouMessage) thankYouMessage.classList.add('hidden');
+      }
     } catch (error) {
       window.errorHandler.handle(error, 'UIManager.displaySummary');
       // 에러 발생 시 안전하게 원본 텍스트 표시

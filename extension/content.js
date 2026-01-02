@@ -38,9 +38,18 @@ if (!window.GenaInitialized) {
       console.log('[ContentExtractor] 추출 시작');
 
       try {
-        // 🆕 PDF 페이지 감지
-        if (window.pdfExtractor && window.pdfExtractor.isPDFPage()) {
-          console.log('[ContentExtractor] PDF 페이지 감지 - PDF 추출 시도');
+        // 🆕 PDF 페이지 감지 (URL 기반 + pdfExtractor 기반)
+        const currentUrl = window.location.href;
+        const isPDFUrl = currentUrl.toLowerCase().endsWith('.pdf') ||
+                         currentUrl.toLowerCase().includes('.pdf?') ||
+                         currentUrl.toLowerCase().includes('.pdf#');
+
+        const isPDFPage = window.pdfExtractor && window.pdfExtractor.isPDFPage();
+
+        console.log('[ContentExtractor] PDF 감지:', { isPDFUrl, isPDFPage, url: currentUrl });
+
+        if (isPDFUrl || isPDFPage) {
+          console.log('[ContentExtractor] ✅ PDF 페이지 감지 - PDF 추출 시도');
           return await this.extractPDF();
         }
 
@@ -91,14 +100,14 @@ if (!window.GenaInitialized) {
         console.log('[ContentExtractor] PDF 추출 시작');
         
         if (!window.pdfExtractor) {
-          throw new Error('PDF Extractor를 사용할 수 없습니다');
+          throw new Error(chrome.i18n.getMessage('pdfExtractorUnavailable'));
         }
         
         // PDF 텍스트 추출
         const result = await window.pdfExtractor.extractText();
         
         if (!result.success || !result.text) {
-          throw new Error(result.error || 'PDF 추출 실패');
+          throw new Error(result.error || chrome.i18n.getMessage('pdfExtractionFailed'));
         }
         
         console.log('[ContentExtractor] PDF 추출 완료:', result.metadata);
@@ -195,12 +204,22 @@ if (!window.GenaInitialized) {
     /**
      * 요소에서 텍스트 추출
      * ✨ v5.0 강화: 노이즈 제거 대폭 개선
+     * ✨ v6.3 성능 최적화: 메인 콘텐츠만 선택적 클로닝
      */
     extractTextFromElement(element) {
       if (!element) return '';
 
+      // ✨ v6.3 성능 최적화: article/main 우선 클로닝 (전체 body 대신)
+      let targetElement = element;
+      const mainContent = element.querySelector('article, main, [role="main"]');
+
+      if (mainContent && element.tagName === 'BODY') {
+        console.log('[ContentExtractor] 메인 콘텐츠만 클로닝 (성능 최적화)');
+        targetElement = mainContent;
+      }
+
       // 복제하여 원본 보호
-      const clone = element.cloneNode(true);
+      const clone = targetElement.cloneNode(true);
 
       // 🎯 1차 제거: 기본 노이즈 요소
       const removeSelectors = [
@@ -472,7 +491,7 @@ if (!window.GenaInitialized) {
     badge.innerHTML = `
       <span class="material-icons Gena-badge-icon">description</span>
       <span class="Gena-badge-text">요약 보기</span>
-      <button class="Gena-badge-close" aria-label="닫기">
+      <button class="Gena-badge-close" aria-label="${chrome.i18n.getMessage('buttonClose')}">
         <span class="material-icons">close</span>
       </button>
     `;
@@ -579,8 +598,8 @@ if (!window.GenaInitialized) {
     notification.innerHTML = `
       <span style="font-size: 20px;">🔄</span>
       <div style="flex: 1;">
-        <div style="font-weight: 600; margin-bottom: 4px;">확장 프로그램이 업데이트되었습니다</div>
-        <div style="font-size: 12px; opacity: 0.9;">페이지를 새로고침해주세요</div>
+        <div style="font-weight: 600; margin-bottom: 4px;">${chrome.i18n.getMessage('extensionUpdated')}</div>
+        <div style="font-size: 12px; opacity: 0.9;">${chrome.i18n.getMessage('pleaseRefreshPage')}</div>
       </div>
       <button id="Gena-reload-btn" style="
         background: rgba(255, 255, 255, 0.2);
@@ -593,9 +612,9 @@ if (!window.GenaInitialized) {
         font-size: 13px;
         transition: all 0.2s;
         white-space: nowrap;
-      " onmouseover="this.style.background='rgba(255,255,255,0.3)'" 
+      " onmouseover="this.style.background='rgba(255,255,255,0.3)'"
          onmouseout="this.style.background='rgba(255,255,255,0.2)'">
-        새로고침
+        ${chrome.i18n.getMessage('buttonRefresh')}
       </button>
       <button id="Gena-close-notification" style="
         background: none;
@@ -607,7 +626,7 @@ if (!window.GenaInitialized) {
         opacity: 0.7;
         font-size: 18px;
         line-height: 1;
-      " onmouseover="this.style.opacity='1'" 
+      " onmouseover="this.style.opacity='1'"
          onmouseout="this.style.opacity='0.7'">
         ✕
       </button>
@@ -740,16 +759,63 @@ if (!window.GenaInitialized) {
           sendResponse({ success: true });
           break;
 
+        case 'toggleOverlay':
+          console.log('[Content] 오버레이 토글 요청');
+          // content-overlay.js로 메시지 전달
+          if (window.genaOverlayManager) {
+            console.log('[Content] 오버레이 매니저 존재 확인');
+            console.log('[Content] 오버레이 상태:', {
+              exists: !!window.genaOverlayManager.overlay,
+              overlay: window.genaOverlayManager.overlay
+            });
+
+            if (!window.genaOverlayManager.overlay) {
+              console.log('[Content] 오버레이 생성');
+              window.genaOverlayManager.create();
+            } else {
+              console.log('[Content] 오버레이 토글 호출');
+              window.genaOverlayManager.toggle();
+            }
+            sendResponse({ success: true });
+          } else {
+            console.warn('[Content] 오버레이 매니저가 로드되지 않음');
+            sendResponse({ success: false, error: 'Overlay manager not loaded' });
+          }
+          break;
+
         default:
-          console.warn('[Content] 알 수 없는 액션:', request.action);
-          sendResponse({ success: false, error: 'Unknown action' });
+          // ✨ 처리하지 못한 액션은 다른 리스너(background.js)가 처리하도록 false 반환
+          console.log('[Content] 처리하지 않는 액션 - background.js로 전달:', request.action);
+          return false;
       }
+
+      // ✨ 케이스를 처리했으면 true 반환 (비동기 응답용)
+      return true;
+
     } catch (error) {
       console.error('[Content] 메시지 처리 오류:', error);
       sendResponse({ success: false, error: error.message });
+      return true;
     }
+  });
 
-    return false; // 동기 응답
+  console.log('[Content] 메시지 리스너 등록 완료');
+
+  // ===== 키보드 단축키 (오버레이 토글) =====
+  document.addEventListener('keydown', (event) => {
+    // Alt + O: 오버레이 토글
+    if (event.altKey && event.key === 'o') {
+      event.preventDefault();
+      console.log('[Content] 키보드 단축키로 오버레이 토글');
+
+      if (window.genaOverlayManager) {
+        if (!window.genaOverlayManager.overlay) {
+          window.genaOverlayManager.create();
+        } else {
+          window.genaOverlayManager.toggle();
+        }
+      }
+    }
   });
 
   // 초기화 로그

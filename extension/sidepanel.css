@@ -1138,3 +1138,81 @@ body.dark-theme .pdf-progress-bar {
 body.dark-theme .pdf-progress-detail {
   color: #A5B4FC;
 }
+
+/* ✨ v6.3 - 요약 품질 피드백 스타일 */
+.summary-feedback {
+  margin-top: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.feedback-question {
+  font-size: 14px;
+  font-weight: 500;
+  color: #2c3e50;
+  margin: 0 0 12px 0;
+}
+
+.feedback-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.feedback-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.feedback-btn-good {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.feedback-btn-good:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.feedback-btn-bad {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+.feedback-btn-bad:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 87, 108, 0.3);
+}
+
+.feedback-icon {
+  font-size: 18px;
+}
+
+.feedback-thank-you {
+  margin: 12px 0 0 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #27ae60;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

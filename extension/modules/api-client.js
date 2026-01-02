@@ -132,6 +132,20 @@ class ApiClient {
         const errorMessage = data.error?.message || data.message || `HTTP ${response.status} 오류가 발생했습니다.`;
         const error = new Error(errorMessage);
 
+        // 403 Forbidden - 이메일 미인증 처리
+        if (response.status === 403) {
+          error.statusCode = 403;
+          error.errorCode = data.errorCode || 'FORBIDDEN';
+
+          // 이메일 미인증 에러
+          if (error.errorCode === 'EMAIL_NOT_VERIFIED') {
+            error.requiresEmailVerification = true;
+            if (this.debug) {
+              console.log(`[ApiClient] Email verification required`);
+            }
+          }
+        }
+
         // 429 Rate Limit 에러인 경우 retryAfter 정보 추가
         if (response.status === 429) {
           // Retry-After 헤더에서 시간 추출 (초 단위)

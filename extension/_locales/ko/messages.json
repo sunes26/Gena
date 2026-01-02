@@ -674,6 +674,9 @@
   "loginSuccess": {
     "message": "로그인 성공!"
   },
+  "logoutSuccess": {
+    "message": "로그아웃되었습니다."
+  },
   "loginSuccessDesc": {
     "message": "Gena 확장 프로그램 아이콘을\n클릭하여 사용을 시작하세요."
   },
@@ -778,6 +781,570 @@
   },
   "errorDriveFolderPageDesc": {
     "message": "현재 페이지는 Google Drive 폴더입니다. PDF 파일을 직접 열어주세요."
+  },
+  "circuitBreakerOpen": {
+    "message": "AI 서비스가 일시적으로 과부하 상태입니다.\n{seconds}초 후에 다시 시도해주세요."
+  },
+  "useCachedSummary": {
+    "message": "이 페이지는 최근에 요약한 기록이 있습니다. 기존 요약을 사용하시겠습니까?"
+  },
+  "summaryFeedbackQuestion": {
+    "message": "이 요약이 도움이 되었나요?"
+  },
+  "feedbackGood": {
+    "message": "도움됨"
+  },
+  "feedbackBad": {
+    "message": "개선 필요"
+  },
+  "feedbackThankYou": {
+    "message": "피드백 감사합니다!"
+  },
+  "pdfPageRange": {
+    "message": "PDF 페이지 범위"
+  },
+  "pdfStartPage": {
+    "message": "시작 페이지"
+  },
+  "pdfEndPage": {
+    "message": "끝 페이지"
+  },
+  "pdfAllPages": {
+    "message": "전체 페이지"
+  },
+  "sourceReference": {
+    "message": "출처"
+  },
+  "viewSource": {
+    "message": "출처 보기"
+  },
+  "cachedSummaryNotice": {
+    "message": "캐시된 요약 (최근 1시간 이내)"
+  },
+  "contentTooShortWarning": {
+    "message": "콘텐츠가 너무 짧습니다 ({length}자).\n요약 품질이 낮을 수 있습니다. 계속하시겠습니까?"
+  },
+  "summaryCancelled": {
+    "message": "요약이 취소되었습니다"
+  },
+  "overlayMinimize": {
+    "message": "최소화"
+  },
+  "overlayMaximize": {
+    "message": "최대화"
+  },
+  "overlayClose": {
+    "message": "닫기"
+  },
+  "overlaySettings": {
+    "message": "설정"
+  },
+  "overlayLoginPrompt": {
+    "message": "Gena의 AI 요약 기능을 사용하려면 로그인해주세요."
+  },
+  "overlayLoginButton": {
+    "message": "로그인하기"
+  },
+  "overlayLoginTitle": {
+    "message": "Gena AI 요약 서비스를 이용하시려면 로그인해주세요"
+  },
+  "overlayEmailPlaceholder": {
+    "message": "email@example.com"
+  },
+  "overlayPasswordPlaceholder": {
+    "message": "비밀번호를 입력하세요"
+  },
+  "overlayForgotPassword": {
+    "message": "비밀번호를 잊으셨나요?"
+  },
+  "overlayBackButton": {
+    "message": "뒤로"
+  },
+  "overlayLoginSubmit": {
+    "message": "로그인"
+  },
+  "overlayLoginSuccess": {
+    "message": "요약 화면으로 이동합니다..."
+  },
+  "overlayPasswordResetTitle": {
+    "message": "비밀번호 재설정"
+  },
+  "overlayPasswordResetDesc": {
+    "message": "가입하신 이메일 주소를 입력하시면 비밀번호 재설정 링크를 보내드립니다."
+  },
+  "overlayPasswordResetSubmit": {
+    "message": "재설정 링크 전송"
+  },
+  "overlaySummarizeButton": {
+    "message": "페이지 요약하기"
+  },
+  "overlaySummarizing": {
+    "message": "요약 생성 중..."
+  },
+  "overlaySummaryResult": {
+    "message": "요약 결과"
+  },
+  "overlayCopyButton": {
+    "message": "복사"
+  },
+  "overlayQuestionPlaceholder": {
+    "message": "궁금한 점을 물어보세요..."
+  },
+  "overlayAskButton": {
+    "message": "전송"
+  },
+  "overlayAiChat": {
+    "message": "AI 채팅"
+  },
+  "overlaySignupPrompt": {
+    "message": "계정이 없으신가요?"
+  },
+  "overlaySignupLink": {
+    "message": "회원가입"
+  },
+  "overlayCopied": {
+    "message": "복사되었습니다!"
+  },
+  "overlayPasswordResetSuccess": {
+    "message": "비밀번호 재설정 이메일이 발송되었습니다. 메일함을 확인해주세요."
+  },
+  "overlayPasswordResetError": {
+    "message": "비밀번호 재설정 요청에 실패했습니다."
+  },
+  "overlaySummaryError": {
+    "message": "요약 실패"
+  },
+  "overlayNoSummaryResult": {
+    "message": "요약 결과가 없습니다."
+  },
+  "overlayLoadingExtract": {
+    "message": "콘텐츠를 추출하고 있습니다..."
+  },
+  "overlayLoadingAnalyze": {
+    "message": "내용을 분석하고 있습니다..."
+  },
+  "overlayLoadingGenerate": {
+    "message": "요약을 완성하고 있습니다..."
+  },
+  "currentPage": {
+    "message": "현재 페이지"
+  },
+  "loginRequired": {
+    "message": "로그인이 필요합니다"
+  },
+  "loginSuccess": {
+    "message": "로그인 성공!"
+  },
+  "analyzingPage": {
+    "message": "페이지를 분석 중..."
+  },
+  "analyzingPageLong": {
+    "message": "페이지를 분석하고 있습니다..."
+  },
+  "aiAnalyzing": {
+    "message": "AI 분석 중..."
+  },
+  "usage": {
+    "message": "사용량"
+  },
+  "checkingUsage": {
+    "message": "확인 중..."
+  },
+  "unlimited": {
+    "message": "무제한"
+  },
+  "usageCount": {
+    "message": "{count}/{limit}회 사용"
+  },
+  "askQuestion": {
+    "message": "질문하기"
+  },
+  "generatingAnswer": {
+    "message": "답변 생성 중"
+  },
+  "answerGenerationFailed": {
+    "message": "답변 생성 실패"
+  },
+  "cannotGenerateAnswer": {
+    "message": "답변을 생성할 수 없습니다."
+  },
+  "source": {
+    "message": "출처"
+  },
+  "sourceDisplayFailed": {
+    "message": "출처 표시 실패"
+  },
+  "sourceNumber": {
+    "message": "출처 [{num}]"
+  },
+  "pageNumber": {
+    "message": "페이지 {num}"
+  },
+  "noTitle": {
+    "message": "제목 없음"
+  },
+  "pleaseEnterEmail": {
+    "message": "이메일을 입력해주세요."
+  },
+  "invalidEmailFormat": {
+    "message": "올바른 이메일 형식이 아닙니다."
+  },
+  "pleaseEnterPassword": {
+    "message": "비밀번호를 입력해주세요."
+  },
+  "loginFailed": {
+    "message": "로그인에 실패했습니다."
+  },
+  "passwordResetEmailSent": {
+    "message": "비밀번호 재설정 이메일이 발송되었습니다. 메일함을 확인해주세요."
+  },
+  "passwordResetRequestFailed": {
+    "message": "비밀번호 재설정 요청에 실패했습니다."
+  },
+  "contentExtractionFailed": {
+    "message": "콘텐츠 추출 실패"
+  },
+  "summaryFailed": {
+    "message": "요약 실패"
+  },
+  "noSummaryResults": {
+    "message": "요약 결과가 없습니다."
+  },
+  "complete": {
+    "message": "완료!"
+  },
+  "error": {
+    "message": "오류"
+  },
+  "back": {
+    "message": "뒤로"
+  },
+  "cancel": {
+    "message": "취소"
+  },
+  "locationInfoUnavailable": {
+    "message": "위치 정보를 사용할 수 없습니다"
+  },
+  "pageInfoNotFound": {
+    "message": "페이지 정보를 찾을 수 없습니다"
+  },
+  "paragraphNotFound": {
+    "message": "해당 문단을 페이지에서 찾을 수 없습니다. 페이지가 동적으로 변경되었을 수 있습니다."
+  },
+  "errorEmailNotFound": {
+    "message": "존재하지 않는 이메일입니다."
+  },
+  "errorInvalidPassword": {
+    "message": "비밀번호가 올바르지 않습니다."
+  },
+  "errorUserDisabled": {
+    "message": "비활성화된 계정입니다."
+  },
+  "errorTooManyAttempts": {
+    "message": "로그인 시도 횟수를 초과했습니다. 잠시 후 다시 시도해주세요."
+  },
+  "errorInvalidCredentials": {
+    "message": "이메일 또는 비밀번호가 올바르지 않습니다."
+  },
+  "errorInvalidEmail": {
+    "message": "올바른 이메일 형식이 아닙니다."
+  },
+  "errorUnknown": {
+    "message": "알 수 없는 오류가 발생했습니다."
+  },
+  "errorEmailAlreadyInUse": {
+    "message": "이미 사용 중인 이메일입니다."
+  },
+  "errorOperationNotAllowed": {
+    "message": "이메일/비밀번호 로그인이 비활성화되어 있습니다."
+  },
+  "errorWeakPassword": {
+    "message": "비밀번호가 너무 약합니다. 최소 8자 이상 입력해주세요."
+  },
+  "errorUserNotFound": {
+    "message": "등록되지 않은 이메일입니다."
+  },
+  "errorWrongPassword": {
+    "message": "비밀번호가 올바르지 않습니다."
+  },
+  "errorTooManyRequests": {
+    "message": "너무 많은 시도가 있었습니다. 잠시 후 다시 시도해주세요."
+  },
+  "errorNetworkFailed": {
+    "message": "네트워크 연결을 확인해주세요."
+  },
+  "errorAuthFailed": {
+    "message": "인증 중 오류가 발생했습니다. 이메일과 비밀번호를 확인해주세요."
+  },
+  "errorNetworkConnection": {
+    "message": "인터넷 연결을 확인해주세요."
+  },
+  "errorTimeout": {
+    "message": "요청 시간이 초과되었습니다. 다시 시도해주세요."
+  },
+  "errorApiKey": {
+    "message": "API 키를 확인해주세요. 설정에서 올바른 키를 입력하세요."
+  },
+  "errorRateLimit": {
+    "message": "API 사용 한도를 초과했습니다. 잠시 후 다시 시도해주세요."
+  },
+  "errorServerIssue": {
+    "message": "서버에 일시적인 문제가 있습니다. 잠시 후 다시 시도해주세요."
+  },
+  "errorStorageQuota": {
+    "message": "저장 공간이 부족합니다. 일부 데이터를 삭제해주세요."
+  },
+  "errorGeneric": {
+    "message": "오류가 발생했습니다. 다시 시도해주세요."
+  },
+  "restrictedPageTitle": {
+    "message": "제한된 페이지"
+  },
+  "restrictedPageMessage": {
+    "message": "이 페이지는 보안상의 이유로 요약할 수 없습니다"
+  },
+  "summaryUnavailable": {
+    "message": "요약 불가"
+  },
+  "pdfSummaryPremium": {
+    "message": "PDF 요약 (프리미엄)"
+  },
+  "pdfFeatureTitle": {
+    "message": "PDF 요약 기능"
+  },
+  "pdfPremiumOnly": {
+    "message": "PDF 요약은 프리미엄 전용 기능입니다"
+  },
+  "pdfUpgradeDescription": {
+    "message": "프리미엄으로 업그레이드하면\nPDF 문서를 무제한으로 요약할 수 있습니다"
+  },
+  "premiumBenefits": {
+    "message": "✨ 프리미엄 혜택"
+  },
+  "benefitUnlimitedPDF": {
+    "message": "PDF 문서 무제한 요약"
+  },
+  "benefitUnlimitedWeb": {
+    "message": "웹페이지 무제한 요약"
+  },
+  "benefitUnlimitedQuestions": {
+    "message": "무제한 질문 기능"
+  },
+  "benefitPrioritySupport": {
+    "message": "우선 지원"
+  },
+  "buttonLater": {
+    "message": "나중에"
+  },
+  "buttonUpgrade": {
+    "message": "업그레이드"
+  },
+  "pricePerMonth": {
+    "message": "/ 월"
+  },
+  "extensionUpdated": {
+    "message": "확장 프로그램이 업데이트되었습니다"
+  },
+  "pleaseRefreshPage": {
+    "message": "페이지를 새로고침해주세요"
+  },
+  "buttonRefresh": {
+    "message": "새로고침"
+  },
+  "buttonClose": {
+    "message": "닫기"
+  },
+  "passwordPlaceholder": {
+    "message": "비밀번호를 입력하세요"
+  },
+  "buttonCopy": {
+    "message": "복사"
+  },
+  "questionPlaceholder": {
+    "message": "궁금한 점을 물어보세요..."
+  },
+  "buttonSend": {
+    "message": "전송"
+  },
+  "pdfDownloading": {
+    "message": "PDF 다운로드 중..."
+  },
+  "pdfFetchingFile": {
+    "message": "파일을 가져오는 중입니다..."
+  },
+  "pdfPreparingProcessing": {
+    "message": "PDF 처리 준비 중..."
+  },
+  "pdfPreparingTools": {
+    "message": "PDF 분석 도구를 준비하고 있습니다..."
+  },
+  "pdfExtractingText": {
+    "message": "PDF 텍스트 추출 중..."
+  },
+  "pdfExtractingProgress": {
+    "message": "페이지 {page}/{total} 추출 중..."
+  },
+  "pdfExtractingInProgress": {
+    "message": "텍스트를 추출하고 있습니다..."
+  },
+  "pdfExtractionComplete": {
+    "message": "PDF 추출 완료!"
+  },
+  "pdfExtractionCompleted": {
+    "message": "추출이 완료되었습니다."
+  },
+  "pdfExtractionFailed": {
+    "message": "PDF 추출 실패"
+  },
+  "pdfErrorOccurred": {
+    "message": "오류가 발생했습니다."
+  },
+  "pdfProcessing": {
+    "message": "PDF 처리 중..."
+  },
+  "pdfPleaseWait": {
+    "message": "잠시만 기다려주세요..."
+  },
+  "validationPasswordMinLength": {
+    "message": "비밀번호는 최소 8자 이상이어야 합니다."
+  },
+  "validationPasswordUppercase": {
+    "message": "비밀번호에 대문자를 포함해야 합니다."
+  },
+  "validationPasswordLowercase": {
+    "message": "비밀번호에 소문자를 포함해야 합니다."
+  },
+  "validationPasswordNumber": {
+    "message": "비밀번호에 숫자를 포함해야 합니다."
+  },
+  "validationPasswordStrong": {
+    "message": "비밀번호가 안전합니다."
+  },
+  "validationEmailInvalid": {
+    "message": "유효한 이메일 주소를 입력해주세요."
+  },
+  "validationNameMinLength": {
+    "message": "이름은 최소 2자 이상이어야 합니다."
+  },
+  "validationPasswordMismatch": {
+    "message": "비밀번호가 일치하지 않습니다."
+  },
+  "signupComplete": {
+    "message": "회원가입이 완료되었습니다. 이메일 인증을 완료해주세요."
+  },
+  "loginSuccess": {
+    "message": "로그인되었습니다."
+  },
+  "passwordResetEmailSent": {
+    "message": "비밀번호 재설정 이메일이 전송되었습니다."
+  },
+  "invalidHistoryId": {
+    "message": "유효하지 않은 히스토리 ID입니다"
+  },
+  "invalidQuestion": {
+    "message": "유효하지 않은 질문입니다"
+  },
+  "questionRequired": {
+    "message": "질문을 입력해주세요"
+  },
+  "questionTooLong": {
+    "message": "질문이 너무 깁니다 (최대 2000자)"
+  },
+  "contextNotSet": {
+    "message": "컨텍스트가 설정되지 않았습니다"
+  },
+  "invalidAnswer": {
+    "message": "유효하지 않은 답변입니다"
+  },
+  "answerTooLong": {
+    "message": "답변이 너무 깁니다"
+  },
+  "confirmDeleteQA": {
+    "message": "히스토리에 저장된 질문/답변도 삭제하시겠습니까?"
+  },
+  "qaHistoryDeleted": {
+    "message": "질문/답변 기록이 삭제되었습니다"
+  },
+  "deleteHistoryFailed": {
+    "message": "기록 삭제에 실패했습니다"
+  },
+  "pdfExtractorUnavailable": {
+    "message": "PDF Extractor를 사용할 수 없습니다"
+  },
+  "chromeInternalPage": {
+    "message": "Chrome 내부 페이지"
+  },
+  "chromeInternalPageDesc": {
+    "message": "Chrome 설정 및 내부 페이지는 요약할 수 없습니다"
+  },
+  "extensionPage": {
+    "message": "확장 프로그램 페이지"
+  },
+  "extensionPageDesc": {
+    "message": "확장 프로그램 페이지는 요약할 수 없습니다"
+  },
+  "edgePage": {
+    "message": "Edge 내부 페이지"
+  },
+  "edgePageDesc": {
+    "message": "Edge 설정 및 내부 페이지는 요약할 수 없습니다"
+  },
+  "webStorePage": {
+    "message": "웹스토어"
+  },
+  "webStorePageDesc": {
+    "message": "웹스토어는 요약할 수 없습니다"
+  },
+  "pdfSummarize": {
+    "message": "PDF 요약하기"
+  },
+  "overlayOpenFailed": {
+    "message": "오버레이 열기 실패: "
+  },
+  "checkConsole": {
+    "message": "\n\n개발자 도구(F12)에서 콘솔을 확인하세요."
+  },
+  "notificationPdfPermissionTitle": {
+    "message": "Gena - PDF 파일 권한 필요"
+  },
+  "notificationPdfPermissionMessage": {
+    "message": "PDF 파일을 요약하려면:\n1. chrome://extensions 페이지를 엽니다\n2. Gena를 찾아 \"파일 URL에 대한 액세스 허용\"을 활성화합니다"
+  },
+  "notificationPdfPermissionMessage2": {
+    "message": "PDF 파일을 요약하려면:\n1. 확장 프로그램 관리 페이지를 엽니다\n2. Gena 확장 프로그램을 찾습니다\n3. \"파일 URL에 대한 액세스 허용\"을 활성화합니다"
+  },
+  "notificationContentExtractionFailed": {
+    "message": "콘텐츠 추출 실패"
+  },
+  "notificationContentExtractionFailedMessage": {
+    "message": "콘텐츠 추출 중 오류가 발생했습니다."
+  },
+  "emailVerificationRequired": {
+    "message": "이메일 인증 필요"
+  },
+  "emailVerificationMessage": {
+    "message": "Gena 서비스를 사용하려면 이메일 인증이 필요합니다."
+  },
+  "emailVerificationStep1": {
+    "message": "가입 시 보내드린 이메일을 확인하세요"
+  },
+  "emailVerificationStep2": {
+    "message": "이메일의 인증 링크를 클릭하세요"
+  },
+  "emailVerificationStep3": {
+    "message": "인증 완료 후 페이지를 새로고침하세요"
+  },
+  "resendVerificationEmail": {
+    "message": "인증 이메일 재발송"
+  },
+  "emailSending": {
+    "message": "발송 중..."
+  },
+  "emailSent": {
+    "message": "✓ 발송 완료"
+  },
+  "emailSendFailed": {
+    "message": "✗ 재발송 실패"
   }
 
 }

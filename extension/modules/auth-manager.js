@@ -112,18 +112,18 @@ class AuthManager {
    */
   validatePassword(password) {
     if (password.length < 8) {
-      return { valid: false, message: '비밀번호는 최소 8자 이상이어야 합니다.' };
+      return { valid: false, message: chrome.i18n.getMessage('validationPasswordMinLength') };
     }
     if (!/[A-Z]/.test(password)) {
-      return { valid: false, message: '비밀번호에 대문자를 포함해야 합니다.' };
+      return { valid: false, message: chrome.i18n.getMessage('validationPasswordUppercase') };
     }
     if (!/[a-z]/.test(password)) {
-      return { valid: false, message: '비밀번호에 소문자를 포함해야 합니다.' };
+      return { valid: false, message: chrome.i18n.getMessage('validationPasswordLowercase') };
     }
     if (!/[0-9]/.test(password)) {
-      return { valid: false, message: '비밀번호에 숫자를 포함해야 합니다.' };
+      return { valid: false, message: chrome.i18n.getMessage('validationPasswordNumber') };
     }
-    return { valid: true, message: '비밀번호가 안전합니다.' };
+    return { valid: true, message: chrome.i18n.getMessage('validationPasswordStrong') };
   }
 
   /**
@@ -133,7 +133,7 @@ class AuthManager {
   async signup(email, password, name, confirmPassword) {
     // 입력값 검증
     if (!this.validateEmail(email)) {
-      throw new Error('유효한 이메일 주소를 입력해주세요.');
+      throw new Error(chrome.i18n.getMessage('validationEmailInvalid'));
     }
 
     const passwordValidation = this.validatePassword(password);
@@ -142,11 +142,11 @@ class AuthManager {
     }
 
     if (!name || name.trim().length < 2) {
-      throw new Error('이름은 최소 2자 이상이어야 합니다.');
+      throw new Error(chrome.i18n.getMessage('validationNameMinLength'));
     }
 
     if (password !== confirmPassword) {
-      throw new Error('비밀번호가 일치하지 않습니다.');
+      throw new Error(chrome.i18n.getMessage('validationPasswordMismatch'));
     }
 
     try {
@@ -209,7 +209,7 @@ class AuthManager {
           displayName: user.displayName,
           emailVerified: user.emailVerified
         },
-        message: '회원가입이 완료되었습니다. 이메일 인증을 완료해주세요.'
+        message: chrome.i18n.getMessage('signupComplete')
       };
       
     } catch (error) {
@@ -228,7 +228,7 @@ class AuthManager {
    */
   async login(email, password, rememberMe = false) {
     if (!this.validateEmail(email)) {
-      throw new Error('유효한 이메일 주소를 입력해주세요.');
+      throw new Error(chrome.i18n.getMessage('validationEmailInvalid'));
     }
 
     if (!password || password.length < 8) {
@@ -291,7 +291,7 @@ class AuthManager {
           displayName: user.displayName,
           emailVerified: user.emailVerified
         },
-        message: '로그인되었습니다.'
+        message: chrome.i18n.getMessage('loginSuccess')
       };
       
     } catch (error) {
@@ -321,7 +321,7 @@ class AuthManager {
       
       return {
         success: true,
-        message: '로그아웃되었습니다.'
+        message: chrome.i18n.getMessage('logoutSuccess')
       };
       
     } catch (error) {
@@ -390,7 +390,7 @@ class AuthManager {
    */
   async requestPasswordReset(email) {
     if (!this.validateEmail(email)) {
-      throw new Error('유효한 이메일 주소를 입력해주세요.');
+      throw new Error(chrome.i18n.getMessage('validationEmailInvalid'));
     }
 
     try {
@@ -406,7 +406,7 @@ class AuthManager {
       
       return {
         success: true,
-        message: '비밀번호 재설정 이메일이 전송되었습니다.'
+        message: chrome.i18n.getMessage('passwordResetEmailSent')
       };
       
     } catch (error) {
@@ -417,28 +417,29 @@ class AuthManager {
   }
 
   /**
-   * Firebase 에러 메시지 한글화
+   * Firebase 에러 메시지 로컬라이징
    */
   getFirebaseErrorMessage(errorCode) {
-    const errorMessages = {
-      'auth/email-already-in-use': '이미 사용 중인 이메일입니다.',
-      'auth/invalid-email': '유효하지 않은 이메일 주소입니다.',
-      'auth/operation-not-allowed': '이메일/비밀번호 로그인이 비활성화되어 있습니다.',
-      'auth/weak-password': '비밀번호가 너무 약합니다. 최소 8자 이상 입력해주세요.',
-      'auth/user-disabled': '비활성화된 계정입니다.',
-      'auth/user-not-found': '등록되지 않은 이메일입니다.',
-      'auth/wrong-password': '비밀번호가 올바르지 않습니다.',
-      'auth/invalid-credential': '이메일 또는 비밀번호가 올바르지 않습니다.',
-      'auth/too-many-requests': '너무 많은 시도가 있었습니다. 잠시 후 다시 시도해주세요.',
-      'auth/network-request-failed': '네트워크 연결을 확인해주세요.'
+    const errorKeys = {
+      'auth/email-already-in-use': 'errorEmailAlreadyInUse',
+      'auth/invalid-email': 'errorInvalidEmail',
+      'auth/operation-not-allowed': 'errorOperationNotAllowed',
+      'auth/weak-password': 'errorWeakPassword',
+      'auth/user-disabled': 'errorUserDisabled',
+      'auth/user-not-found': 'errorUserNotFound',
+      'auth/wrong-password': 'errorWrongPassword',
+      'auth/invalid-credential': 'errorInvalidCredentials',
+      'auth/too-many-requests': 'errorTooManyRequests',
+      'auth/network-request-failed': 'errorNetworkFailed'
     };
 
     // 디버깅: 에러 코드 로깅
-    if (!errorMessages[errorCode]) {
+    if (!errorKeys[errorCode]) {
       console.warn('[AuthManager] 알 수 없는 Firebase 에러 코드:', errorCode);
     }
 
-    return errorMessages[errorCode] || '인증 중 오류가 발생했습니다. 이메일과 비밀번호를 확인해주세요.';
+    const messageKey = errorKeys[errorCode] || 'errorAuthFailed';
+    return chrome.i18n.getMessage(messageKey);
   }
 }
 

@@ -36,7 +36,12 @@ class CircuitBreaker {
   async execute(fn) {
     if (this.state === 'OPEN') {
       if (Date.now() < this.nextAttempt) {
-        throw new Error(`Circuit breaker is OPEN for ${this.name}. Retry after ${Math.ceil((this.nextAttempt - Date.now()) / 1000)}s`);
+        const remainingSeconds = Math.ceil((this.nextAttempt - Date.now()) / 1000);
+        const error = new Error('CIRCUIT_BREAKER_OPEN');
+        error.code = 'CIRCUIT_BREAKER_OPEN';
+        error.remainingSeconds = remainingSeconds;
+        error.retryAfter = remainingSeconds;
+        throw error;
       }
       this.state = 'HALF_OPEN';
       console.log(`[Circuit Breaker] ${this.name} is now HALF_OPEN`);

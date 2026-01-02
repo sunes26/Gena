@@ -674,6 +674,9 @@
   "loginSuccess": {
     "message": "Login Successful!"
   },
+  "logoutSuccess": {
+    "message": "You have been logged out."
+  },
   "loginSuccessDesc": {
     "message": "Click the Gena extension icon\nto start using it."
   },
@@ -778,6 +781,570 @@
   },
   "errorDriveFolderPageDesc": {
     "message": "This is a Google Drive folder page. Please open the PDF file directly."
+  },
+  "circuitBreakerOpen": {
+    "message": "AI service is temporarily overloaded.\nPlease try again in {seconds} seconds."
+  },
+  "useCachedSummary": {
+    "message": "This page was recently summarized. Would you like to use the cached summary?"
+  },
+  "summaryFeedbackQuestion": {
+    "message": "Was this summary helpful?"
+  },
+  "feedbackGood": {
+    "message": "Helpful"
+  },
+  "feedbackBad": {
+    "message": "Needs improvement"
+  },
+  "feedbackThankYou": {
+    "message": "Thank you for your feedback!"
+  },
+  "pdfPageRange": {
+    "message": "PDF Page Range"
+  },
+  "pdfStartPage": {
+    "message": "Start Page"
+  },
+  "pdfEndPage": {
+    "message": "End Page"
+  },
+  "pdfAllPages": {
+    "message": "All Pages"
+  },
+  "sourceReference": {
+    "message": "Source"
+  },
+  "viewSource": {
+    "message": "View Source"
+  },
+  "cachedSummaryNotice": {
+    "message": "Cached summary (within 1 hour)"
+  },
+  "contentTooShortWarning": {
+    "message": "Content is too short ({length} characters).\nSummary quality may be low. Continue?"
+  },
+  "summaryCancelled": {
+    "message": "Summary cancelled"
+  },
+  "overlayMinimize": {
+    "message": "Minimize"
+  },
+  "overlayMaximize": {
+    "message": "Maximize"
+  },
+  "overlayClose": {
+    "message": "Close"
+  },
+  "overlaySettings": {
+    "message": "Settings"
+  },
+  "overlayLoginPrompt": {
+    "message": "Please log in to use Gena's AI summary feature."
+  },
+  "overlayLoginButton": {
+    "message": "Log In"
+  },
+  "overlayLoginTitle": {
+    "message": "Please log in to use Gena AI Summary Service"
+  },
+  "overlayEmailPlaceholder": {
+    "message": "email@example.com"
+  },
+  "overlayPasswordPlaceholder": {
+    "message": "Enter your password"
+  },
+  "overlayForgotPassword": {
+    "message": "Forgot password?"
+  },
+  "overlayBackButton": {
+    "message": "Back"
+  },
+  "overlayLoginSubmit": {
+    "message": "Log In"
+  },
+  "overlayLoginSuccess": {
+    "message": "Redirecting to summary..."
+  },
+  "overlayPasswordResetTitle": {
+    "message": "Reset Password"
+  },
+  "overlayPasswordResetDesc": {
+    "message": "Enter your email address and we'll send you a password reset link."
+  },
+  "overlayPasswordResetSubmit": {
+    "message": "Send Reset Link"
+  },
+  "overlaySummarizeButton": {
+    "message": "Summarize Page"
+  },
+  "overlaySummarizing": {
+    "message": "Generating summary..."
+  },
+  "overlaySummaryResult": {
+    "message": "Summary"
+  },
+  "overlayCopyButton": {
+    "message": "Copy"
+  },
+  "overlayQuestionPlaceholder": {
+    "message": "Ask a question..."
+  },
+  "overlayAskButton": {
+    "message": "Send"
+  },
+  "overlayAiChat": {
+    "message": "AI Chat"
+  },
+  "overlaySignupPrompt": {
+    "message": "Don't have an account?"
+  },
+  "overlaySignupLink": {
+    "message": "Sign up"
+  },
+  "overlayCopied": {
+    "message": "Copied!"
+  },
+  "overlayPasswordResetSuccess": {
+    "message": "Password reset email sent. Please check your inbox."
+  },
+  "overlayPasswordResetError": {
+    "message": "Failed to request password reset."
+  },
+  "overlaySummaryError": {
+    "message": "Summary failed"
+  },
+  "overlayNoSummaryResult": {
+    "message": "No summary available."
+  },
+  "overlayLoadingExtract": {
+    "message": "Extracting content..."
+  },
+  "overlayLoadingAnalyze": {
+    "message": "Analyzing content..."
+  },
+  "overlayLoadingGenerate": {
+    "message": "Generating summary..."
+  },
+  "currentPage": {
+    "message": "Current Page"
+  },
+  "loginRequired": {
+    "message": "Login Required"
+  },
+  "loginSuccess": {
+    "message": "Login Successful!"
+  },
+  "analyzingPage": {
+    "message": "Analyzing page..."
+  },
+  "analyzingPageLong": {
+    "message": "Analyzing the page..."
+  },
+  "aiAnalyzing": {
+    "message": "AI Analyzing..."
+  },
+  "usage": {
+    "message": "Usage"
+  },
+  "checkingUsage": {
+    "message": "Checking..."
+  },
+  "unlimited": {
+    "message": "Unlimited"
+  },
+  "usageCount": {
+    "message": "{count}/{limit} used"
+  },
+  "askQuestion": {
+    "message": "Ask a Question"
+  },
+  "generatingAnswer": {
+    "message": "Generating answer"
+  },
+  "answerGenerationFailed": {
+    "message": "Failed to generate answer"
+  },
+  "cannotGenerateAnswer": {
+    "message": "Cannot generate answer."
+  },
+  "source": {
+    "message": "Source"
+  },
+  "sourceDisplayFailed": {
+    "message": "Failed to display source"
+  },
+  "sourceNumber": {
+    "message": "Source [{num}]"
+  },
+  "pageNumber": {
+    "message": "Page {num}"
+  },
+  "noTitle": {
+    "message": "No Title"
+  },
+  "pleaseEnterEmail": {
+    "message": "Please enter your email."
+  },
+  "invalidEmailFormat": {
+    "message": "Invalid email format."
+  },
+  "pleaseEnterPassword": {
+    "message": "Please enter your password."
+  },
+  "loginFailed": {
+    "message": "Login failed."
+  },
+  "passwordResetEmailSent": {
+    "message": "Password reset email sent. Please check your inbox."
+  },
+  "passwordResetRequestFailed": {
+    "message": "Failed to request password reset."
+  },
+  "contentExtractionFailed": {
+    "message": "Content extraction failed"
+  },
+  "summaryFailed": {
+    "message": "Summary failed"
+  },
+  "noSummaryResults": {
+    "message": "No summary results."
+  },
+  "complete": {
+    "message": "Complete!"
+  },
+  "error": {
+    "message": "Error"
+  },
+  "back": {
+    "message": "Back"
+  },
+  "cancel": {
+    "message": "Cancel"
+  },
+  "locationInfoUnavailable": {
+    "message": "Location information unavailable"
+  },
+  "pageInfoNotFound": {
+    "message": "Page information not found"
+  },
+  "paragraphNotFound": {
+    "message": "Cannot find the paragraph on the page. The page may have been dynamically changed."
+  },
+  "errorEmailNotFound": {
+    "message": "Email not found."
+  },
+  "errorInvalidPassword": {
+    "message": "Invalid password."
+  },
+  "errorUserDisabled": {
+    "message": "This account has been disabled."
+  },
+  "errorTooManyAttempts": {
+    "message": "Too many login attempts. Please try again later."
+  },
+  "errorInvalidCredentials": {
+    "message": "Invalid email or password."
+  },
+  "errorInvalidEmail": {
+    "message": "Invalid email format."
+  },
+  "errorUnknown": {
+    "message": "An unknown error occurred."
+  },
+  "errorEmailAlreadyInUse": {
+    "message": "This email is already in use."
+  },
+  "errorOperationNotAllowed": {
+    "message": "Email/password login is disabled."
+  },
+  "errorWeakPassword": {
+    "message": "Password is too weak. Please use at least 8 characters."
+  },
+  "errorUserNotFound": {
+    "message": "Email not registered."
+  },
+  "errorWrongPassword": {
+    "message": "Incorrect password."
+  },
+  "errorTooManyRequests": {
+    "message": "Too many requests. Please try again later."
+  },
+  "errorNetworkFailed": {
+    "message": "Please check your network connection."
+  },
+  "errorAuthFailed": {
+    "message": "Authentication failed. Please check your email and password."
+  },
+  "errorNetworkConnection": {
+    "message": "Please check your internet connection."
+  },
+  "errorTimeout": {
+    "message": "Request timed out. Please try again."
+  },
+  "errorApiKey": {
+    "message": "Please check your API key. Enter the correct key in settings."
+  },
+  "errorRateLimit": {
+    "message": "API rate limit exceeded. Please try again later."
+  },
+  "errorServerIssue": {
+    "message": "Server is experiencing temporary issues. Please try again later."
+  },
+  "errorStorageQuota": {
+    "message": "Storage space is insufficient. Please delete some data."
+  },
+  "errorGeneric": {
+    "message": "An error occurred. Please try again."
+  },
+  "restrictedPageTitle": {
+    "message": "Restricted Page"
+  },
+  "restrictedPageMessage": {
+    "message": "This page cannot be summarized for security reasons"
+  },
+  "summaryUnavailable": {
+    "message": "Unavailable"
+  },
+  "pdfSummaryPremium": {
+    "message": "PDF Summary (Premium)"
+  },
+  "pdfFeatureTitle": {
+    "message": "PDF Summary Feature"
+  },
+  "pdfPremiumOnly": {
+    "message": "PDF summary is a premium-only feature"
+  },
+  "pdfUpgradeDescription": {
+    "message": "Upgrade to premium to\nsummarize unlimited PDF documents"
+  },
+  "premiumBenefits": {
+    "message": "✨ Premium Benefits"
+  },
+  "benefitUnlimitedPDF": {
+    "message": "Unlimited PDF document summaries"
+  },
+  "benefitUnlimitedWeb": {
+    "message": "Unlimited webpage summaries"
+  },
+  "benefitUnlimitedQuestions": {
+    "message": "Unlimited question feature"
+  },
+  "benefitPrioritySupport": {
+    "message": "Priority support"
+  },
+  "buttonLater": {
+    "message": "Later"
+  },
+  "buttonUpgrade": {
+    "message": "Upgrade"
+  },
+  "pricePerMonth": {
+    "message": "/ month"
+  },
+  "extensionUpdated": {
+    "message": "Extension has been updated"
+  },
+  "pleaseRefreshPage": {
+    "message": "Please refresh the page"
+  },
+  "buttonRefresh": {
+    "message": "Refresh"
+  },
+  "buttonClose": {
+    "message": "Close"
+  },
+  "passwordPlaceholder": {
+    "message": "Enter your password"
+  },
+  "buttonCopy": {
+    "message": "Copy"
+  },
+  "questionPlaceholder": {
+    "message": "Ask me anything..."
+  },
+  "buttonSend": {
+    "message": "Send"
+  },
+  "pdfDownloading": {
+    "message": "Downloading PDF..."
+  },
+  "pdfFetchingFile": {
+    "message": "Fetching file..."
+  },
+  "pdfPreparingProcessing": {
+    "message": "Preparing PDF processing..."
+  },
+  "pdfPreparingTools": {
+    "message": "Preparing PDF analysis tools..."
+  },
+  "pdfExtractingText": {
+    "message": "Extracting PDF text..."
+  },
+  "pdfExtractingProgress": {
+    "message": "Extracting page {page}/{total}..."
+  },
+  "pdfExtractingInProgress": {
+    "message": "Extracting text..."
+  },
+  "pdfExtractionComplete": {
+    "message": "PDF extraction complete!"
+  },
+  "pdfExtractionCompleted": {
+    "message": "Extraction complete."
+  },
+  "pdfExtractionFailed": {
+    "message": "PDF extraction failed"
+  },
+  "pdfErrorOccurred": {
+    "message": "An error occurred."
+  },
+  "pdfProcessing": {
+    "message": "Processing PDF..."
+  },
+  "pdfPleaseWait": {
+    "message": "Please wait..."
+  },
+  "validationPasswordMinLength": {
+    "message": "Password must be at least 8 characters long."
+  },
+  "validationPasswordUppercase": {
+    "message": "Password must include uppercase letters."
+  },
+  "validationPasswordLowercase": {
+    "message": "Password must include lowercase letters."
+  },
+  "validationPasswordNumber": {
+    "message": "Password must include numbers."
+  },
+  "validationPasswordStrong": {
+    "message": "Password is strong."
+  },
+  "validationEmailInvalid": {
+    "message": "Please enter a valid email address."
+  },
+  "validationNameMinLength": {
+    "message": "Name must be at least 2 characters long."
+  },
+  "validationPasswordMismatch": {
+    "message": "Passwords do not match."
+  },
+  "signupComplete": {
+    "message": "Sign up complete. Please verify your email."
+  },
+  "loginSuccess": {
+    "message": "Logged in successfully."
+  },
+  "passwordResetEmailSent": {
+    "message": "Password reset email sent."
+  },
+  "invalidHistoryId": {
+    "message": "Invalid history ID"
+  },
+  "invalidQuestion": {
+    "message": "Invalid question"
+  },
+  "questionRequired": {
+    "message": "Please enter a question"
+  },
+  "questionTooLong": {
+    "message": "Question is too long (max 2000 characters)"
+  },
+  "contextNotSet": {
+    "message": "Context not set"
+  },
+  "invalidAnswer": {
+    "message": "Invalid answer"
+  },
+  "answerTooLong": {
+    "message": "Answer is too long"
+  },
+  "confirmDeleteQA": {
+    "message": "Delete question/answer from history?"
+  },
+  "qaHistoryDeleted": {
+    "message": "Q&A history deleted"
+  },
+  "deleteHistoryFailed": {
+    "message": "Failed to delete history"
+  },
+  "pdfExtractorUnavailable": {
+    "message": "PDF Extractor is unavailable"
+  },
+  "chromeInternalPage": {
+    "message": "Chrome Internal Page"
+  },
+  "chromeInternalPageDesc": {
+    "message": "Chrome settings and internal pages cannot be summarized"
+  },
+  "extensionPage": {
+    "message": "Extension Page"
+  },
+  "extensionPageDesc": {
+    "message": "Extension pages cannot be summarized"
+  },
+  "edgePage": {
+    "message": "Edge Internal Page"
+  },
+  "edgePageDesc": {
+    "message": "Edge settings and internal pages cannot be summarized"
+  },
+  "webStorePage": {
+    "message": "Web Store"
+  },
+  "webStorePageDesc": {
+    "message": "Web Store cannot be summarized"
+  },
+  "pdfSummarize": {
+    "message": "Summarize PDF"
+  },
+  "overlayOpenFailed": {
+    "message": "Failed to open overlay: "
+  },
+  "checkConsole": {
+    "message": "\n\nCheck the console in Developer Tools (F12)."
+  },
+  "notificationPdfPermissionTitle": {
+    "message": "Gena - PDF File Permission Required"
+  },
+  "notificationPdfPermissionMessage": {
+    "message": "To summarize PDF files:\n1. Open chrome://extensions page\n2. Find Gena and enable \"Allow access to file URLs\""
+  },
+  "notificationPdfPermissionMessage2": {
+    "message": "To summarize PDF files:\n1. Open extension management page\n2. Find Gena extension\n3. Enable \"Allow access to file URLs\""
+  },
+  "notificationContentExtractionFailed": {
+    "message": "Content Extraction Failed"
+  },
+  "notificationContentExtractionFailedMessage": {
+    "message": "An error occurred during content extraction."
+  },
+  "emailVerificationRequired": {
+    "message": "Email Verification Required"
+  },
+  "emailVerificationMessage": {
+    "message": "Email verification is required to use Gena service."
+  },
+  "emailVerificationStep1": {
+    "message": "Check the email sent during registration"
+  },
+  "emailVerificationStep2": {
+    "message": "Click the verification link in the email"
+  },
+  "emailVerificationStep3": {
+    "message": "Refresh the page after verification"
+  },
+  "resendVerificationEmail": {
+    "message": "Resend Verification Email"
+  },
+  "emailSending": {
+    "message": "Sending..."
+  },
+  "emailSent": {
+    "message": "✓ Sent"
+  },
+  "emailSendFailed": {
+    "message": "✗ Send Failed"
   }
 
 }

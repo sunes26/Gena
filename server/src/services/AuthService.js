@@ -604,10 +604,10 @@ class AuthService {
 
   /**
    * 비밀번호 재설정 링크 생성
-   * 
+   *
    * @param {string} email - 사용자 이메일
    * @returns {Promise<string>} 비밀번호 재설정 링크
-   * 
+   *
    * @example
    * const link = await authService.generatePasswordResetLink('user@example.com');
    */
@@ -633,6 +633,133 @@ class AuthService {
       }
       console.error('비밀번호 재설정 링크 생성 실패:', error);
       throw new DatabaseError('비밀번호 재설정 링크 생성 중 오류가 발생했습니다');
+    }
+  }
+
+  // ===== 1회용 로그인 토큰 =====
+
+  /**
+   * 1회용 로그인 토큰 생성 (확장 프로그램 → 웹사이트 자동 로그인용)
+   *
+   * @param {string} userId - 사용자 UID
+   * @returns {Promise<string>} 1회용 토큰
+   * @throws {ValidationError} userId가 유효하지 않은 경우
+   * @throws {DatabaseError} 토큰 생성 실패 시
+   *
+   * @example
+   * const token = await authService.generateOneTimeLoginToken('user123');
+   * // 토큰을 웹사이트로 전달: https://genaai.net/auth/token-login?token={token}
+   */
+  async generateOneTimeLoginToken(userId) {
+    this._checkFirebase();
+
+    if (!userId || typeof userId !== 'string') {
+      throw new ValidationError('유효하지 않은 사용자 ID입니다');
+    }
+
+    try {
+      // 사용자 존재 확인
+      const userDoc = await this.db.collection(COLLECTIONS.USERS).doc(userId).get();
+      if (!userDoc.exists) {
+        throw new NotFoundError(ERROR_MESSAGES.USER_NOT_FOUND);
+      }
+
+      // 랜덤 토큰 생성 (32바이트 = 64자 hex)
+      const crypto = require('crypto');
+      const token = crypto.randomBytes(32).toString('hex');
+
+      // Firestore에 토큰 저장 (5분 만료)
+      const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5분 후
+      await this.db.collection('one_time_tokens').doc(token).set({
+        userId: userId,
+        createdAt: new Date(),
+        expiresAt: expiresAt,
+        used: false,
+        purpose: 'web_login' // 웹사이트 자동 로그인용
+      });
+
+      console.log(`✅ 1회용 로그인 토큰 생성: ${maskUserId(userId)} (만료: ${expiresAt.toISOString()})`);
+
+      return token;
+
+    } catch (error) {
+      if (error instanceof NotFoundError || error instanceof ValidationError) {
+        throw error;
+      }
+      console.error('1회용 토큰 생성 실패:', error);
+      throw new DatabaseError('토큰 생성 중 오류가 발생했습니다');
+    }
+  }
+
+  /**
+   * 1회용 로그인 토큰 검증 및 사용
+   *
+   * @param {string} token - 1회용 토큰
+   * @returns {Promise<Object>} 사용자 정보 및 커스텀 토큰
+   * @returns {Object} returns.user - 사용자 정보
+   * @returns {string} returns.customToken - Firebase 커스텀 토큰
+   * @throws {AuthenticationError} 토큰이 유효하지 않거나 만료된 경우
+   *
+   * @example
+   * const result = await authService.verifyOneTimeLoginToken(token);
+   * // 클라이언트에서 customToken으로 signInWithCustomToken 호출
+   */
+  async verifyOneTimeLoginToken(token) {
+    this._checkFirebase();
+
+    if (!token || typeof token !== 'string') {
+      throw new ValidationError('유효하지 않은 토큰입니다');
+    }
+
+    try {
+      const tokenDoc = await this.db.collection('one_time_tokens').doc(token).get();
+
+      // 토큰이 존재하지 않음
+      if (!tokenDoc.exists) {
+        throw new AuthenticationError('유효하지 않은 토큰입니다');
+      }
+
+      const tokenData = tokenDoc.data();
+
+      // 이미 사용된 토큰
+      if (tokenData.used) {
+        throw new AuthenticationError('이미 사용된 토큰입니다');
+      }
+
+      // 만료된 토큰
+      if (new Date() > tokenData.expiresAt.toDate()) {
+        throw new AuthenticationError('만료된 토큰입니다');
+      }
+
+      // 사용자 정보 조회
+      const user = await this.getUserById(tokenData.userId);
+
+      // 토큰을 사용됨으로 표시
+      await this.db.collection('one_time_tokens').doc(token).update({
+        used: true,
+        usedAt: new Date()
+      });
+
+      // Firebase 커스텀 토큰 생성
+      const customToken = await this.auth.createCustomToken(tokenData.userId, {
+        email: user.email,
+        isPremium: user.isPremium,
+        role: user.role
+      });
+
+      console.log(`✅ 1회용 토큰 검증 성공: ${maskUserId(tokenData.userId)}`);
+
+      return {
+        user: this._sanitizeUserData(user),
+        customToken
+      };
+
+    } catch (error) {
+      if (error instanceof AuthenticationError || error instanceof ValidationError) {
+        throw error;
+      }
+      console.error('1회용 토큰 검증 실패:', error);
+      throw new AuthenticationError('토큰 검증 중 오류가 발생했습니다');
     }
   }
 }

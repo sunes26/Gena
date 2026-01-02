@@ -58,39 +58,48 @@ const elements = {
  */
 async function init() {
   try {
-    // I18n 초기화
-    await i18nManager.initialize();
-    
-    // 저장된 언어 설정 복원
-    const savedLocale = i18nManager.getCurrentLocale();
-    elements.languageSelect.value = savedLocale;
-    
-    // 페이지 텍스트 업데이트
-    updateAllText();
-    
-    // 이미 로그인되어 있는지 확인
+    // 먼저 로그인 상태 확인
     const isLoggedIn = await authManager.isLoggedIn();
+
+    let currentLocale;
+
     if (isLoggedIn) {
+      // 로그인한 경우: 저장된 언어 사용
+      await i18nManager.initialize();
+      currentLocale = i18nManager.getCurrentLocale();
       showLoginSuccessMessage();
-      return;
+    } else {
+      // 로그인하지 않은 경우: 무조건 브라우저 언어 사용
+      const browserLocale = i18nManager.detectBrowserLocale();
+      i18nManager.currentLocale = browserLocale;
+      await i18nManager.loadMessages(browserLocale);
+      currentLocale = browserLocale;
+
+      console.log('[Auth] 로그인 전 - 브라우저 언어 사용:', browserLocale);
+
+      // 이벤트 리스너 등록
+      setupEventListeners();
+
+      // 비밀번호 표시/숨기기 기능 초기화
+      setupPasswordToggle();
     }
 
-    // 이벤트 리스너 등록
-    setupEventListeners();
-    
-    // 비밀번호 표시/숨기기 기능 초기화
-    setupPasswordToggle();
-    
+    // 언어 선택 드롭다운 설정
+    elements.languageSelect.value = currentLocale;
+
+    // 페이지 텍스트 업데이트
+    updateAllText();
+
     // ✅ 깜빡임 방지: 초기화 완료 후 페이드인
     document.body.classList.add('loaded');
     console.log('[Auth] 초기화 완료 - 페이드인');
-    
+
   } catch (error) {
     console.error('[Auth] 초기화 오류:', error);
-    
+
     // ✅ 에러 발생 시에도 페이지 표시
     document.body.classList.add('loaded');
-    
+
     alert('초기화 오류가 발생했습니다. 페이지를 새로고침해주세요.');
   }
 }
@@ -376,11 +385,27 @@ function getErrorMessage(key) {
       'nameRequired': 'Name must be at least 2 characters.',
       'passwordMismatch': 'Passwords do not match.',
       'passwordConfirmRequired': 'Please confirm your password.'
+    },
+    'ja': {
+      'emailRequired': 'メールアドレスを入力してください。',
+      'invalidEmail': '有効なメールアドレスを入力してください。',
+      'passwordRequired': 'パスワードを入力してください。',
+      'nameRequired': '名前は2文字以上である必要があります。',
+      'passwordMismatch': 'パスワードが一致しません。',
+      'passwordConfirmRequired': 'パスワードの確認を入力してください。'
+    },
+    'zh': {
+      'emailRequired': '请输入邮箱。',
+      'invalidEmail': '请输入有效的邮箱地址。',
+      'passwordRequired': '请输入密码。',
+      'nameRequired': '名称必须至少2个字符。',
+      'passwordMismatch': '密码不匹配。',
+      'passwordConfirmRequired': '请确认密码。'
     }
   };
 
   const locale = i18nManager.getCurrentLocale();
-  return messages[locale]?.[key] || key;
+  return messages[locale]?.[key] || messages['en']?.[key] || key;
 }
 
 /**

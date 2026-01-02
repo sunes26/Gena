@@ -23,7 +23,14 @@
       "Bash(done)",
       "Bash(test:*)",
       "Bash(gcloud:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(dir:*)",
+      "Bash(for key in \"overlayAiChat\" \"overlaySignupPrompt\" \"overlaySignupLink\" \"checkingUsage\")",
+      "Bash(do echo -n \"Checking $key: \")",
+      "Bash(grep:*)",
+      "Bash(for key in overlayAiChat overlaySignupPrompt overlaySignupLink checkingUsage)",
+      "Bash(do echo \"=== $key ===\")",
+      "Bash(python -m json.tool:*)"
     ]
   }
 }

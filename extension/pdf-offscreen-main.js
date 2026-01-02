@@ -56,7 +56,7 @@ async function extractPDFText(pdfData, url) {
         sendProgress({
             stage: 'extract',
             progress: 55,
-            message: 'PDF 파일 분석 중...'
+            message: chrome.i18n.getMessage('pdfProcessing')
         });
 
         const loadingTask = pdfjsLib.getDocument({
@@ -75,36 +75,60 @@ async function extractPDFText(pdfData, url) {
 
         const maxPages = Math.min(pdf.numPages, 100);
 
+        // ✨ 텍스트와 위치 정보를 함께 저장
         const textPromises = [];
+        const textItems = []; // 각 텍스트 아이템의 상세 정보 저장
+
         for (let pageNum = 1; pageNum <= maxPages; pageNum++) {
             const pagePromise = pdf.getPage(pageNum)
-                .then(page => page.getTextContent())
-                .then(textContent => {
+                .then(async page => {
+                    const textContent = await page.getTextContent();
+                    const viewport = page.getViewport({ scale: 1.0 });
+
                     const pageText = textContent.items.map(item => item.str).join(' ');
-                    
+
+                    // ✨ 각 텍스트 아이템의 위치 정보 저장
+                    textContent.items.forEach(item => {
+                        if (item.str && item.str.trim().length > 0) {
+                            const transform = item.transform;
+                            textItems.push({
+                                text: item.str,
+                                page: pageNum,
+                                x: transform[4], // x 좌표
+                                y: transform[5], // y 좌표
+                                width: item.width,
+                                height: item.height,
+                                pageWidth: viewport.width,
+                                pageHeight: viewport.height
+                            });
+                        }
+                    });
+
                     const progress = 60 + Math.floor((pageNum / maxPages) * 35);
                     sendProgress({
                         stage: 'extract',
                         progress: progress,
                         currentPage: pageNum,
                         totalPages: maxPages,
-                        message: `페이지 ${pageNum}/${maxPages} 추출 중...`
+                        message: chrome.i18n.getMessage('pdfExtractingProgress').replace('{page}', pageNum).replace('{total}', maxPages)
                     });
-                    
+
                     console.log(`[PDF Offscreen] 페이지 ${pageNum}/${maxPages} 완료 (${pageText.length}자)`);
                     return pageText;
                 });
-            
+
             textPromises.push(pagePromise);
         }
 
         const pageTexts = await Promise.all(textPromises);
         let extractedText = pageTexts.join('\n\n');
 
+        console.log(`[PDF Offscreen] 총 ${textItems.length}개의 텍스트 아이템 위치 정보 저장`);
+
         sendProgress({
             stage: 'extract',
             progress: 95,
-            message: '추출된 텍스트 정리 중...'
+            message: chrome.i18n.getMessage('pdfExtractingInProgress')
         });
 
         extractedText = cleanText(extractedText);
@@ -118,21 +142,23 @@ async function extractPDFText(pdfData, url) {
         const result = {
             success: true,
             text: extractedText,
+            textItems: textItems, // ✨ 위치 정보 포함
             metadata: {
                 url: url,
                 totalPages: pdf.numPages,
                 extractedPages: maxPages,
                 charCount: extractedText.length,
-                wordCount: countWords(extractedText)
+                wordCount: countWords(extractedText),
+                hasPositionData: textItems.length > 0 // ✨ 위치 정보 유무
             }
         };
 
         console.log('[PDF Offscreen] 추출 완료:', result.metadata);
-        
+
         sendProgress({
             stage: 'extract',
             progress: 100,
-            message: '추출 완료!'
+            message: chrome.i18n.getMessage('pdfExtractionComplete')
         });
         
         return result;
@@ -249,12 +275,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         return true;
     }
-    
-    console.warn('[PDF Offscreen] 알 수 없는 액션:', request.action);
-    sendResponse({
-        success: false,
-        error: '알 수 없는 액션입니다.'
-    });
+
+    // ✨ 처리하지 않는 액션은 다른 리스너(background.js)가 처리하도록 false 반환
+    console.log('[PDF Offscreen] 처리하지 않는 액션 - 다른 리스너로 전달:', request.action);
+    return false;
 });
 
 // ===== 초기화 =====

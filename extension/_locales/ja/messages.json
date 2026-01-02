@@ -674,6 +674,9 @@
   "loginSuccess": {
     "message": "ログイン成功！"
   },
+  "logoutSuccess": {
+    "message": "ログアウトしました。"
+  },
   "loginSuccessDesc": {
     "message": "Gena拡張機能アイコンを\nクリックして使用を開始してください。"
   },
@@ -778,6 +781,570 @@
   },
   "errorDriveFolderPageDesc": {
     "message": "これはGoogle Driveのフォルダページです。PDFファイルを直接開いてください。"
+  },
+  "circuitBreakerOpen": {
+    "message": "AIサービスが一時的に過負荷状態です。\n{seconds}秒後に再試行してください。"
+  },
+  "useCachedSummary": {
+    "message": "このページは最近要約されました。キャッシュされた要約を使用しますか？"
+  },
+  "summaryFeedbackQuestion": {
+    "message": "この要約は役に立ちましたか？"
+  },
+  "feedbackGood": {
+    "message": "役に立った"
+  },
+  "feedbackBad": {
+    "message": "改善が必要"
+  },
+  "feedbackThankYou": {
+    "message": "フィードバックありがとうございます！"
+  },
+  "pdfPageRange": {
+    "message": "PDFページ範囲"
+  },
+  "pdfStartPage": {
+    "message": "開始ページ"
+  },
+  "pdfEndPage": {
+    "message": "終了ページ"
+  },
+  "pdfAllPages": {
+    "message": "すべてのページ"
+  },
+  "sourceReference": {
+    "message": "出典"
+  },
+  "viewSource": {
+    "message": "出典を見る"
+  },
+  "cachedSummaryNotice": {
+    "message": "キャッシュされた要約（1時間以内）"
+  },
+  "contentTooShortWarning": {
+    "message": "コンテンツが短すぎます（{length}文字）。\n要約の品質が低い可能性があります。続けますか？"
+  },
+  "summaryCancelled": {
+    "message": "要約がキャンセルされました"
+  },
+  "overlayMinimize": {
+    "message": "最小化"
+  },
+  "overlayMaximize": {
+    "message": "最大化"
+  },
+  "overlayClose": {
+    "message": "閉じる"
+  },
+  "overlaySettings": {
+    "message": "設定"
+  },
+  "overlayLoginPrompt": {
+    "message": "GenaのAI要約機能を使用するにはログインしてください。"
+  },
+  "overlayLoginButton": {
+    "message": "ログイン"
+  },
+  "overlayLoginTitle": {
+    "message": "Gena AI要約サービスを利用するにはログインしてください"
+  },
+  "overlayEmailPlaceholder": {
+    "message": "email@example.com"
+  },
+  "overlayPasswordPlaceholder": {
+    "message": "パスワードを入力してください"
+  },
+  "overlayForgotPassword": {
+    "message": "パスワードをお忘れですか？"
+  },
+  "overlayBackButton": {
+    "message": "戻る"
+  },
+  "overlayLoginSubmit": {
+    "message": "ログイン"
+  },
+  "overlayLoginSuccess": {
+    "message": "要約画面に移動します..."
+  },
+  "overlayPasswordResetTitle": {
+    "message": "パスワードリセット"
+  },
+  "overlayPasswordResetDesc": {
+    "message": "登録されたメールアドレスを入力すると、パスワードリセットリンクをお送りします。"
+  },
+  "overlayPasswordResetSubmit": {
+    "message": "リセットリンクを送信"
+  },
+  "overlaySummarizeButton": {
+    "message": "ページを要約する"
+  },
+  "overlaySummarizing": {
+    "message": "要約を生成中..."
+  },
+  "overlaySummaryResult": {
+    "message": "要約結果"
+  },
+  "overlayCopyButton": {
+    "message": "コピー"
+  },
+  "overlayQuestionPlaceholder": {
+    "message": "質問を入力してください..."
+  },
+  "overlayAskButton": {
+    "message": "送信"
+  },
+  "overlayAiChat": {
+    "message": "AIチャット"
+  },
+  "overlaySignupPrompt": {
+    "message": "アカウントをお持ちでないですか？"
+  },
+  "overlaySignupLink": {
+    "message": "新規登録"
+  },
+  "overlayCopied": {
+    "message": "コピーしました！"
+  },
+  "overlayPasswordResetSuccess": {
+    "message": "パスワードリセットメールが送信されました。受信トレイをご確認ください。"
+  },
+  "overlayPasswordResetError": {
+    "message": "パスワードリセットのリクエストに失敗しました。"
+  },
+  "overlaySummaryError": {
+    "message": "要約に失敗しました"
+  },
+  "overlayNoSummaryResult": {
+    "message": "要約結果がありません。"
+  },
+  "overlayLoadingExtract": {
+    "message": "コンテンツを抽出中..."
+  },
+  "overlayLoadingAnalyze": {
+    "message": "内容を分析中..."
+  },
+  "overlayLoadingGenerate": {
+    "message": "要約を生成中..."
+  },
+  "currentPage": {
+    "message": "現在のページ"
+  },
+  "loginRequired": {
+    "message": "ログインが必要です"
+  },
+  "loginSuccess": {
+    "message": "ログイン成功！"
+  },
+  "analyzingPage": {
+    "message": "ページを分析中..."
+  },
+  "analyzingPageLong": {
+    "message": "ページを分析しています..."
+  },
+  "aiAnalyzing": {
+    "message": "AI分析中..."
+  },
+  "usage": {
+    "message": "使用量"
+  },
+  "checkingUsage": {
+    "message": "確認中..."
+  },
+  "unlimited": {
+    "message": "無制限"
+  },
+  "usageCount": {
+    "message": "{count}/{limit}回使用"
+  },
+  "askQuestion": {
+    "message": "質問する"
+  },
+  "generatingAnswer": {
+    "message": "回答生成中"
+  },
+  "answerGenerationFailed": {
+    "message": "回答生成に失敗しました"
+  },
+  "cannotGenerateAnswer": {
+    "message": "回答を生成できません。"
+  },
+  "source": {
+    "message": "出典"
+  },
+  "sourceDisplayFailed": {
+    "message": "出典表示に失敗しました"
+  },
+  "sourceNumber": {
+    "message": "出典 [{num}]"
+  },
+  "pageNumber": {
+    "message": "ページ {num}"
+  },
+  "noTitle": {
+    "message": "タイトルなし"
+  },
+  "pleaseEnterEmail": {
+    "message": "メールアドレスを入力してください。"
+  },
+  "invalidEmailFormat": {
+    "message": "正しいメール形式ではありません。"
+  },
+  "pleaseEnterPassword": {
+    "message": "パスワードを入力してください。"
+  },
+  "loginFailed": {
+    "message": "ログインに失敗しました。"
+  },
+  "passwordResetEmailSent": {
+    "message": "パスワードリセットメールが送信されました。受信トレイをご確認ください。"
+  },
+  "passwordResetRequestFailed": {
+    "message": "パスワードリセットのリクエストに失敗しました。"
+  },
+  "contentExtractionFailed": {
+    "message": "コンテンツの抽出に失敗しました"
+  },
+  "summaryFailed": {
+    "message": "要約に失敗しました"
+  },
+  "noSummaryResults": {
+    "message": "要約結果がありません。"
+  },
+  "complete": {
+    "message": "完了！"
+  },
+  "error": {
+    "message": "エラー"
+  },
+  "back": {
+    "message": "戻る"
+  },
+  "cancel": {
+    "message": "キャンセル"
+  },
+  "locationInfoUnavailable": {
+    "message": "位置情報が利用できません"
+  },
+  "pageInfoNotFound": {
+    "message": "ページ情報が見つかりません"
+  },
+  "paragraphNotFound": {
+    "message": "ページで該当する段落が見つかりません。ページが動的に変更された可能性があります。"
+  },
+  "errorEmailNotFound": {
+    "message": "メールアドレスが見つかりません。"
+  },
+  "errorInvalidPassword": {
+    "message": "パスワードが正しくありません。"
+  },
+  "errorUserDisabled": {
+    "message": "このアカウントは無効化されています。"
+  },
+  "errorTooManyAttempts": {
+    "message": "ログイン試行回数を超えました。しばらくしてから再度お試しください。"
+  },
+  "errorInvalidCredentials": {
+    "message": "メールアドレスまたはパスワードが正しくありません。"
+  },
+  "errorInvalidEmail": {
+    "message": "有効なメールアドレス形式ではありません。"
+  },
+  "errorUnknown": {
+    "message": "不明なエラーが発生しました。"
+  },
+  "errorEmailAlreadyInUse": {
+    "message": "このメールアドレスは既に使用されています。"
+  },
+  "errorOperationNotAllowed": {
+    "message": "メール/パスワードログインが無効になっています。"
+  },
+  "errorWeakPassword": {
+    "message": "パスワードが弱すぎます。8文字以上で入力してください。"
+  },
+  "errorUserNotFound": {
+    "message": "登録されていないメールアドレスです。"
+  },
+  "errorWrongPassword": {
+    "message": "パスワードが正しくありません。"
+  },
+  "errorTooManyRequests": {
+    "message": "リクエストが多すぎます。しばらくしてから再度お試しください。"
+  },
+  "errorNetworkFailed": {
+    "message": "ネットワーク接続を確認してください。"
+  },
+  "errorAuthFailed": {
+    "message": "認証中にエラーが発生しました。メールアドレスとパスワードを確認してください。"
+  },
+  "errorNetworkConnection": {
+    "message": "インターネット接続を確認してください。"
+  },
+  "errorTimeout": {
+    "message": "リクエストがタイムアウトしました。再度お試しください。"
+  },
+  "errorApiKey": {
+    "message": "APIキーを確認してください。設定で正しいキーを入力してください。"
+  },
+  "errorRateLimit": {
+    "message": "API使用制限を超えました。しばらくしてから再度お試しください。"
+  },
+  "errorServerIssue": {
+    "message": "サーバーに一時的な問題があります。しばらくしてから再度お試しください。"
+  },
+  "errorStorageQuota": {
+    "message": "ストレージ容量が不足しています。一部のデータを削除してください。"
+  },
+  "errorGeneric": {
+    "message": "エラーが発生しました。再度お試しください。"
+  },
+  "restrictedPageTitle": {
+    "message": "制限されたページ"
+  },
+  "restrictedPageMessage": {
+    "message": "このページはセキュリティ上の理由で要約できません"
+  },
+  "summaryUnavailable": {
+    "message": "要約不可"
+  },
+  "pdfSummaryPremium": {
+    "message": "PDF要約（プレミアム）"
+  },
+  "pdfFeatureTitle": {
+    "message": "PDF要約機能"
+  },
+  "pdfPremiumOnly": {
+    "message": "PDF要約はプレミアム専用機能です"
+  },
+  "pdfUpgradeDescription": {
+    "message": "プレミアムにアップグレードすると\nPDF文書を無制限に要約できます"
+  },
+  "premiumBenefits": {
+    "message": "✨ プレミアム特典"
+  },
+  "benefitUnlimitedPDF": {
+    "message": "PDF文書の無制限要約"
+  },
+  "benefitUnlimitedWeb": {
+    "message": "ウェブページの無制限要約"
+  },
+  "benefitUnlimitedQuestions": {
+    "message": "無制限質問機能"
+  },
+  "benefitPrioritySupport": {
+    "message": "優先サポート"
+  },
+  "buttonLater": {
+    "message": "後で"
+  },
+  "buttonUpgrade": {
+    "message": "アップグレード"
+  },
+  "pricePerMonth": {
+    "message": "/ 月"
+  },
+  "extensionUpdated": {
+    "message": "拡張機能が更新されました"
+  },
+  "pleaseRefreshPage": {
+    "message": "ページを更新してください"
+  },
+  "buttonRefresh": {
+    "message": "更新"
+  },
+  "buttonClose": {
+    "message": "閉じる"
+  },
+  "passwordPlaceholder": {
+    "message": "パスワードを入力してください"
+  },
+  "buttonCopy": {
+    "message": "コピー"
+  },
+  "questionPlaceholder": {
+    "message": "何でも聞いてください..."
+  },
+  "buttonSend": {
+    "message": "送信"
+  },
+  "pdfDownloading": {
+    "message": "PDFダウンロード中..."
+  },
+  "pdfFetchingFile": {
+    "message": "ファイル取得中..."
+  },
+  "pdfPreparingProcessing": {
+    "message": "PDF処理準備中..."
+  },
+  "pdfPreparingTools": {
+    "message": "PDF分析ツール準備中..."
+  },
+  "pdfExtractingText": {
+    "message": "PDFテキスト抽出中..."
+  },
+  "pdfExtractingProgress": {
+    "message": "ページ{page}/{total}抽出中..."
+  },
+  "pdfExtractingInProgress": {
+    "message": "テキスト抽出中..."
+  },
+  "pdfExtractionComplete": {
+    "message": "PDF抽出完了!"
+  },
+  "pdfExtractionCompleted": {
+    "message": "抽出が完了しました。"
+  },
+  "pdfExtractionFailed": {
+    "message": "PDF抽出失敗"
+  },
+  "pdfErrorOccurred": {
+    "message": "エラーが発生しました。"
+  },
+  "pdfProcessing": {
+    "message": "PDF処理中..."
+  },
+  "pdfPleaseWait": {
+    "message": "お待ちください..."
+  },
+  "validationPasswordMinLength": {
+    "message": "パスワードは8文字以上である必要があります。"
+  },
+  "validationPasswordUppercase": {
+    "message": "パスワードに大文字を含める必要があります。"
+  },
+  "validationPasswordLowercase": {
+    "message": "パスワードに小文字を含める必要があります。"
+  },
+  "validationPasswordNumber": {
+    "message": "パスワードに数字を含める必要があります。"
+  },
+  "validationPasswordStrong": {
+    "message": "パスワードは安全です。"
+  },
+  "validationEmailInvalid": {
+    "message": "有効なメールアドレスを入力してください。"
+  },
+  "validationNameMinLength": {
+    "message": "名前は2文字以上である必要があります。"
+  },
+  "validationPasswordMismatch": {
+    "message": "パスワードが一致しません。"
+  },
+  "signupComplete": {
+    "message": "会員登録が完了しました。メール認証を完了してください。"
+  },
+  "loginSuccess": {
+    "message": "ログインしました。"
+  },
+  "passwordResetEmailSent": {
+    "message": "パスワードリセットメールが送信されました。"
+  },
+  "invalidHistoryId": {
+    "message": "無効な履歴IDです"
+  },
+  "invalidQuestion": {
+    "message": "無効な質問です"
+  },
+  "questionRequired": {
+    "message": "質問を入力してください"
+  },
+  "questionTooLong": {
+    "message": "質問が長すぎます（最大2000文字）"
+  },
+  "contextNotSet": {
+    "message": "コンテキストが設定されていません"
+  },
+  "invalidAnswer": {
+    "message": "無効な回答です"
+  },
+  "answerTooLong": {
+    "message": "回答が長すぎます"
+  },
+  "confirmDeleteQA": {
+    "message": "履歴に保存された質問/回答も削除しますか？"
+  },
+  "qaHistoryDeleted": {
+    "message": "質問/回答履歴が削除されました"
+  },
+  "deleteHistoryFailed": {
+    "message": "履歴の削除に失敗しました"
+  },
+  "pdfExtractorUnavailable": {
+    "message": "PDFエクストラクタが利用できません"
+  },
+  "chromeInternalPage": {
+    "message": "Chrome内部ページ"
+  },
+  "chromeInternalPageDesc": {
+    "message": "Chrome設定と内部ページは要約できません"
+  },
+  "extensionPage": {
+    "message": "拡張機能ページ"
+  },
+  "extensionPageDesc": {
+    "message": "拡張機能ページは要約できません"
+  },
+  "edgePage": {
+    "message": "Edge内部ページ"
+  },
+  "edgePageDesc": {
+    "message": "Edge設定と内部ページは要約できません"
+  },
+  "webStorePage": {
+    "message": "ウェブストア"
+  },
+  "webStorePageDesc": {
+    "message": "ウェブストアは要約できません"
+  },
+  "pdfSummarize": {
+    "message": "PDF要約"
+  },
+  "overlayOpenFailed": {
+    "message": "オーバーレイを開けません: "
+  },
+  "checkConsole": {
+    "message": "\n\n開発者ツール（F12）でコンソールを確認してください。"
+  },
+  "notificationPdfPermissionTitle": {
+    "message": "Gena - PDFファイル権限が必要"
+  },
+  "notificationPdfPermissionMessage": {
+    "message": "PDFファイルを要約するには:\n1. chrome://extensions ページを開きます\n2. Genaを見つけて「ファイルURLへのアクセスを許可」を有効にします"
+  },
+  "notificationPdfPermissionMessage2": {
+    "message": "PDFファイルを要約するには:\n1. 拡張機能管理ページを開きます\n2. Gena拡張機能を見つけます\n3. 「ファイルURLへのアクセスを許可」を有効にします"
+  },
+  "notificationContentExtractionFailed": {
+    "message": "コンテンツ抽出失敗"
+  },
+  "notificationContentExtractionFailedMessage": {
+    "message": "コンテンツ抽出中にエラーが発生しました。"
+  },
+  "emailVerificationRequired": {
+    "message": "メール認証が必要"
+  },
+  "emailVerificationMessage": {
+    "message": "Genaサービスを使用するにはメール認証が必要です。"
+  },
+  "emailVerificationStep1": {
+    "message": "登録時に送信されたメールを確認してください"
+  },
+  "emailVerificationStep2": {
+    "message": "メール内の認証リンクをクリックしてください"
+  },
+  "emailVerificationStep3": {
+    "message": "認証完了後、ページを更新してください"
+  },
+  "resendVerificationEmail": {
+    "message": "認証メールを再送信"
+  },
+  "emailSending": {
+    "message": "送信中..."
+  },
+  "emailSent": {
+    "message": "✓ 送信完了"
+  },
+  "emailSendFailed": {
+    "message": "✗ 送信失敗"
   }
 
 }

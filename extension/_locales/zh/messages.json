@@ -674,6 +674,9 @@
   "loginSuccess": {
     "message": "登录成功！"
   },
+  "logoutSuccess": {
+    "message": "已成功退出登录。"
+  },
   "loginSuccessDesc": {
     "message": "点击Gena扩展图标\n开始使用。"
   },
@@ -778,6 +781,570 @@
   },
   "errorDriveFolderPageDesc": {
     "message": "这是Google云端硬盘文件夹页面。请直接打开PDF文件。"
+  },
+  "circuitBreakerOpen": {
+    "message": "AI服务暂时过载。\n请在{seconds}秒后重试。"
+  },
+  "useCachedSummary": {
+    "message": "此页面最近已摘要。是否使用缓存的摘要？"
+  },
+  "summaryFeedbackQuestion": {
+    "message": "此摘要是否有帮助？"
+  },
+  "feedbackGood": {
+    "message": "有帮助"
+  },
+  "feedbackBad": {
+    "message": "需要改进"
+  },
+  "feedbackThankYou": {
+    "message": "感谢您的反馈！"
+  },
+  "pdfPageRange": {
+    "message": "PDF页面范围"
+  },
+  "pdfStartPage": {
+    "message": "起始页"
+  },
+  "pdfEndPage": {
+    "message": "结束页"
+  },
+  "pdfAllPages": {
+    "message": "所有页面"
+  },
+  "sourceReference": {
+    "message": "来源"
+  },
+  "viewSource": {
+    "message": "查看来源"
+  },
+  "cachedSummaryNotice": {
+    "message": "缓存的摘要（1小时内）"
+  },
+  "contentTooShortWarning": {
+    "message": "内容太短（{length}字符）。\n摘要质量可能较低。是否继续？"
+  },
+  "summaryCancelled": {
+    "message": "摘要已取消"
+  },
+  "overlayMinimize": {
+    "message": "最小化"
+  },
+  "overlayMaximize": {
+    "message": "最大化"
+  },
+  "overlayClose": {
+    "message": "关闭"
+  },
+  "overlaySettings": {
+    "message": "设置"
+  },
+  "overlayLoginPrompt": {
+    "message": "请登录以使用Gena的AI摘要功能。"
+  },
+  "overlayLoginButton": {
+    "message": "登录"
+  },
+  "overlayLoginTitle": {
+    "message": "请登录以使用Gena AI摘要服务"
+  },
+  "overlayEmailPlaceholder": {
+    "message": "email@example.com"
+  },
+  "overlayPasswordPlaceholder": {
+    "message": "请输入密码"
+  },
+  "overlayForgotPassword": {
+    "message": "忘记密码？"
+  },
+  "overlayBackButton": {
+    "message": "返回"
+  },
+  "overlayLoginSubmit": {
+    "message": "登录"
+  },
+  "overlayLoginSuccess": {
+    "message": "正在跳转到摘要页面..."
+  },
+  "overlayPasswordResetTitle": {
+    "message": "重置密码"
+  },
+  "overlayPasswordResetDesc": {
+    "message": "输入您注册的电子邮件地址，我们将向您发送密码重置链接。"
+  },
+  "overlayPasswordResetSubmit": {
+    "message": "发送重置链接"
+  },
+  "overlaySummarizeButton": {
+    "message": "摘要页面"
+  },
+  "overlaySummarizing": {
+    "message": "正在生成摘要..."
+  },
+  "overlaySummaryResult": {
+    "message": "摘要结果"
+  },
+  "overlayCopyButton": {
+    "message": "复制"
+  },
+  "overlayQuestionPlaceholder": {
+    "message": "请提问..."
+  },
+  "overlayAskButton": {
+    "message": "发送"
+  },
+  "overlayAiChat": {
+    "message": "AI 聊天"
+  },
+  "overlaySignupPrompt": {
+    "message": "还没有账户？"
+  },
+  "overlaySignupLink": {
+    "message": "注册"
+  },
+  "overlayCopied": {
+    "message": "已复制！"
+  },
+  "overlayPasswordResetSuccess": {
+    "message": "密码重置邮件已发送。请检查您的收件箱。"
+  },
+  "overlayPasswordResetError": {
+    "message": "请求密码重置失败。"
+  },
+  "overlaySummaryError": {
+    "message": "摘要失败"
+  },
+  "overlayNoSummaryResult": {
+    "message": "没有可用的摘要。"
+  },
+  "overlayLoadingExtract": {
+    "message": "正在提取内容..."
+  },
+  "overlayLoadingAnalyze": {
+    "message": "正在分析内容..."
+  },
+  "overlayLoadingGenerate": {
+    "message": "正在生成摘要..."
+  },
+  "currentPage": {
+    "message": "当前页面"
+  },
+  "loginRequired": {
+    "message": "需要登录"
+  },
+  "loginSuccess": {
+    "message": "登录成功！"
+  },
+  "analyzingPage": {
+    "message": "正在分析页面..."
+  },
+  "analyzingPageLong": {
+    "message": "正在分析页面..."
+  },
+  "aiAnalyzing": {
+    "message": "AI分析中..."
+  },
+  "usage": {
+    "message": "使用量"
+  },
+  "checkingUsage": {
+    "message": "检查中..."
+  },
+  "unlimited": {
+    "message": "无限制"
+  },
+  "usageCount": {
+    "message": "已使用{count}/{limit}次"
+  },
+  "askQuestion": {
+    "message": "提问"
+  },
+  "generatingAnswer": {
+    "message": "正在生成回答"
+  },
+  "answerGenerationFailed": {
+    "message": "生成回答失败"
+  },
+  "cannotGenerateAnswer": {
+    "message": "无法生成回答。"
+  },
+  "source": {
+    "message": "来源"
+  },
+  "sourceDisplayFailed": {
+    "message": "显示来源失败"
+  },
+  "sourceNumber": {
+    "message": "来源 [{num}]"
+  },
+  "pageNumber": {
+    "message": "第 {num} 页"
+  },
+  "noTitle": {
+    "message": "无标题"
+  },
+  "pleaseEnterEmail": {
+    "message": "请输入电子邮件。"
+  },
+  "invalidEmailFormat": {
+    "message": "无效的电子邮件格式。"
+  },
+  "pleaseEnterPassword": {
+    "message": "请输入密码。"
+  },
+  "loginFailed": {
+    "message": "登录失败。"
+  },
+  "passwordResetEmailSent": {
+    "message": "密码重置邮件已发送。请检查您的收件箱。"
+  },
+  "passwordResetRequestFailed": {
+    "message": "请求密码重置失败。"
+  },
+  "contentExtractionFailed": {
+    "message": "内容提取失败"
+  },
+  "summaryFailed": {
+    "message": "摘要失败"
+  },
+  "noSummaryResults": {
+    "message": "没有摘要结果。"
+  },
+  "complete": {
+    "message": "完成！"
+  },
+  "error": {
+    "message": "错误"
+  },
+  "back": {
+    "message": "返回"
+  },
+  "cancel": {
+    "message": "取消"
+  },
+  "locationInfoUnavailable": {
+    "message": "位置信息不可用"
+  },
+  "pageInfoNotFound": {
+    "message": "找不到页面信息"
+  },
+  "paragraphNotFound": {
+    "message": "在页面上找不到该段落。页面可能已被动态更改。"
+  },
+  "errorEmailNotFound": {
+    "message": "邮箱不存在。"
+  },
+  "errorInvalidPassword": {
+    "message": "密码不正确。"
+  },
+  "errorUserDisabled": {
+    "message": "此账户已被禁用。"
+  },
+  "errorTooManyAttempts": {
+    "message": "登录尝试次数过多。请稍后再试。"
+  },
+  "errorInvalidCredentials": {
+    "message": "邮箱或密码不正确。"
+  },
+  "errorInvalidEmail": {
+    "message": "邮箱格式不正确。"
+  },
+  "errorUnknown": {
+    "message": "发生未知错误。"
+  },
+  "errorEmailAlreadyInUse": {
+    "message": "此邮箱已被使用。"
+  },
+  "errorOperationNotAllowed": {
+    "message": "邮箱/密码登录已被禁用。"
+  },
+  "errorWeakPassword": {
+    "message": "密码太弱。请使用至少8个字符。"
+  },
+  "errorUserNotFound": {
+    "message": "邮箱未注册。"
+  },
+  "errorWrongPassword": {
+    "message": "密码不正确。"
+  },
+  "errorTooManyRequests": {
+    "message": "请求过多。请稍后再试。"
+  },
+  "errorNetworkFailed": {
+    "message": "请检查网络连接。"
+  },
+  "errorAuthFailed": {
+    "message": "认证失败。请检查您的邮箱和密码。"
+  },
+  "errorNetworkConnection": {
+    "message": "请检查网络连接。"
+  },
+  "errorTimeout": {
+    "message": "请求超时。请重试。"
+  },
+  "errorApiKey": {
+    "message": "请检查您的API密钥。在设置中输入正确的密钥。"
+  },
+  "errorRateLimit": {
+    "message": "超过API使用限制。请稍后再试。"
+  },
+  "errorServerIssue": {
+    "message": "服务器出现临时问题。请稍后再试。"
+  },
+  "errorStorageQuota": {
+    "message": "存储空间不足。请删除一些数据。"
+  },
+  "errorGeneric": {
+    "message": "发生错误。请重试。"
+  },
+  "restrictedPageTitle": {
+    "message": "受限页面"
+  },
+  "restrictedPageMessage": {
+    "message": "出于安全原因，此页面无法摘要"
+  },
+  "summaryUnavailable": {
+    "message": "无法摘要"
+  },
+  "pdfSummaryPremium": {
+    "message": "PDF摘要（高级版）"
+  },
+  "pdfFeatureTitle": {
+    "message": "PDF摘要功能"
+  },
+  "pdfPremiumOnly": {
+    "message": "PDF摘要是高级版专属功能"
+  },
+  "pdfUpgradeDescription": {
+    "message": "升级到高级版\n无限制摘要PDF文档"
+  },
+  "premiumBenefits": {
+    "message": "✨ 高级版权益"
+  },
+  "benefitUnlimitedPDF": {
+    "message": "无限制PDF文档摘要"
+  },
+  "benefitUnlimitedWeb": {
+    "message": "无限制网页摘要"
+  },
+  "benefitUnlimitedQuestions": {
+    "message": "无限制提问功能"
+  },
+  "benefitPrioritySupport": {
+    "message": "优先支持"
+  },
+  "buttonLater": {
+    "message": "稍后"
+  },
+  "buttonUpgrade": {
+    "message": "升级"
+  },
+  "pricePerMonth": {
+    "message": "/ 月"
+  },
+  "extensionUpdated": {
+    "message": "扩展程序已更新"
+  },
+  "pleaseRefreshPage": {
+    "message": "请刷新页面"
+  },
+  "buttonRefresh": {
+    "message": "刷新"
+  },
+  "buttonClose": {
+    "message": "关闭"
+  },
+  "passwordPlaceholder": {
+    "message": "请输入密码"
+  },
+  "buttonCopy": {
+    "message": "复制"
+  },
+  "questionPlaceholder": {
+    "message": "问我任何问题..."
+  },
+  "buttonSend": {
+    "message": "发送"
+  },
+  "pdfDownloading": {
+    "message": "正在下载PDF..."
+  },
+  "pdfFetchingFile": {
+    "message": "正在获取文件..."
+  },
+  "pdfPreparingProcessing": {
+    "message": "正在准备PDF处理..."
+  },
+  "pdfPreparingTools": {
+    "message": "正在准备PDF分析工具..."
+  },
+  "pdfExtractingText": {
+    "message": "正在提取PDF文本..."
+  },
+  "pdfExtractingProgress": {
+    "message": "正在提取第{page}/{total}页..."
+  },
+  "pdfExtractingInProgress": {
+    "message": "正在提取文本..."
+  },
+  "pdfExtractionComplete": {
+    "message": "PDF提取完成!"
+  },
+  "pdfExtractionCompleted": {
+    "message": "提取已完成。"
+  },
+  "pdfExtractionFailed": {
+    "message": "PDF提取失败"
+  },
+  "pdfErrorOccurred": {
+    "message": "发生错误。"
+  },
+  "pdfProcessing": {
+    "message": "正在处理PDF..."
+  },
+  "pdfPleaseWait": {
+    "message": "请稍候..."
+  },
+  "validationPasswordMinLength": {
+    "message": "密码必须至少为8个字符。"
+  },
+  "validationPasswordUppercase": {
+    "message": "密码必须包含大写字母。"
+  },
+  "validationPasswordLowercase": {
+    "message": "密码必须包含小写字母。"
+  },
+  "validationPasswordNumber": {
+    "message": "密码必须包含数字。"
+  },
+  "validationPasswordStrong": {
+    "message": "密码安全。"
+  },
+  "validationEmailInvalid": {
+    "message": "请输入有效的邮箱地址。"
+  },
+  "validationNameMinLength": {
+    "message": "名称必须至少为2个字符。"
+  },
+  "validationPasswordMismatch": {
+    "message": "密码不匹配。"
+  },
+  "signupComplete": {
+    "message": "注册完成。请验证您的邮箱。"
+  },
+  "loginSuccess": {
+    "message": "登录成功。"
+  },
+  "passwordResetEmailSent": {
+    "message": "密码重置邮件已发送。"
+  },
+  "invalidHistoryId": {
+    "message": "无效的历史记录ID"
+  },
+  "invalidQuestion": {
+    "message": "无效的问题"
+  },
+  "questionRequired": {
+    "message": "请输入问题"
+  },
+  "questionTooLong": {
+    "message": "问题太长（最多2000字符）"
+  },
+  "contextNotSet": {
+    "message": "未设置上下文"
+  },
+  "invalidAnswer": {
+    "message": "无效的回答"
+  },
+  "answerTooLong": {
+    "message": "回答太长"
+  },
+  "confirmDeleteQA": {
+    "message": "是否也删除历史记录中的问答？"
+  },
+  "qaHistoryDeleted": {
+    "message": "问答记录已删除"
+  },
+  "deleteHistoryFailed": {
+    "message": "删除记录失败"
+  },
+  "pdfExtractorUnavailable": {
+    "message": "PDF提取器不可用"
+  },
+  "chromeInternalPage": {
+    "message": "Chrome内部页面"
+  },
+  "chromeInternalPageDesc": {
+    "message": "Chrome设置和内部页面无法摘要"
+  },
+  "extensionPage": {
+    "message": "扩展程序页面"
+  },
+  "extensionPageDesc": {
+    "message": "扩展程序页面无法摘要"
+  },
+  "edgePage": {
+    "message": "Edge内部页面"
+  },
+  "edgePageDesc": {
+    "message": "Edge设置和内部页面无法摘要"
+  },
+  "webStorePage": {
+    "message": "网上应用店"
+  },
+  "webStorePageDesc": {
+    "message": "网上应用店无法摘要"
+  },
+  "pdfSummarize": {
+    "message": "摘要PDF"
+  },
+  "overlayOpenFailed": {
+    "message": "无法打开覆盖层: "
+  },
+  "checkConsole": {
+    "message": "\n\n请在开发者工具（F12）中查看控制台。"
+  },
+  "notificationPdfPermissionTitle": {
+    "message": "Gena - 需要PDF文件权限"
+  },
+  "notificationPdfPermissionMessage": {
+    "message": "要摘要PDF文件:\n1. 打开 chrome://extensions 页面\n2. 找到Gena并启用\"允许访问文件网址\""
+  },
+  "notificationPdfPermissionMessage2": {
+    "message": "要摘要PDF文件:\n1. 打开扩展程序管理页面\n2. 找到Gena扩展程序\n3. 启用\"允许访问文件网址\""
+  },
+  "notificationContentExtractionFailed": {
+    "message": "内容提取失败"
+  },
+  "notificationContentExtractionFailedMessage": {
+    "message": "内容提取时发生错误。"
+  },
+  "emailVerificationRequired": {
+    "message": "需要验证电子邮件"
+  },
+  "emailVerificationMessage": {
+    "message": "使用Gena服务需要验证电子邮件。"
+  },
+  "emailVerificationStep1": {
+    "message": "检查注册时发送的电子邮件"
+  },
+  "emailVerificationStep2": {
+    "message": "点击电子邮件中的验证链接"
+  },
+  "emailVerificationStep3": {
+    "message": "验证完成后刷新页面"
+  },
+  "resendVerificationEmail": {
+    "message": "重新发送验证电子邮件"
+  },
+  "emailSending": {
+    "message": "发送中..."
+  },
+  "emailSent": {
+    "message": "✓ 发送成功"
+  },
+  "emailSendFailed": {
+    "message": "✗ 发送失败"
   }
 
 }

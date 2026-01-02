@@ -179,52 +179,62 @@ class ErrorHandler {
    */
   getUserMessage(error) {
     const message = (error.message || '').toLowerCase();
-    
+
+    // 이메일 인증 필요
+    if (error.statusCode === 403 ||
+        error.errorCode === 'EMAIL_NOT_VERIFIED' ||
+        error.requiresEmailVerification ||
+        message.includes('이메일 인증') ||
+        message.includes('email verification') ||
+        message.includes('email_verified')) {
+      return '이메일 인증이 필요합니다. 이메일함을 확인하고 인증 링크를 클릭해주세요.';
+    }
+
     // 네트워크 에러
-    if (message.includes('failed to fetch') || 
-        message.includes('network') || 
+    if (message.includes('failed to fetch') ||
+        message.includes('network') ||
         message.includes('인터넷')) {
       return '인터넷 연결을 확인해주세요.';
     }
-    
+
     // 타임아웃
     if (message.includes('timeout') || message.includes('시간')) {
       return '요청 시간이 초과되었습니다. 다시 시도해주세요.';
     }
-    
+
     // API 키 오류
-    if (message.includes('api key') || 
-        message.includes('unauthorized') || 
+    if (message.includes('api key') ||
+        message.includes('unauthorized') ||
         message.includes('401')) {
       return 'API 키를 확인해주세요. 설정에서 올바른 키를 입력하세요.';
     }
-    
+
     // 사용량 한도
-    if (message.includes('429') || 
-        message.includes('rate') || 
+    if (message.includes('429') ||
+        message.includes('rate') ||
         message.includes('한도')) {
       return 'API 사용 한도를 초과했습니다. 잠시 후 다시 시도해주세요.';
     }
-    
+
     // 서버 에러
-    if (message.includes('500') || 
-        message.includes('502') || 
+    if (message.includes('500') ||
+        message.includes('502') ||
         message.includes('503')) {
       return '서버에 일시적인 문제가 있습니다. 잠시 후 다시 시도해주세요.';
     }
-    
+
     // 입력 검증 에러
-    if (message.includes('50자') || 
-        message.includes('최소') || 
+    if (message.includes('50자') ||
+        message.includes('최소') ||
         message.includes('최대')) {
       return error.message; // 이미 사용자 친화적
     }
-    
+
     // 스토리지 에러
     if (message.includes('quota') || message.includes('저장')) {
       return '저장 공간이 부족합니다. 일부 데이터를 삭제해주세요.';
     }
-    
+
     // 기본 메시지
     return error.message || '오류가 발생했습니다. 다시 시도해주세요.';
   }

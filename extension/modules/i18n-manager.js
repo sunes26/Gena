@@ -25,14 +25,16 @@ class I18nManager {
   constructor(defaultLocale = 'ko') {
     this.currentLocale = defaultLocale;
     this.messages = {};
-    this.supportedLocales = ['ko', 'en'];
-    
+    this.supportedLocales = ['ko', 'en', 'ja', 'zh'];
+
     // 로케일 정보
     this.localeInfo = {
       'ko': { name: '한국어', nativeName: '한국어', flag: '🇰🇷' },
-      'en': { name: 'English', nativeName: 'English', flag: '🇺🇸' }
+      'en': { name: 'English', nativeName: 'English', flag: '🇺🇸' },
+      'ja': { name: '日本語', nativeName: '日本語', flag: '🇯🇵' },
+      'zh': { name: '中文', nativeName: '中文', flag: '🇨🇳' }
     };
-    
+
     this.debug = false;
   }
 
@@ -80,8 +82,9 @@ class I18nManager {
    */
   async getSavedLocale() {
     return new Promise((resolve) => {
-      chrome.storage.local.get(['locale'], (result) => {
-        resolve(result.locale || null);
+      chrome.storage.local.get(['settings'], (result) => {
+        const settings = result.settings || {};
+        resolve(settings.language || null);
       });
     });
   }
@@ -93,11 +96,15 @@ class I18nManager {
    */
   async saveLocale(locale) {
     return new Promise((resolve) => {
-      chrome.storage.local.set({ locale }, () => {
-        if (this.debug) {
-          console.log('[I18nManager] Locale saved:', locale);
-        }
-        resolve();
+      chrome.storage.local.get(['settings'], (result) => {
+        const settings = result.settings || {};
+        settings.language = locale;
+        chrome.storage.local.set({ settings }, () => {
+          if (this.debug) {
+            console.log('[I18nManager] Locale saved:', locale);
+          }
+          resolve();
+        });
       });
     });
   }
@@ -343,6 +350,68 @@ class I18nManager {
         'loginSuccessDesc': 'Click the Gena extension icon\nto start using it.',
         'or': 'or',
         'language': 'Language'
+      },
+      'ja': {
+        'login': 'ログイン',
+        'signup': '会員登録',
+        'email': 'メール',
+        'password': 'パスワード',
+        'passwordConfirm': 'パスワード確認',
+        'name': '名前',
+        'rememberMe': 'ログイン状態を保持',
+        'forgotPassword': 'パスワードをお忘れですか？',
+        'loginButton': 'ログイン',
+        'signupButton': '会員登録',
+        'noAccount': 'アカウントをお持ちでないですか？',
+        'hasAccount': '既にアカウントをお持ちですか？',
+        'emailPlaceholder': 'email@example.com',
+        'passwordPlaceholder': 'パスワードを入力してください',
+        'passwordConfirmPlaceholder': 'パスワードを再入力してください',
+        'namePlaceholder': '田中太郎',
+        'passwordRequirement': '8文字以上、大文字、小文字、数字を含む',
+        'passwordWeak': '弱い',
+        'passwordMedium': '普通',
+        'passwordStrong': '強い',
+        'resetPasswordTitle': 'パスワード再設定',
+        'resetPasswordDesc': '登録されたメールアドレスを入力すると、パスワード再設定リンクをお送りします。',
+        'sendResetLink': '再設定リンク送信',
+        'cancel': 'キャンセル',
+        'close': '閉じる',
+        'loginSuccess': 'ログイン成功！',
+        'loginSuccessDesc': 'Gena拡張機能アイコンを\nクリックして使用を開始してください。',
+        'or': 'または',
+        'language': '言語'
+      },
+      'zh': {
+        'login': '登录',
+        'signup': '注册',
+        'email': '邮箱',
+        'password': '密码',
+        'passwordConfirm': '确认密码',
+        'name': '姓名',
+        'rememberMe': '保持登录状态',
+        'forgotPassword': '忘记密码？',
+        'loginButton': '登录',
+        'signupButton': '注册',
+        'noAccount': '还没有账户？',
+        'hasAccount': '已有账户？',
+        'emailPlaceholder': 'email@example.com',
+        'passwordPlaceholder': '请输入密码',
+        'passwordConfirmPlaceholder': '请再次输入密码',
+        'namePlaceholder': '张三',
+        'passwordRequirement': '至少8个字符，包含大小写字母和数字',
+        'passwordWeak': '弱',
+        'passwordMedium': '中等',
+        'passwordStrong': '强',
+        'resetPasswordTitle': '重置密码',
+        'resetPasswordDesc': '输入您的注册邮箱，我们将发送密码重置链接给您。',
+        'sendResetLink': '发送重置链接',
+        'cancel': '取消',
+        'close': '关闭',
+        'loginSuccess': '登录成功！',
+        'loginSuccessDesc': '点击Gena扩展程序图标\n开始使用。',
+        'or': '或',
+        'language': '语言'
       }
     };
 

@@ -232,16 +232,32 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // webhook_retry_queue: 웹훅 재시도 큐
+    match /webhook_retry_queue/{queueId} {
+      allow read, write: if false;
+    }
+
+    // webhook_failures: 웹훅 실패 로그
+    match /webhook_failures/{failureId} {
+      allow read, write: if false;
+    }
+
     // ========================================
     // 6. 기타 시스템 컬렉션
     // ========================================
-    
+
+    // 1회용 로그인 토큰 (서버 전용)
+    // Extension → 웹사이트 자동 로그인용
+    match /one_time_tokens/{tokenId} {
+      allow read, write: if false; // 클라이언트 접근 완전 차단 (Admin SDK만 접근)
+    }
+
     // 헬스체크 (테스트용)
     match /_health/{document} {
       allow read: if true;
       allow write: if false;
     }
-    
+
     // 테스트용 (_test 컬렉션)
     // 프로덕션 보안: 클라이언트 접근 완전 차단
     // Admin SDK는 이 규칙을 우회하므로 서버 연결 테스트는 계속 작동
@@ -284,15 +300,20 @@ service cloud.firestore {
              // id, createdAt 변경 불가
              newData.id == oldData.id &&
              newData.createdAt == oldData.createdAt &&
-             // email 변경 불가 (Firebase Auth에서 관리)
-             newData.email == oldData.email &&
+             // ✅ email은 Firebase Auth와 동기화 허용 (Firebase Auth의 이메일과 일치해야 함)
+             newData.email == request.auth.token.email &&
+             // ✅ emailVerified 업데이트 허용 (Firebase Auth와 동기화)
+             (!newData.keys().hasAny(['emailVerified']) || newData.emailVerified is bool) &&
              // updatedAt 필수 (과거보다 미래여야 함)
              newData.keys().hasAny(['updatedAt']) &&
              newData.updatedAt is timestamp &&
              (!oldData.keys().hasAny(['updatedAt']) ||
               newData.updatedAt > oldData.updatedAt) &&
              // role 변경 불가 (관리자만 가능)
-             (newData.role == oldData.role || request.auth.token.admin == true) &&
+             (!newData.keys().hasAny(['role']) ||
+              !oldData.keys().hasAny(['role']) ||
+              newData.role == oldData.role ||
+              request.auth.token.admin == true) &&
              // isPremium 변경 불가 (관리자 또는 서버만 가능)
              (!newData.keys().hasAny(['isPremium']) ||
               newData.isPremium == oldData.isPremium ||

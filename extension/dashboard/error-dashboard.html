@@ -672,9 +672,10 @@
                 document.getElementById('openaiStatus').innerHTML = '✅ 정상';
                 
                 // 프록시 서버 상태
-                const proxyUrl = 'http://localhost:3000/health';
+                // TODO: 프로덕션 API 엔드포인트로 변경 필요
+                const proxyUrl = 'https://api.genaai.net/health';
                 try {
-                    const response = await fetch(proxyUrl, { 
+                    const response = await fetch(proxyUrl, {
                         method: 'GET',
                         mode: 'cors'
                     });

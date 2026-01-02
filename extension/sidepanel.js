@@ -188,21 +188,21 @@ class SidePanelController {
     // 단계별 메시지
     switch (data.stage) {
       case 'download':
-        progressText.textContent = 'PDF 다운로드 중...';
-        progressDetail.textContent = (data.message || '파일을 가져오는 중입니다...') + estimatedTimeText;
+        progressText.textContent = chrome.i18n.getMessage('pdfDownloading');
+        progressDetail.textContent = (data.message || chrome.i18n.getMessage('pdfFetchingFile')) + estimatedTimeText;
         break;
 
       case 'offscreen':
-        progressText.textContent = 'PDF 처리 준비 중...';
-        progressDetail.textContent = (data.message || 'PDF 분석 도구를 준비하고 있습니다...') + estimatedTimeText;
+        progressText.textContent = chrome.i18n.getMessage('pdfPreparingProcessing');
+        progressDetail.textContent = (data.message || chrome.i18n.getMessage('pdfPreparingTools')) + estimatedTimeText;
         break;
 
       case 'extract':
-        progressText.textContent = 'PDF 텍스트 추출 중...';
+        progressText.textContent = chrome.i18n.getMessage('pdfExtractingText');
         if (data.currentPage && data.totalPages) {
-          progressDetail.textContent = `페이지 ${data.currentPage}/${data.totalPages} 추출 중...${estimatedTimeText}`;
+          progressDetail.textContent = chrome.i18n.getMessage('pdfExtractingProgress').replace('{page}', data.currentPage).replace('{total}', data.totalPages) + estimatedTimeText;
         } else {
-          progressDetail.textContent = (data.message || '텍스트를 추출하고 있습니다...') + estimatedTimeText;
+          progressDetail.textContent = (data.message || chrome.i18n.getMessage('pdfExtractingInProgress')) + estimatedTimeText;
         }
         break;
 
@@ -211,8 +211,8 @@ class SidePanelController {
         this.pdfStartTime = null;
         this.pdfLastProgress = 0;
 
-        progressText.textContent = 'PDF 추출 완료!';
-        progressDetail.textContent = data.message || '추출이 완료되었습니다.';
+        progressText.textContent = chrome.i18n.getMessage('pdfExtractionComplete');
+        progressDetail.textContent = data.message || chrome.i18n.getMessage('pdfExtractionCompleted');
         // 2초 후 숨김
         setTimeout(() => {
           container.classList.add('hidden');
@@ -224,8 +224,8 @@ class SidePanelController {
         this.pdfStartTime = null;
         this.pdfLastProgress = 0;
 
-        progressText.textContent = 'PDF 추출 실패';
-        progressDetail.textContent = data.message || '오류가 발생했습니다.';
+        progressText.textContent = chrome.i18n.getMessage('pdfExtractionFailed');
+        progressDetail.textContent = data.message || chrome.i18n.getMessage('pdfErrorOccurred');
         progressBar.style.background = 'linear-gradient(90deg, #ef4444 0%, #f87171 100%)';
         // 3초 후 숨김
         setTimeout(() => {
@@ -235,8 +235,8 @@ class SidePanelController {
         break;
 
       default:
-        progressText.textContent = 'PDF 처리 중...';
-        progressDetail.textContent = (data.message || '잠시만 기다려주세요...') + estimatedTimeText;
+        progressText.textContent = chrome.i18n.getMessage('pdfProcessing');
+        progressDetail.textContent = (data.message || chrome.i18n.getMessage('pdfPleaseWait')) + estimatedTimeText;
     }
 
     console.log('[SidePanel] 진행 상황 업데이트:', data);
@@ -474,10 +474,9 @@ class SidePanelController {
 
         const upgradeBtn = overlay.querySelector('#upgradeFromQuestion');
         if (upgradeBtn) {
-          upgradeBtn.addEventListener('click', () => {
-            chrome.tabs.create({
-              url: 'https://genaai.net/premium',
-            });
+          upgradeBtn.addEventListener('click', async () => {
+            // 1회용 토큰으로 자동 로그인 후 구독 페이지로 이동
+            await this.openWebsiteWithAutoLogin('/subscription');
           });
         }
       }
@@ -892,7 +891,7 @@ class SidePanelController {
           this.updatePDFProgress({
             stage: 'download',
             progress: 0,
-            message: 'PDF 파일을 가져오는 중...'
+            message: chrome.i18n.getMessage('pdfFetchingFile')
           });
 
           console.log('[SidePanel] 🔵 Service Worker 깨우는 중...');
@@ -970,7 +969,7 @@ class SidePanelController {
           this.updatePDFProgress({
             stage: 'complete',
             progress: 100,
-            message: '추출이 완료되었습니다!'
+            message: chrome.i18n.getMessage('pdfExtractionCompleted')
           });
 
           const contentValidation = window.validateInput(result.text, {
@@ -1369,22 +1368,193 @@ class SidePanelController {
     }
   }
 
-  calculateMaxTokens(contentLength) {
-    if (contentLength < 1000) {
-      return 500;
-    } else if (contentLength < 3000) {
-      return 1000;
-    } else if (contentLength < 7000) {
-      return 1500;
-    } else if (contentLength < 15000) {
-      return 2000;
-    } else {
-      return 2500;
+  /**
+   * ✨ v6.3 - 캐시 키 생성
+   */
+  generateSummaryCacheKey(url) {
+    return `summary_cache_${url}`;
+  }
+
+  /**
+   * ✨ v6.3 - 캐시 인덱스 조회 (LRU 관리용)
+   */
+  async getCacheIndex() {
+    try {
+      const result = await chrome.storage.local.get('summary_cache_index');
+      return result.summary_cache_index || [];
+    } catch (error) {
+      console.error('[SidePanel] 캐시 인덱스 조회 오류:', error);
+      return [];
+    }
+  }
+
+  /**
+   * ✨ v6.3 - 캐시 인덱스 저장
+   */
+  async saveCacheIndex(index) {
+    try {
+      await chrome.storage.local.set({ summary_cache_index: index });
+    } catch (error) {
+      console.error('[SidePanel] 캐시 인덱스 저장 오류:', error);
+    }
+  }
+
+  /**
+   * ✨ v6.3 - 캐시된 요약 조회
+   */
+  async getCachedSummary(url) {
+    try {
+      const cacheKey = this.generateSummaryCacheKey(url);
+      const result = await chrome.storage.local.get(cacheKey);
+
+      if (result[cacheKey]) {
+        const cached = result[cacheKey];
+        // 1시간 이내의 캐시만 사용
+        if (Date.now() - cached.timestamp < 3600000) {
+          console.log('[SidePanel] 캐시된 요약 발견 (1시간 이내)');
+
+          // LRU: 접근 시간 업데이트
+          await this.updateCacheAccessTime(url);
+
+          return cached;
+        } else {
+          // 만료된 캐시 삭제
+          console.log('[SidePanel] 만료된 캐시 삭제:', url);
+          await this.removeCacheEntry(url);
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('[SidePanel] 캐시 조회 오류:', error);
+      return null;
+    }
+  }
+
+  /**
+   * ✨ v6.3 - 캐시 접근 시간 업데이트 (LRU)
+   */
+  async updateCacheAccessTime(url) {
+    try {
+      const index = await this.getCacheIndex();
+      const entry = index.find(item => item.url === url);
+
+      if (entry) {
+        entry.lastAccess = Date.now();
+        await this.saveCacheIndex(index);
+      }
+    } catch (error) {
+      console.error('[SidePanel] 캐시 접근 시간 업데이트 오류:', error);
+    }
+  }
+
+  /**
+   * ✨ v6.3 - 캐시 엔트리 삭제
+   */
+  async removeCacheEntry(url) {
+    try {
+      const cacheKey = this.generateSummaryCacheKey(url);
+      await chrome.storage.local.remove(cacheKey);
+
+      // 인덱스에서도 제거
+      const index = await this.getCacheIndex();
+      const newIndex = index.filter(item => item.url !== url);
+      await this.saveCacheIndex(newIndex);
+
+      console.log('[SidePanel] 캐시 엔트리 삭제 완료:', url);
+    } catch (error) {
+      console.error('[SidePanel] 캐시 삭제 오류:', error);
+    }
+  }
+
+  /**
+   * ✨ v6.3 - 요약 캐시 저장 (최대 50개 제한, LRU)
+   */
+  async saveSummaryCache(url, summary, historyId) {
+    try {
+      const MAX_CACHE_SIZE = 50;
+      const cacheKey = this.generateSummaryCacheKey(url);
+
+      // 캐시 인덱스 조회
+      let index = await this.getCacheIndex();
+
+      // 이미 존재하는 캐시인지 확인
+      const existingIndex = index.findIndex(item => item.url === url);
+
+      if (existingIndex >= 0) {
+        // 기존 캐시 업데이트
+        index[existingIndex].lastAccess = Date.now();
+        index[existingIndex].timestamp = Date.now();
+      } else {
+        // 새 캐시 추가 전 크기 확인
+        if (index.length >= MAX_CACHE_SIZE) {
+          // LRU: 가장 오래 접근하지 않은 캐시 삭제
+          index.sort((a, b) => a.lastAccess - b.lastAccess);
+          const oldestEntry = index.shift();
+
+          console.log(`[SidePanel] 캐시 크기 제한 (${MAX_CACHE_SIZE}개) 도달 - 가장 오래된 캐시 삭제:`, oldestEntry.url);
+
+          // 가장 오래된 캐시 삭제
+          const oldestKey = this.generateSummaryCacheKey(oldestEntry.url);
+          await chrome.storage.local.remove(oldestKey);
+        }
+
+        // 새 캐시 인덱스 추가
+        index.push({
+          url,
+          timestamp: Date.now(),
+          lastAccess: Date.now()
+        });
+      }
+
+      // 인덱스 저장
+      await this.saveCacheIndex(index);
+
+      // 실제 캐시 데이터 저장
+      await chrome.storage.local.set({
+        [cacheKey]: {
+          summary,
+          historyId,
+          timestamp: Date.now(),
+          url
+        }
+      });
+
+      console.log(`[SidePanel] 요약 캐시 저장 완료 (${index.length}/${MAX_CACHE_SIZE})`);
+    } catch (error) {
+      console.error('[SidePanel] 캐시 저장 오류:', error);
     }
   }
 
   async summarizePage() {
     try {
+      // ✨ v6.3 - 중복 요약 방지: 캐시 확인
+      const cached = await this.getCachedSummary(this.currentPageInfo.url);
+
+      if (cached) {
+        const message = window.languageManager.getMessage('useCachedSummary') ||
+          '이 페이지는 최근에 요약한 기록이 있습니다. 기존 요약을 사용하시겠습니까?';
+
+        if (confirm(message)) {
+          console.log('[SidePanel] 캐시된 요약 사용');
+          this.currentSummary = cached.summary;
+          this.currentHistoryId = cached.historyId;
+
+          window.uiManager.displaySummary(this.currentSummary);
+
+          // 캐시 사용 알림 표시
+          const noticeMessage = window.languageManager.getMessage('cachedSummaryNotice') ||
+            '캐시된 요약 (최근 1시간 이내)';
+          this.showToast(noticeMessage, 'info');
+
+          // Q&A 초기화
+          const content = await this.extractPageContent();
+          await window.qaManager.initialize(cached.historyId, content);
+          await this.checkPremiumAndToggleQuestion();
+
+          return;
+        }
+      }
+
       const canUse = await window.usageManager.canSummarize();
 
       if (!canUse.allowed) {
@@ -1405,25 +1575,39 @@ class SidePanelController {
 
       const content = await this.extractPageContent();
 
+      // ✨ v6.3 - 강화된 콘텐츠 길이 검증
       if (!content || content.length < 100) {
         throw new Error(window.languageManager.getMessage('errorExtractContent'));
+      }
+
+      // 100-500자: 경고 메시지와 함께 사용자 확인
+      if (content.length < 500) {
+        const warningMessage = window.languageManager.getMessage('contentTooShortWarning') ||
+          `콘텐츠가 너무 짧습니다 (${content.length}자).\n요약 품질이 낮을 수 있습니다. 계속하시겠습니까?`;
+
+        const confirmed = confirm(warningMessage);
+        if (!confirmed) {
+          window.uiManager.showLoading(false);
+          this.showToast('summaryCancelled');
+          return;
+        }
       }
 
       console.log('[SidePanel] 요약 시작 - 콘텐츠 길이:', content.length);
 
       const optimalLength = this.determineOptimalLength(content.length);
-      const maxTokens = this.calculateMaxTokens(content.length);
 
       console.log('[SidePanel] 자동 설정:', {
         length: optimalLength,
-        maxTokens: maxTokens,
+        contentLength: content.length
       });
 
+      // ✨ v6.3 - maxTokens는 api-service.js에서 자동 계산 (중복 제거)
       this.currentSummary = await window.apiService.summarizeText(
         content,
         optimalLength,
         this.currentPageInfo,
-        maxTokens
+        null  // maxTokens는 api-service.js에서 자동 계산
       );
       console.log(
         '[SidePanel] 요약 완료 (길이:',
@@ -1444,6 +1628,9 @@ class SidePanelController {
 
       // ✨ Side Panel 상태 저장
       await this.saveSidePanelState();
+
+      // ✨ v6.3 - 요약 캐시 저장
+      await this.saveSummaryCache(this.currentPageInfo.url, this.currentSummary, historyId);
 
       this.showToast('toastSaved');
       
@@ -1936,6 +2123,67 @@ class SidePanelController {
     }
   }
 
+  /**
+   * 1회용 웹 로그인 토큰을 생성하고 웹사이트로 자동 로그인
+   * @param {string} redirectPath - 로그인 후 리다이렉트할 경로 (기본: /subscription)
+   */
+  async openWebsiteWithAutoLogin(redirectPath = '/subscription') {
+    try {
+      // Firebase 로그인 확인
+      const user = await new Promise((resolve) => {
+        window.auth.onAuthStateChanged(resolve);
+      });
+
+      if (!user) {
+        console.error('로그인이 필요합니다');
+        alert(window.languageManager.getMessage('pleaseLogin') || '먼저 로그인해주세요');
+        return;
+      }
+
+      // Firebase ID Token 가져오기
+      const idToken = await user.getIdToken();
+
+      // 백엔드에 1회용 토큰 요청
+      const response = await fetch(
+        `${window.CONFIG.BACKEND_URL}/api/auth/generate-web-login-token`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${idToken}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('토큰 생성 실패');
+      }
+
+      const data = await response.json();
+
+      if (!data.success || !data.redirectUrl) {
+        throw new Error('토큰 생성 실패');
+      }
+
+      // 웹사이트 URL에 리다이렉트 경로 추가
+      const url = new URL(data.redirectUrl);
+      url.searchParams.set('redirect', redirectPath);
+
+      // 새 탭으로 웹사이트 열기
+      chrome.tabs.create({
+        url: url.toString(),
+      });
+
+      console.log('✅ 웹사이트로 자동 로그인 리다이렉트 완료');
+    } catch (error) {
+      console.error('웹 로그인 토큰 생성 실패:', error);
+      // 실패 시 기본 URL로 이동 (로그인 필요)
+      chrome.tabs.create({
+        url: `https://genaai.net${redirectPath}`,
+      });
+    }
+  }
+
   showUpgradeModal(type) {
     const existingModal = document.getElementById('upgradeModal');
     if (existingModal) {
@@ -2062,10 +2310,9 @@ class SidePanelController {
     });
 
     const upgradeBtn = modal.querySelector('.upgrade-btn');
-    upgradeBtn.addEventListener('click', () => {
-      chrome.tabs.create({
-        url: 'https://genaai.net/premium',
-      });
+    upgradeBtn.addEventListener('click', async () => {
+      // 1회용 토큰으로 자동 로그인 후 구독 페이지로 이동
+      await this.openWebsiteWithAutoLogin('/subscription');
       modal.remove();
     });
 
@@ -2132,6 +2379,58 @@ class SidePanelController {
           this.askQuestion();
         }
       });
+    }
+
+    // ✨ v6.3 - 피드백 버튼 이벤트 리스너
+    const feedbackGoodBtn = document.getElementById('feedbackGood');
+    const feedbackBadBtn = document.getElementById('feedbackBad');
+
+    if (feedbackGoodBtn) {
+      feedbackGoodBtn.addEventListener('click', () => this.submitFeedback('good'));
+    }
+
+    if (feedbackBadBtn) {
+      feedbackBadBtn.addEventListener('click', () => this.submitFeedback('bad'));
+    }
+  }
+
+  /**
+   * ✨ v6.3 - 피드백 제출
+   */
+  async submitFeedback(rating) {
+    try {
+      if (!this.currentHistoryId) {
+        console.warn('[SidePanel] 피드백 제출 실패: historyId 없음');
+        return;
+      }
+
+      console.log(`[SidePanel] 피드백 제출: ${rating}`);
+
+      // Firestore에 피드백 저장
+      await window.historyManager.updateHistory(this.currentHistoryId, {
+        'feedback.rating': rating,
+        'feedback.timestamp': Date.now()
+      });
+
+      // 피드백 UI 숨기고 감사 메시지 표시
+      const feedbackSection = document.getElementById('summaryFeedback');
+      const feedbackButtons = feedbackSection?.querySelector('.feedback-buttons');
+      const feedbackQuestion = feedbackSection?.querySelector('.feedback-question');
+      const thankYouMessage = document.getElementById('feedbackThankYou');
+
+      if (feedbackButtons) feedbackButtons.classList.add('hidden');
+      if (feedbackQuestion) feedbackQuestion.classList.add('hidden');
+      if (thankYouMessage) thankYouMessage.classList.remove('hidden');
+
+      // 2초 후 전체 피드백 섹션 숨김
+      setTimeout(() => {
+        if (feedbackSection) feedbackSection.classList.add('hidden');
+      }, 2000);
+
+      console.log('[SidePanel] 피드백 저장 완료');
+    } catch (error) {
+      console.error('[SidePanel] 피드백 제출 오류:', error);
+      window.errorHandler?.handle(error, 'submit-feedback');
     }
   }
 
